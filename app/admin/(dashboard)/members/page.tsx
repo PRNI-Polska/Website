@@ -417,10 +417,42 @@ export default function AdminMembersPage() {
                             {member.email}
                           </td>
                           <td className="py-3 px-4 text-sm text-muted-foreground">
-                            {member.fullName || <span className="text-[#333]">—</span>}
+                            <input
+                              type="text"
+                              defaultValue={member.fullName || ""}
+                              onBlur={async (e) => {
+                                const val = e.target.value.trim();
+                                if (val !== (member.fullName || "")) {
+                                  const res = await fetch(`/api/admin/members/${member.id}`, {
+                                    method: "PATCH",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ fullName: val }),
+                                  });
+                                  if (res.ok) setMembers((prev) => prev.map((m) => m.id === member.id ? { ...m, fullName: val || null } : m));
+                                }
+                              }}
+                              placeholder="—"
+                              className="bg-transparent border-b border-transparent hover:border-border focus:border-foreground outline-none w-full py-0.5 transition-colors placeholder-[#333]"
+                            />
                           </td>
                           <td className="py-3 px-4 text-sm text-muted-foreground">
-                            {member.location || <span className="text-[#333]">—</span>}
+                            <input
+                              type="text"
+                              defaultValue={member.location || ""}
+                              onBlur={async (e) => {
+                                const val = e.target.value.trim();
+                                if (val !== (member.location || "")) {
+                                  const res = await fetch(`/api/admin/members/${member.id}`, {
+                                    method: "PATCH",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ location: val }),
+                                  });
+                                  if (res.ok) setMembers((prev) => prev.map((m) => m.id === member.id ? { ...m, location: val || null } : m));
+                                }
+                              }}
+                              placeholder="—"
+                              className="bg-transparent border-b border-transparent hover:border-border focus:border-foreground outline-none w-full py-0.5 transition-colors placeholder-[#333]"
+                            />
                           </td>
                           <td className="py-3 px-4">
                             <select

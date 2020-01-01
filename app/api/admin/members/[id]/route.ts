@@ -39,10 +39,18 @@ export async function PATCH(
       data.displayName = body.displayName.trim();
     }
 
+    if (typeof body.fullName === "string") {
+      data.fullName = body.fullName.trim() || null;
+    }
+
+    if (typeof body.location === "string") {
+      data.location = body.location.trim() || null;
+    }
+
     const updated = await prisma.member.update({
       where: { id },
       data,
-      select: { id: true, email: true, displayName: true, role: true, isActive: true },
+      select: { id: true, email: true, displayName: true, fullName: true, location: true, role: true, isActive: true },
     });
 
     return NextResponse.json({ member: updated });

@@ -195,9 +195,9 @@ export default function HomePage() {
             <Button size="lg" variant="secondary" asChild>
               <Link href="/recruitment">{t("cta.contact")}</Link>
             </Button>
-            <Button 
-              size="lg" 
-              className="border-2 border-white text-white bg-transparent hover:bg-white/20"
+            <Button
+              size="lg"
+              variant="outline"
               asChild
             >
               <Link href="/about">{t("cta.learn")}</Link>

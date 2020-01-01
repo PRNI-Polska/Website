@@ -3,12 +3,13 @@
 
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 
-export type Locale = "en" | "pl";
+export type Locale = "en" | "pl" | "de";
 
 interface Translations {
   [key: string]: {
     en: string;
     pl: string;
+    de?: string;
   };
 }
 
@@ -23,7 +24,12 @@ export const translations: Translations = {
   "nav.contact": { en: "Contact", pl: "Kontakt", de: "Kontakt" },
   
   // Party names
-  "party.name.short": { en: "PRNI", pl: "PRNI" },
+  "party.name.short": { en: "PRNI", pl: "PRNI", de: "PRNI" },
+  "party.name.full": { 
+    en: "Polish National-Integralist Movement", 
+    pl: "Polski Ruch Narodowo-Integralistyczny",
+    de: "Polnische National-Integralistische Bewegung"
+  },
   "party.name.full.en": { 
     en: "Polish National-Integralist Movement", 
     pl: "Polish National-Integralist Movement" 

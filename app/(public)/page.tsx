@@ -72,9 +72,9 @@ export default function HomePage() {
             
             {/* Party Name */}
             <div className="mb-6 animate-fade-in animation-delay-100">
-              <h2 className="text-lg md:text-xl text-primary font-semibold tracking-widest uppercase mb-2">
+              <p className="text-lg md:text-xl text-primary font-semibold tracking-widest uppercase mb-2">
                 {t("party.name.full")}
-              </h2>
+              </p>
             </div>
             
             <h1 className="text-display-hero font-heading font-bold tracking-tight mb-6 animate-fade-in animation-delay-200">
@@ -91,7 +91,7 @@ export default function HomePage() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/contact">{t("hero.cta.join")}</Link>
+                <Link href="/recruitment">{t("hero.cta.join")}</Link>
               </Button>
             </div>
           </div>
@@ -193,7 +193,7 @@ export default function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" asChild>
-              <Link href="/contact">{t("cta.contact")}</Link>
+              <Link href="/recruitment">{t("cta.contact")}</Link>
             </Button>
             <Button 
               size="lg" 

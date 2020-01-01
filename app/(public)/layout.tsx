@@ -3,6 +3,7 @@
 
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { CookieConsent } from "@/components/cookie-consent";
 import { I18nProvider } from "@/lib/i18n";
 
 export default function PublicLayout({
@@ -18,6 +19,7 @@ export default function PublicLayout({
           {children}
         </main>
         <Footer />
+        <CookieConsent />
       </div>
     </I18nProvider>
   );

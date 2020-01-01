@@ -1,7 +1,7 @@
 // file: lib/i18n.tsx
 "use client";
 
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 
 export type Locale = "en" | "pl" | "de";
 
@@ -35,11 +35,13 @@ export const translations: Translations = {
   },
   "party.name.full.en": { 
     en: "Polish National-Integralist Movement", 
-    pl: "Polish National-Integralist Movement" 
+    pl: "Polish National-Integralist Movement",
+    de: "Polnische National-Integralistische Bewegung",
   },
   "party.name.full.pl": { 
     en: "Polski Ruch Narodowo-Integralistyczny", 
-    pl: "Polski Ruch Narodowo-Integralistyczny" 
+    pl: "Polski Ruch Narodowo-Integralistyczny",
+    de: "Polski Ruch Narodowo-Integralistyczny",
   },
   
   // Hero section
@@ -299,14 +301,15 @@ export const translations: Translations = {
   },
   
   // Sections
-  "section.news": { en: "Latest News", pl: "Najnowsze Wiadomości" },
-  "section.news.subtitle": { en: "Stay updated with our latest announcements", pl: "Bądź na bieżąco z naszymi komunikatami" },
-  "section.events": { en: "Upcoming Events", pl: "Nadchodzące Wydarzenia" },
-  "section.events.subtitle": { en: "Join us at our upcoming events", pl: "Dołącz do nas na nadchodzących wydarzeniach" },
-  "section.manifesto": { en: "Our Manifesto", pl: "Nasz Manifest" },
+  "section.news": { en: "Latest News", pl: "Najnowsze Wiadomości", de: "Neueste Nachrichten" },
+  "section.news.subtitle": { en: "Stay updated with our latest announcements", pl: "Bądź na bieżąco z naszymi komunikatami", de: "Bleiben Sie auf dem Laufenden mit unseren neuesten Mitteilungen" },
+  "section.events": { en: "Upcoming Events", pl: "Nadchodzące Wydarzenia", de: "Kommende Veranstaltungen" },
+  "section.events.subtitle": { en: "Join us at our upcoming events", pl: "Dołącz do nas na nadchodzących wydarzeniach", de: "Nehmen Sie an unseren kommenden Veranstaltungen teil" },
+  "section.manifesto": { en: "Our Manifesto", pl: "Nasz Manifest", de: "Unser Manifest" },
   "section.manifesto.subtitle": { 
     en: "Explore our vision and policies for building a stronger Poland.", 
-    pl: "Poznaj naszą wizję i politykę budowania silniejszej Polski." 
+    pl: "Poznaj naszą wizję i politykę budowania silniejszej Polski.",
+    de: "Entdecken Sie unsere Vision und unsere Politik für ein stärkeres Polen.",
   },
   
   // Wings - General
@@ -600,15 +603,16 @@ export const translations: Translations = {
   "cta.title": { en: "Join Our Movement", pl: "Dołącz do Naszego Ruchu", de: "Treten Sie unserer Bewegung bei" },
   "cta.text": { 
     en: "Be part of the national revival. Together we will build a strong, unified Poland.", 
-    pl: "Bądź częścią narodowego odrodzenia. Razem zbudujemy silną, zjednoczoną Polskę." 
+    pl: "Bądź częścią narodowego odrodzenia. Razem zbudujemy silną, zjednoczoną Polskę.",
+    de: "Seien Sie Teil der nationalen Erneuerung. Gemeinsam werden wir ein starkes, geeintes Polen aufbauen.",
   },
-  "cta.contact": { en: "Contact Us", pl: "Skontaktuj się" },
-  "cta.learn": { en: "Learn About Us", pl: "Poznaj Nas" },
+  "cta.contact": { en: "Contact Us", pl: "Skontaktuj się", de: "Kontaktieren Sie uns" },
+  "cta.learn": { en: "Learn About Us", pl: "Poznaj Nas", de: "Über uns erfahren" },
   
   // Footer
-  "footer.quicklinks": { en: "Quick Links", pl: "Szybkie Linki" },
-  "footer.contact": { en: "Contact Us", pl: "Kontakt" },
-  "footer.rights": { en: "All rights reserved.", pl: "Wszelkie prawa zastrzeżone." },
+  "footer.quicklinks": { en: "Quick Links", pl: "Szybkie Linki", de: "Schnelllinks" },
+  "footer.contact": { en: "Contact Us", pl: "Kontakt", de: "Kontakt" },
+  "footer.rights": { en: "All rights reserved.", pl: "Wszelkie prawa zastrzeżone.", de: "Alle Rechte vorbehalten." },
   "footer.tagline": {
     en: "The nation as the highest political value. Together we build a strong, unified Poland rooted in tradition and national identity.",
     pl: "Naród jako najwyższa wartość polityczna. Razem budujemy silną, zjednoczoną Polskę zakorzenioną w tradycji i tożsamości narodowej.",
@@ -616,10 +620,10 @@ export const translations: Translations = {
   },
   
   // Common
-  "common.viewAll": { en: "View All", pl: "Zobacz Wszystko" },
-  "common.readMore": { en: "Read More", pl: "Czytaj Więcej" },
-  "common.back": { en: "Back", pl: "Wstecz" },
-  "common.loading": { en: "Loading...", pl: "Ładowanie..." },
+  "common.viewAll": { en: "View All", pl: "Zobacz Wszystko", de: "Alle anzeigen" },
+  "common.readMore": { en: "Read More", pl: "Czytaj Więcej", de: "Weiterlesen" },
+  "common.back": { en: "Back", pl: "Wstecz", de: "Zurück" },
+  "common.loading": { en: "Loading...", pl: "Ładowanie...", de: "Laden..." },
   
   // Contact form
   "contact.title": { en: "Contact", pl: "Kontakt", de: "Kontakt" },
@@ -724,8 +728,31 @@ interface I18nContextType {
 
 const I18nContext = createContext<I18nContextType | null>(null);
 
+const LOCALE_KEY = "prni_locale";
+
+function getSavedLocale(): Locale {
+  if (typeof window === "undefined") return "pl";
+  const saved = localStorage.getItem(LOCALE_KEY);
+  if (saved === "en" || saved === "pl" || saved === "de") return saved;
+  return "pl";
+}
+
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<Locale>("pl"); // Default to Polish
+  const [locale, setLocaleState] = useState<Locale>("pl");
+
+  useEffect(() => {
+    setLocaleState(getSavedLocale());
+  }, []);
+
+  const setLocale = useCallback((l: Locale) => {
+    setLocaleState(l);
+    localStorage.setItem(LOCALE_KEY, l);
+    document.documentElement.lang = l;
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
 
   const t = useCallback((key: string): string => {
     const translation = translations[key];
@@ -733,7 +760,6 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       console.warn(`Missing translation for key: ${key}`);
       return key;
     }
-    // Fallback: de -> en -> pl -> key
     return translation[locale] ?? translation.en ?? translation.pl ?? key;
   }, [locale]);
 
@@ -763,12 +789,14 @@ export function LanguageSwitcher() {
   ];
   
   return (
-    <div className="flex items-center gap-1 text-sm">
+    <div className="flex items-center gap-1 text-sm" role="group" aria-label="Language">
       {languages.map((lang, index) => (
         <span key={lang.code} className="flex items-center">
           {index > 0 && <span className="text-muted-foreground mx-0.5">/</span>}
           <button
             onClick={() => setLocale(lang.code)}
+            lang={lang.code}
+            aria-pressed={locale === lang.code}
             className={`px-2 py-1 rounded transition-colors ${
               locale === lang.code 
                 ? "bg-primary text-primary-foreground" 

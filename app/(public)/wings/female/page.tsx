@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowLeft, Bell, Mail } from "lucide-react";
+import { ArrowLeft, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/lib/i18n";
@@ -20,14 +20,12 @@ export default function FemaleWingPage() {
     if (!email) return;
 
     setIsSubmitting(true);
-    
-    // Simulate subscription (connect to actual service)
     await new Promise((resolve) => setTimeout(resolve, 1000));
     
     const messages = {
-      pl: { title: "Zapisano!", desc: "Powiadomimy Cię, gdy Skrzydło Kobiece zostanie uruchomione." },
-      en: { title: "Subscribed!", desc: "We'll notify you when the Female Wing launches." },
-      de: { title: "Angemeldet!", desc: "Wir benachrichtigen Sie, wenn der Frauenflügel startet." },
+      pl: { title: "Zapisano", desc: "Powiadomimy Cię, gdy Skrzydło Kobiece zostanie uruchomione." },
+      en: { title: "Subscribed", desc: "We'll notify you when the Female Wing launches." },
+      de: { title: "Angemeldet", desc: "Wir benachrichtigen Sie, wenn der Frauenflügel startet." },
     };
     
     toast({
@@ -39,89 +37,82 @@ export default function FemaleWingPage() {
     setIsSubmitting(false);
   };
 
+  const backText = locale === "pl" ? "Powrót" : locale === "de" ? "Zurück" : "Back";
+  const comingSoonText = locale === "pl" ? "Wkrótce" : locale === "de" ? "Demnächst" : "Coming soon";
+  const notifyText = locale === "pl" ? "Powiadom mnie" : locale === "de" ? "Benachrichtigen" : "Notify me";
+  const emailPlaceholder = locale === "pl" ? "Twój email" : locale === "de" ? "Ihre E-Mail" : "Your email";
+  const submittingText = locale === "pl" ? "Zapisywanie..." : locale === "de" ? "Speichern..." : "Subscribing...";
+
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="relative py-32 md:py-40 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-        
-        <div className="container-custom relative">
-          {/* Back link */}
+      <section className="py-24 md:py-32">
+        <div className="container-custom max-w-3xl">
+          {/* Back */}
           <Link 
             href="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors mb-12 group"
+            className="reveal-section reveal-delay-1 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-12 group"
           >
-            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-            {t("wings.back")}
+            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" style={{ transitionDuration: 'var(--dur-2)', transitionTimingFunction: 'var(--ease-out)' }} />
+            {backText}
           </Link>
 
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight mb-6 panel-reveal panel-reveal-1">
-              {t("wings.female.title")}
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground panel-reveal panel-reveal-2">
-              {t("wings.female.tagline")}
-            </p>
-            <div className="w-24 h-1 bg-primary mt-8 line-reveal" />
+          <h1 className="reveal-section reveal-delay-2 text-4xl md:text-5xl font-heading font-bold tracking-tight text-foreground mb-4">
+            {t("wings.female.title")}
+          </h1>
+          <p className="reveal-section reveal-delay-3 text-lg text-muted-foreground">
+            {t("wings.female.tagline")}
+          </p>
+        </div>
+      </section>
+
+      {/* Coming Soon */}
+      <section className="py-16 border-t border-border">
+        <div className="container-custom max-w-3xl">
+          {/* Badge */}
+          <div className="reveal-section reveal-delay-1 inline-flex items-center gap-2 px-3 py-1.5 rounded bg-muted text-muted-foreground text-xs font-medium mb-6">
+            {comingSoonText}
+          </div>
+          
+          <p className="reveal-section reveal-delay-2 text-lg text-foreground leading-relaxed mb-10">
+            {t("wings.female.purpose.text")}
+          </p>
+
+          {/* Notification Form */}
+          <div className="reveal-section reveal-delay-3 max-w-sm">
+            <form onSubmit={handleNotifySubmit} className="flex gap-2">
+              <div className="relative flex-1">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  type="email"
+                  placeholder={emailPlaceholder}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="pl-9"
+                />
+              </div>
+              <Button type="submit" disabled={isSubmitting} className="hover-lift">
+                {isSubmitting ? submittingText : notifyText}
+              </Button>
+            </form>
           </div>
         </div>
       </section>
 
-      {/* Coming Soon Content */}
-      <section className="py-20">
-        <div className="container-custom">
-          <div className="max-w-2xl mx-auto text-center">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-muted-foreground text-sm mb-8">
-              <Bell className="w-4 h-4" />
-              {t("wings.female.comingSoon")}
-            </div>
-            
-            <p className="text-lg text-muted-foreground leading-relaxed mb-12">
-              {t("wings.female.purpose.text")}
-            </p>
-
-            {/* Notification Form */}
-            <div className="max-w-md mx-auto">
-              <form onSubmit={handleNotifySubmit} className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    type="email"
-                    placeholder={locale === "pl" ? "Twój email" : locale === "de" ? "Ihre E-Mail" : "Your email"}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className="pl-10"
-                  />
-                </div>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting 
-                    ? (locale === "pl" ? "Zapisywanie..." : locale === "de" ? "Anmelden..." : "Subscribing...")
-                    : t("wings.female.notify")
-                  }
-                </Button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact CTA */}
-      <section className="py-20 bg-muted/30">
-        <div className="container-custom">
-          <div className="max-w-2xl mx-auto text-center">
-            <p className="text-muted-foreground mb-6">
-              {locale === "pl" 
-                ? "Chcesz dowiedzieć się więcej? Skontaktuj się z nami." 
-                : locale === "de"
-                ? "Möchten Sie mehr erfahren? Kontaktieren Sie uns."
-                : "Want to learn more? Get in touch with us."}
-            </p>
-            <Button variant="outline" asChild>
-              <Link href="/contact">{t("wings.contactCta")}</Link>
-            </Button>
-          </div>
+      {/* Contact */}
+      <section className="py-20 border-t border-border bg-muted/30">
+        <div className="container-custom max-w-3xl">
+          <p className="reveal-section reveal-delay-1 text-muted-foreground mb-6">
+            {locale === "pl" 
+              ? "Masz pytania? Skontaktuj się z nami." 
+              : locale === "de"
+              ? "Haben Sie Fragen? Kontaktieren Sie uns."
+              : "Have questions? Get in touch with us."}
+          </p>
+          <Button variant="outline" asChild className="reveal-section reveal-delay-2 hover-lift">
+            <Link href="/contact">{t("wings.contactCta")}</Link>
+          </Button>
         </div>
       </section>
     </div>

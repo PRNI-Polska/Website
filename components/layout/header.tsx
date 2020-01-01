@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useI18n, LanguageSwitcher } from "@/lib/i18n";
 
-// Navigation structure
 const navigationItems = [
   { key: "nav.manifesto", href: "/manifesto" },
   { key: "nav.about", href: "/about" },
@@ -34,22 +33,17 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { t, locale } = useI18n();
 
-  // Check if we're on the homepage (Wings Gateway)
   const isHomepage = pathname === "/";
 
-  // Handle scroll for transparent -> solid header
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      setIsScrolled(window.scrollY > 20);
     };
-
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Check initial state
-    
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
     setWingsDropdownOpen(false);
@@ -60,50 +54,45 @@ export function Header() {
     return pathname === href || (href !== "/" && pathname.startsWith(href));
   };
 
+  // Dynamic header styles based on scroll and location
+  const headerBg = isHomepage && !isScrolled && !mobileMenuOpen
+    ? "bg-transparent"
+    : "bg-background/95 backdrop-blur-sm border-b border-border";
+
   return (
     <header 
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        isHomepage && !isScrolled && !mobileMenuOpen
-          ? "bg-transparent border-transparent"
-          : "bg-white/95 backdrop-blur-sm border-b border-border"
+        "fixed top-0 left-0 right-0 z-50",
+        headerBg
       )}
+      style={{ 
+        transition: 'background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out)' 
+      }}
     >
-      <nav className="container-custom flex h-16 md:h-20 items-center justify-between" aria-label="Main navigation">
+      <nav className="container-custom flex h-14 md:h-16 items-center justify-between" aria-label="Main navigation">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative h-10 w-10 md:h-12 md:w-12 flex-shrink-0">
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="relative h-8 w-8 md:h-9 md:w-9 flex-shrink-0">
             <Image
               src="/logo.png"
               alt="PRNI"
               fill
-              className="object-contain transition-transform group-hover:scale-105"
+              className="object-contain"
+              style={{ transition: 'transform var(--dur-2) var(--ease-out)' }}
               priority
             />
           </div>
-          <div className="hidden sm:flex flex-col">
-            <span className="font-heading text-base md:text-lg font-bold tracking-tight text-primary">
-              PRNI
-            </span>
-            <span className={cn(
-              "text-[10px] md:text-xs leading-tight transition-colors",
-              isHomepage && !isScrolled 
-                ? "text-foreground/70" 
-                : "text-muted-foreground"
-            )}>
-              {locale === "pl" 
-                ? "Polski Ruch Narodowo-Integralistyczny" 
-                : locale === "de"
-                ? "Polnische N.I. Bewegung"
-                : "Polish N.I. Movement"}
-            </span>
-          </div>
+          <span className={cn(
+            "hidden sm:block font-heading text-sm md:text-base font-semibold tracking-tight",
+            isHomepage && !isScrolled ? "text-foreground" : "text-foreground"
+          )}>
+            PRNI
+          </span>
         </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden lg:flex lg:items-center lg:gap-x-1">
           {navigationItems.map((item) => {
-            // Wings dropdown
             if (item.children) {
               return (
                 <div key={item.key} className="relative">
@@ -111,36 +100,36 @@ export function Header() {
                     onClick={() => setWingsDropdownOpen(!wingsDropdownOpen)}
                     onBlur={() => setTimeout(() => setWingsDropdownOpen(false), 150)}
                     className={cn(
-                      "flex items-center gap-1 px-4 py-2 text-sm font-medium rounded-md transition-colors",
-                      "hover:bg-accent hover:text-accent-foreground",
+                      "flex items-center gap-1 px-3 py-1.5 text-sm rounded",
+                      "transition-colors",
                       pathname.startsWith("/wings") 
-                        ? "text-primary" 
-                        : isHomepage && !isScrolled 
-                          ? "text-foreground/80 hover:text-foreground" 
-                          : "text-muted-foreground"
+                        ? "text-foreground" 
+                        : "text-muted-foreground hover:text-foreground"
                     )}
+                    style={{ transitionDuration: 'var(--dur-1)', transitionTimingFunction: 'var(--ease-out)' }}
                     aria-expanded={wingsDropdownOpen}
                     aria-haspopup="true"
                   >
                     {t(item.key)}
-                    <ChevronDown className={cn(
-                      "w-4 h-4 transition-transform",
-                      wingsDropdownOpen && "rotate-180"
-                    )} />
+                    <ChevronDown 
+                      className={cn("w-3.5 h-3.5 transition-transform", wingsDropdownOpen && "rotate-180")}
+                      style={{ transitionDuration: 'var(--dur-2)', transitionTimingFunction: 'var(--ease-out)' }}
+                    />
                   </button>
                   
-                  {/* Dropdown */}
                   {wingsDropdownOpen && (
-                    <div className="absolute top-full left-0 mt-1 w-56 bg-white rounded-lg shadow-lg border border-border py-2 z-50">
+                    <div 
+                      className="absolute top-full left-0 mt-1 w-48 bg-card rounded border border-border py-1 shadow-elevated animate-fade-in"
+                    >
                       {item.children.map((child) => (
                         <Link
                           key={child.key}
                           href={child.href}
                           className={cn(
-                            "block px-4 py-2 text-sm transition-colors",
-                            "hover:bg-accent hover:text-accent-foreground",
-                            isActive(child.href) ? "text-primary font-medium" : "text-muted-foreground"
+                            "block px-3 py-2 text-sm transition-colors",
+                            isActive(child.href) ? "text-foreground bg-muted" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                           )}
+                          style={{ transitionDuration: 'var(--dur-1)', transitionTimingFunction: 'var(--ease-out)' }}
                         >
                           {t(child.key)}
                         </Link>
@@ -156,27 +145,24 @@ export function Header() {
                 key={item.key}
                 href={item.href}
                 className={cn(
-                  "px-4 py-2 text-sm font-medium rounded-md transition-colors",
-                  "hover:bg-accent hover:text-accent-foreground",
+                  "px-3 py-1.5 text-sm rounded transition-colors",
                   isActive(item.href) 
-                    ? "text-primary" 
-                    : isHomepage && !isScrolled 
-                      ? "text-foreground/80 hover:text-foreground" 
-                      : "text-muted-foreground"
+                    ? "text-foreground" 
+                    : "text-muted-foreground hover:text-foreground"
                 )}
+                style={{ transitionDuration: 'var(--dur-1)', transitionTimingFunction: 'var(--ease-out)' }}
               >
                 {t(item.key)}
               </Link>
             );
           })}
           
-          {/* Language Switcher */}
-          <div className="ml-4 pl-4 border-l border-border">
+          <div className="ml-3 pl-3 border-l border-border">
             <LanguageSwitcher />
           </div>
         </div>
 
-        {/* Mobile: Language + Menu Button */}
+        {/* Mobile */}
         <div className="flex items-center gap-3 lg:hidden">
           <LanguageSwitcher />
           <Button
@@ -186,15 +172,9 @@ export function Header() {
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-menu"
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-            className={cn(
-              isHomepage && !isScrolled && !mobileMenuOpen && "text-foreground/80"
-            )}
+            className="h-8 w-8"
           >
-            {mobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
       </nav>
@@ -203,19 +183,18 @@ export function Header() {
       <div 
         id="mobile-menu" 
         className={cn(
-          "lg:hidden overflow-hidden transition-all duration-300 ease-out",
-          mobileMenuOpen ? "max-h-[500px] border-t" : "max-h-0"
+          "lg:hidden overflow-hidden bg-background border-t border-border",
+          mobileMenuOpen ? "block" : "hidden"
         )}
         role="navigation"
         aria-label="Mobile navigation"
       >
-        <div className="container-custom py-4 space-y-1 bg-white">
+        <div className="container-custom py-3 space-y-1">
           {navigationItems.map((item) => {
-            // Wings with children (expanded in mobile)
             if (item.children) {
               return (
                 <div key={item.key} className="space-y-1">
-                  <span className="block px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <span className="block px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     {t(item.key)}
                   </span>
                   {item.children.map((child) => (
@@ -223,10 +202,10 @@ export function Header() {
                       key={child.key}
                       href={child.href}
                       className={cn(
-                        "block px-3 py-2 pl-6 rounded-md text-sm font-medium transition-colors",
+                        "block px-3 py-2 pl-6 rounded text-sm transition-colors",
                         isActive(child.href) 
-                          ? "bg-primary text-primary-foreground" 
-                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                          ? "bg-muted text-foreground" 
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                       )}
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -242,10 +221,10 @@ export function Header() {
                 key={item.key}
                 href={item.href}
                 className={cn(
-                  "block px-3 py-2 rounded-md text-base font-medium transition-colors",
+                  "block px-3 py-2 rounded text-sm transition-colors",
                   isActive(item.href) 
-                    ? "bg-primary text-primary-foreground" 
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    ? "bg-muted text-foreground" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 )}
                 onClick={() => setMobileMenuOpen(false)}
               >

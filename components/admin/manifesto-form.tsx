@@ -19,6 +19,12 @@ import { createManifestoSectionSchema, type CreateManifestoSectionInput } from "
 import { slugify, cn } from "@/lib/utils";
 import type { ManifestoSection } from "@prisma/client";
 
+// Type-safe status values
+const STATUS_VALUES = ["DRAFT", "PUBLISHED", "ARCHIVED"] as const;
+type Status = (typeof STATUS_VALUES)[number];
+const isStatus = (v: unknown): v is Status =>
+  typeof v === "string" && (STATUS_VALUES as readonly string[]).includes(v);
+
 interface ManifestoFormProps {
   section?: ManifestoSection;
   parentOptions?: { id: string; title: string }[];
@@ -37,7 +43,7 @@ export function ManifestoForm({ section, parentOptions = [] }: ManifestoFormProp
           content: section.content,
           order: section.order,
           parentId: section.parentId,
-          status: section.status,
+          status: isStatus(section.status) ? section.status : "DRAFT",
         }
       : {
           title: "",
@@ -160,7 +166,12 @@ export function ManifestoForm({ section, parentOptions = [] }: ManifestoFormProp
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>Status</Label>
-                <Select defaultValue={section?.status || "DRAFT"} onValueChange={(v) => setValue("status", v as any)}>
+                <Select
+                  defaultValue={isStatus(section?.status) ? section.status : "DRAFT"}
+                  onValueChange={(value) => {
+                    if (isStatus(value)) setValue("status", value);
+                  }}
+                >
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="DRAFT">Draft</SelectItem>

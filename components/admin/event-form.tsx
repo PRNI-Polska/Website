@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { Loader2, Eye, Save, Calendar } from "lucide-react";
+import { Loader2, Eye, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,10 +26,16 @@ import { createEventSchema, type CreateEventInput } from "@/lib/validations";
 import { cn } from "@/lib/utils";
 import type { Event } from "@prisma/client";
 
+// Type-safe status values
+const STATUS_VALUES = ["DRAFT", "PUBLISHED", "ARCHIVED"] as const;
+type Status = (typeof STATUS_VALUES)[number];
+const isStatus = (v: unknown): v is Status =>
+  typeof v === "string" && (STATUS_VALUES as readonly string[]).includes(v);
+
 const statuses = [
-  { value: "DRAFT", label: "Draft" },
-  { value: "PUBLISHED", label: "Published" },
-  { value: "ARCHIVED", label: "Archived" },
+  { value: "DRAFT" as const, label: "Draft" },
+  { value: "PUBLISHED" as const, label: "Published" },
+  { value: "ARCHIVED" as const, label: "Archived" },
 ];
 
 interface EventFormProps {
@@ -62,7 +68,7 @@ export function EventForm({ event }: EventFormProps) {
           rsvpLink: event.rsvpLink || "",
           organizerContact: event.organizerContact || "",
           tags: event.tags,
-          status: event.status,
+          status: isStatus(event.status) ? event.status : "DRAFT",
         }
       : {
           title: "",
@@ -258,8 +264,10 @@ export function EventForm({ event }: EventFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
                 <Select
-                  defaultValue={event?.status || "DRAFT"}
-                  onValueChange={(value) => setValue("status", value as any)}
+                  defaultValue={isStatus(event?.status) ? event.status : "DRAFT"}
+                  onValueChange={(value) => {
+                    if (isStatus(value)) setValue("status", value);
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />

@@ -44,7 +44,7 @@ export default function HomePage() {
             <div className="mb-6 animate-fade-in animation-delay-100">
               <h2 className="text-lg md:text-xl text-primary font-semibold tracking-widest uppercase mb-2">
                 {locale === "pl" 
-                  ? "Polski Narodowy Ruch Integralistyczny" 
+                  ? "Polski Ruch Narodowo-Integralistyczny" 
                   : "Polish National-Integralist Movement"}
               </h2>
             </div>

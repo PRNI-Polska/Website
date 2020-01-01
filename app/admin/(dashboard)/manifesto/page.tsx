@@ -1,9 +1,8 @@
 // file: app/admin/(dashboard)/manifesto/page.tsx
 import Link from "next/link";
-import { Plus, Edit, Trash2, MoreHorizontal, GripVertical } from "lucide-react";
+import { Plus, Edit, MoreHorizontal, GripVertical } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DeleteButton } from "@/components/admin/delete-button";
@@ -84,7 +83,7 @@ function SectionRow({
   section, 
   isChild 
 }: { 
-  section: { id: string; title: string; slug: string; status: ContentStatus; order: number; updatedAt: Date };
+  section: { id: string; title: string; slug: string; status: string; order: number; updatedAt: Date };
   isChild?: boolean;
 }) {
   return (

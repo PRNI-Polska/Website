@@ -38,7 +38,7 @@ interface PageProps {
 async function getAnnouncements(page: number, category?: string, search?: string) {
   const where = {
     status: "PUBLISHED" as const,
-    ...(category && { category: category as AnnouncementCategory }),
+    ...(category && { category }),
     ...(search && {
       OR: [
         { title: { contains: search, mode: "insensitive" as const } },
@@ -102,7 +102,7 @@ function CategoryFilter({
   categories, 
   activeCategory 
 }: { 
-  categories: { category: AnnouncementCategory; _count: number }[];
+  categories: { category: string; _count: number }[];
   activeCategory?: string;
 }) {
   return (
@@ -118,7 +118,7 @@ function CategoryFilter({
             variant={activeCategory === category ? "default" : "outline"} 
             className="cursor-pointer"
           >
-            {categoryLabels[category]} ({_count})
+            {categoryLabels[category as AnnouncementCategory]} ({_count})
           </Badge>
         </Link>
       ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, type FormEvent } from "react";
+import { useState, useCallback, useEffect, type FormEvent } from "react";
 import { Phone, Copy, Check, ExternalLink, Clock, Shield, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,13 @@ import { createMeeting, type CreatedMeeting } from "@/lib/calls/api";
 
 export default function AdminCallsPage() {
   const [adminSecret, setAdminSecret] = useState("");
+  const [keyLoaded, setKeyLoaded] = useState(false);
   const [title, setTitle] = useState("Spotkanie PRNI");
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem("prni-calls-key");
+    if (saved) { setAdminSecret(saved); setKeyLoaded(true); }
+  }, []);
   const [duration, setDuration] = useState(120);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +28,12 @@ export default function AdminCallsPage() {
     e.preventDefault();
     if (!adminSecret) return;
     setLoading(true); setError(null); setResult(null);
-    try { setResult(await createMeeting(adminSecret, title, duration)); }
+    try {
+      const meeting = await createMeeting(adminSecret, title, duration);
+      setResult(meeting);
+      sessionStorage.setItem("prni-calls-key", adminSecret);
+      setKeyLoaded(true);
+    }
     catch (err) { setError(err instanceof Error ? err.message : "Error"); }
     finally { setLoading(false); }
   }, [adminSecret, title, duration]);
@@ -88,16 +99,19 @@ export default function AdminCallsPage() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="apiKey">API Key</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="apiKey">API Key</Label>
+                  {keyLoaded && <span className="text-xs text-emerald-500">Saved</span>}
+                </div>
                 <Input
                   id="apiKey"
                   type="password"
                   value={adminSecret}
-                  onChange={(e) => setAdminSecret(e.target.value)}
+                  onChange={(e) => { setAdminSecret(e.target.value); setKeyLoaded(false); }}
                   placeholder="Paste VaultCall API key..."
                 />
                 <p className="text-xs text-muted-foreground">
-                  The admin secret from your VaultCall server.
+                  Enter once — it stays saved in your browser session.
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4">

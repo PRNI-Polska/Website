@@ -2,7 +2,7 @@ export type Lang = "pl" | "en" | "de";
 
 export const translations = {
   subtitle: { pl: "Polski Ruch Narodowo-Integralistyczny", en: "Polish National-Integralist Movement", de: "Polnische National-Integralistische Bewegung" },
-  slogan: { pl: "Naród Ponad Wszystkim", en: "Nation Above All", de: "Nation Über Alles" },
+  slogan: { pl: "Przyszłość zaczyna się teraz", en: "The future starts now", de: "Die Zukunft beginnt jetzt" },
   encrypted: { pl: "Szyfrowane", en: "Encrypted", de: "Verschlüsselt" },
   anonymous: { pl: "Anonimowe", en: "Anonymous", de: "Anonym" },
   secure: { pl: "Bezpieczne", en: "Secure", de: "Sicher" },

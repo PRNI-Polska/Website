@@ -23,7 +23,7 @@ Zapraszamy na wystąpienie publiczne Polskiego Ruchu Narodowo-Integralistycznego
 
 **Dołącz do nas i bądź częścią zmian!**
 
-*Naród Ponad Wszystkim*`,
+*Przyszłość zaczyna się teraz*`,
       startDateTime: new Date("2026-04-18T12:00:00+02:00"),
       endDateTime: new Date("2026-04-18T16:00:00+02:00"),
       location: "Polska — szczegóły wkrótce",
@@ -45,7 +45,7 @@ Zapraszamy na jedno z największych wydarzeń PRNI — wystąpienie publiczne po
 
 **To wydarzenie, na którym nie może Cię zabraknąć!**
 
-*Naród Ponad Wszystkim*`,
+*Przyszłość zaczyna się teraz*`,
       startDateTime: new Date("2026-05-16T11:00:00+02:00"),
       endDateTime: new Date("2026-05-16T17:00:00+02:00"),
       location: "Polska — szczegóły wkrótce",
@@ -66,7 +66,7 @@ Zapraszamy na czerwcowe wystąpienie publiczne Polskiego Ruchu Narodowo-Integral
 
 **Razem budujemy silną i suwerenną Polskę!**
 
-*Naród Ponad Wszystkim*`,
+*Przyszłość zaczyna się teraz*`,
       startDateTime: new Date("2026-06-13T12:00:00+02:00"),
       endDateTime: new Date("2026-06-13T16:00:00+02:00"),
       location: "Polska — szczegóły wkrótce",

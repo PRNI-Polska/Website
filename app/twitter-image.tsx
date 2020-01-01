@@ -72,7 +72,7 @@ export default async function TwitterImage() {
             fontStyle: "italic",
           }}
         >
-          Naród Ponad Wszystkim
+          Przyszłość zaczyna się teraz
         </div>
 
         <div

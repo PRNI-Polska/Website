@@ -364,13 +364,13 @@ export default function SecurityPage() {
                               <Globe className="h-3 w-3" />
                               {alert.ipAddress}
                             </span>
-                            {alert.metadata?.country && (
+                            {alert.metadata && "country" in alert.metadata ? (
                               <span className="flex items-center gap-1 font-medium text-foreground/70">
                                 {alert.metadata.city ? `${String(alert.metadata.city)}, ` : ""}
                                 {alert.metadata.region ? `${String(alert.metadata.region)}, ` : ""}
                                 {String(alert.metadata.country)}
                               </span>
-                            )}
+                            ) : null}
                             {alert.path && (
                               <span className="font-mono">{alert.path}</span>
                             )}

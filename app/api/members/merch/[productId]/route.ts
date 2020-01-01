@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMemberFromRequest } from "@/lib/member-auth";
 import { getStoreProduct } from "@/lib/gelato";
-import { getRetailPrice } from "@/lib/gelato-prices";
+import { getVariantRetailPrices } from "@/lib/gelato-prices";
 
 export async function GET(
   request: NextRequest,
@@ -16,12 +16,14 @@ export async function GET(
     const { productId } = await params;
     const product = await getStoreProduct(productId);
 
+    const productUids = product.variants.map((v) => v.productUid);
+    const retailPrices = await getVariantRetailPrices(productUids);
+
     const variants = product.variants.map((v) => {
-      const pricing = getRetailPrice(product.id, v.id);
+      const pricing = retailPrices.get(v.productUid);
       const parts = v.title.split(" - ");
       const color = parts[0]?.trim() || "";
       const size = parts[1]?.trim() || "";
-      // parts[2] would be print tech (e.g. "DTG") — we skip it
 
       return {
         id: v.id,
@@ -30,7 +32,7 @@ export async function GET(
         color,
         size,
         retail_price: pricing?.price || null,
-        currency: pricing?.currency || "PLN",
+        currency: pricing?.currency || "EUR",
       };
     });
 

@@ -1,39 +1,63 @@
-// Retail prices for Gelato products.
-// Gelato is a fulfillment service — it charges YOU a production cost.
-// These are the prices you charge your MEMBERS.
-//
-// Map: Gelato product ID → { currency, defaultPrice, variantPrices (optional) }
-//
-// After adding products in Gelato dashboard, copy their product IDs here
-// and set your desired retail prices.
+import { getCatalogPricesBatch } from "./gelato";
 
-export interface ProductPricing {
-  currency: string;
-  defaultPrice: string;
-  variantPrices?: Record<string, string>;
+// Markup multiplier applied to Gelato's production cost to get retail price.
+// e.g. 2.5 means you sell at 2.5× the cost Gelato charges you.
+const MARKUP_MULTIPLIER = 2.5;
+
+// Minimum retail price (EUR) — floor so tiny items don't end up too cheap
+const MIN_PRICE_EUR = 19.99;
+
+// Round to .99 for clean retail pricing
+function roundToNine(n: number): number {
+  return Math.floor(n) + 0.99;
 }
 
-export const gelatoPrices: Record<string, ProductPricing> = {
-  // PRNI | Heavyweight Classic T-Shirt
-  "d1d0824f-9400-4312-a871-3264186d7914": {
-    currency: "EUR",
-    defaultPrice: "24.99",
-  },
+export function applyMarkup(costEur: number): number {
+  const raw = costEur * MARKUP_MULTIPLIER;
+  return Math.max(roundToNine(raw), MIN_PRICE_EUR);
+}
 
-  // Add more products here as you create them in Gelato:
-  // "gelato-product-id": {
-  //   currency: "EUR",
-  //   defaultPrice: "29.99",
-  // },
-};
+/**
+ * Given a list of variant productUids, fetches their Gelato production costs
+ * and returns a map of productUid → retail price string.
+ */
+export async function getVariantRetailPrices(
+  productUids: string[],
+  currency: string = "EUR",
+  country: string = "PL"
+): Promise<Map<string, { price: string; currency: string }>> {
+  const costs = await getCatalogPricesBatch(productUids, currency, country);
+  const result = new Map<string, { price: string; currency: string }>();
 
-export function getRetailPrice(productId: string, variantId?: string): { price: string; currency: string } | null {
-  const pricing = gelatoPrices[productId];
-  if (!pricing) return null;
-
-  if (variantId && pricing.variantPrices?.[variantId]) {
-    return { price: pricing.variantPrices[variantId], currency: pricing.currency };
+  for (const uid of productUids) {
+    const cost = costs.get(uid);
+    if (cost != null) {
+      result.set(uid, {
+        price: applyMarkup(cost).toFixed(2),
+        currency,
+      });
+    }
   }
 
-  return { price: pricing.defaultPrice, currency: pricing.currency };
+  return result;
+}
+
+/**
+ * Gets the lowest retail price across a set of variant productUids.
+ * Used for "from €XX.XX" display on the product listing page.
+ */
+export async function getLowestRetailPrice(
+  productUids: string[],
+  currency: string = "EUR",
+  country: string = "PL"
+): Promise<{ price: string; currency: string } | null> {
+  const prices = await getVariantRetailPrices(productUids, currency, country);
+  let lowest: number | null = null;
+
+  for (const { price } of prices.values()) {
+    const num = parseFloat(price);
+    if (lowest === null || num < lowest) lowest = num;
+  }
+
+  return lowest !== null ? { price: lowest.toFixed(2), currency } : null;
 }

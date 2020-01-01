@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMemberFromRequest } from "@/lib/member-auth";
 import { getStoreProducts } from "@/lib/gelato";
-import { getRetailPrice } from "@/lib/gelato-prices";
+import { getLowestRetailPrice } from "@/lib/gelato-prices";
 
 export async function GET(request: NextRequest) {
   const member = await getMemberFromRequest(request);
@@ -12,8 +12,11 @@ export async function GET(request: NextRequest) {
   try {
     const products = await getStoreProducts();
 
-    const enriched = products.map((p) => {
-        const pricing = getRetailPrice(p.id);
+    const enriched = await Promise.all(
+      products.map(async (p) => {
+        const productUids = p.variants.map((v) => v.productUid);
+        const lowest = await getLowestRetailPrice(productUids);
+
         return {
           id: p.id,
           name: p.title,
@@ -21,10 +24,11 @@ export async function GET(request: NextRequest) {
           preview_image: p.previewUrl || p.externalPreviewUrl || p.externalThumbnailUrl,
           variants: p.variants.length,
           variantOptions: p.productVariantOptions,
-          price_from: pricing?.price || null,
-          currency: pricing?.currency || "PLN",
+          price_from: lowest?.price || null,
+          currency: lowest?.currency || "EUR",
         };
-      });
+      })
+    );
 
     return NextResponse.json({ products: enriched });
   } catch (err) {

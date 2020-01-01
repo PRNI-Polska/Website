@@ -32,7 +32,6 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
 
   return (
     <div className="relative min-h-screen">
-      {/* Fixed sword background — stationary, white sword on black blends naturally */}
       <div
         className="fixed inset-0 pointer-events-none z-0"
         aria-hidden="true"
@@ -41,7 +40,7 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
           backgroundSize: "auto 110vh",
-          opacity: 0.15,
+          opacity: 0.07,
         }}
       />
 

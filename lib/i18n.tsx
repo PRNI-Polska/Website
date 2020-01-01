@@ -109,6 +109,36 @@ export const translations: Translations = {
     en: "We recognize that the economy should serve the nation. We advocate neither for extreme free market nor for socialism. We permit state intervention where national interest or social stability requires it.", 
     de: "Wir erkennen an, dass die Wirtschaft der Nation dienen sollte. Wir befürworten weder einen extremen freien Markt noch den Sozialismus. Wir erlauben staatliche Intervention, wo es das nationale Interesse oder die soziale Stabilität erfordert."
   },
+  "ideology.s6.title": { 
+    pl: "§ 6. Zasady współpracy międzynarodowej",
+    en: "§ 6. Principles of International Cooperation", 
+    de: "§ 6. Grundsätze der internationalen Zusammenarbeit"
+  },
+  "ideology.s6.text": { 
+    pl: "Opowiadamy się za współpracą międzynarodową opartą na poszanowaniu suwerenności, samostanowienia oraz pełnej niezależności politycznej i gospodarczej państw. Wszelkie formy integracji ponadnarodowej uznajemy za dopuszczalne wyłącznie wówczas, gdy nie naruszają one nadrzędności interesu narodowego, nie ograniczają kompetencji państwa w kluczowych obszarach oraz pozostają oparte na dobrowolności i równoprawności uczestników.",
+    en: "We advocate for international cooperation based on respect for sovereignty, self-determination, and full political and economic independence of states. We consider all forms of supranational integration admissible only when they do not violate the supremacy of national interest, do not limit state competences in key areas, and remain based on voluntariness and equality of participants.", 
+    de: "Wir befürworten internationale Zusammenarbeit auf der Grundlage der Achtung von Souveränität, Selbstbestimmung und vollständiger politischer und wirtschaftlicher Unabhängigkeit der Staaten. Wir betrachten alle Formen supranationaler Integration nur dann als zulässig, wenn sie den Vorrang des nationalen Interesses nicht verletzen, die staatlichen Kompetenzen in Schlüsselbereichen nicht einschränken und auf Freiwilligkeit und Gleichberechtigung der Teilnehmer basieren."
+  },
+  "ideology.s7.title": { 
+    pl: "§ 7. Bezpieczeństwo i obronność państwa",
+    en: "§ 7. State Security and Defense", 
+    de: "§ 7. Staatliche Sicherheit und Verteidigung"
+  },
+  "ideology.s7.text": { 
+    pl: "Uznajemy, że bezpieczeństwo państwa powinno opierać się na zdolności do samodzielnej obrony oraz na współpracy międzynarodowej o wyłącznie obronnym charakterze. Sprzeciwiamy się polityce ekspansji militarnej, wykorzystywaniu sojuszy wojskowych jako narzędzi presji politycznej oraz działaniom prowadzącym do destabilizacji ładu międzynarodowego. Trwałe bezpieczeństwo może być budowane jedynie w oparciu o równowagę sił, odpowiedzialność państw oraz poszanowanie ich suwerenności.",
+    en: "We recognize that state security should be based on the ability for self-defense and on international cooperation of exclusively defensive nature. We oppose policies of military expansion, the use of military alliances as tools of political pressure, and actions leading to the destabilization of international order. Lasting security can only be built on the basis of balance of power, state responsibility, and respect for their sovereignty.", 
+    de: "Wir erkennen an, dass die staatliche Sicherheit auf der Fähigkeit zur Selbstverteidigung und auf internationaler Zusammenarbeit ausschließlich defensiver Natur basieren sollte. Wir lehnen eine Politik der militärischen Expansion, den Einsatz von Militärbündnissen als Instrumente politischen Drucks und Handlungen ab, die zur Destabilisierung der internationalen Ordnung führen. Dauerhafte Sicherheit kann nur auf der Grundlage eines Kräftegleichgewichts, staatlicher Verantwortung und der Achtung ihrer Souveränität aufgebaut werden."
+  },
+  "ideology.s8.title": { 
+    pl: "§ 8. Degeneracja moralna współczesnego społeczeństwa",
+    en: "§ 8. Moral Degeneration of Modern Society", 
+    de: "§ 8. Moralische Degeneration der modernen Gesellschaft"
+  },
+  "ideology.s8.text": { 
+    pl: "Sprzeciwiamy się ogarniającym świat globalizmowi oraz międzynarodowym korporacjom wspierającym liberalne i progresywne inicjatywy mające na celu destabilizację i kontrolę narodów, w wyniku których współczesne społeczeństwa poddawane są procesowi głębokiej erozji moralnej i aksjologicznej — jeśli proces ten nie zostanie powstrzymany, doprowadzi on do destrukcji ładu społecznego i tożsamości narodowej.",
+    en: "We oppose the globalism engulfing the world and international corporations supporting liberal and progressive initiatives aimed at destabilizing and controlling nations, as a result of which modern societies are subjected to a process of deep moral and axiological erosion — if this process is not stopped, it will lead to the destruction of social order and national identity.", 
+    de: "Wir lehnen den die Welt erfassenden Globalismus und internationale Konzerne ab, die liberale und progressive Initiativen unterstützen, die auf die Destabilisierung und Kontrolle von Nationen abzielen, wodurch moderne Gesellschaften einem Prozess tiefer moralischer und axiologischer Erosion ausgesetzt sind — wenn dieser Prozess nicht gestoppt wird, wird er zur Zerstörung der sozialen Ordnung und der nationalen Identität führen."
+  },
   
   // Sections
   "section.news": { pl: "Najnowsze Wiadomości", en: "Latest News", de: "Neueste Nachrichten" },

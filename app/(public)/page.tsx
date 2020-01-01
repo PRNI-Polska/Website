@@ -13,7 +13,7 @@ import { AnimatedSection } from "@/components/ui/animated-section";
 import { FloatingActionButton } from "@/components/ui/floating-action-button";
 import { formatDate } from "@/lib/utils";
 
-const ideologyIcons = [Shield, Flag, Scale, Building, Landmark];
+const ideologyIcons = [Shield, Flag, Scale, Building, Landmark, Users, Shield, Megaphone];
 
 interface Announcement {
   id: string;
@@ -46,6 +46,9 @@ export default function HomePage() {
     { titleKey: "ideology.s3.title", textKey: "ideology.s3.text" },
     { titleKey: "ideology.s4.title", textKey: "ideology.s4.text" },
     { titleKey: "ideology.s5.title", textKey: "ideology.s5.text" },
+    { titleKey: "ideology.s6.title", textKey: "ideology.s6.text" },
+    { titleKey: "ideology.s7.title", textKey: "ideology.s7.text" },
+    { titleKey: "ideology.s8.title", textKey: "ideology.s8.text" },
   ];
 
   const categoryLabels: Record<string, { pl: string; en: string; de: string }> = {
@@ -203,18 +206,16 @@ export default function HomePage() {
             </h2>
           </AnimatedSection>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {ideologySections.map((section, index) => {
-              const Icon = ideologyIcons[index];
+              const Icon = ideologyIcons[index % ideologyIcons.length];
               return (
                 <AnimatedSection 
                   key={section.titleKey}
                   delay={index * 100}
                   animation="scale"
                 >
-                  <Card 
-                    className={`card-hover hover-lift h-full ${index === 4 ? 'md:col-span-2 lg:col-span-1' : ''}`}
-                  >
+                  <Card className="card-hover hover-lift h-full">
                     <CardHeader>
                       <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-3 transition-transform group-hover:scale-110">
                         <Icon className="h-6 w-6 text-primary" aria-hidden="true" />

@@ -1,20 +1,15 @@
 import { getCatalogPricesBatch } from "./gelato";
 
-// Markup multiplier applied to Gelato's production cost to get retail price.
-// e.g. 2.5 means you sell at 2.5× the cost Gelato charges you.
-const MARKUP_MULTIPLIER = 2.5;
+// Small fixed margin on top of Gelato's production cost to cover
+// payment processing fees (Stripe ~3%) and rounding.
+const FIXED_MARGIN_EUR = 1.5;
 
-// Minimum retail price (EUR) — floor so tiny items don't end up too cheap
-const MIN_PRICE_EUR = 19.99;
-
-// Round to .99 for clean retail pricing
-function roundToNine(n: number): number {
-  return Math.floor(n) + 0.99;
+function roundUp50(n: number): number {
+  return Math.ceil(n * 2) / 2; // round up to nearest €0.50
 }
 
 export function applyMarkup(costEur: number): number {
-  const raw = costEur * MARKUP_MULTIPLIER;
-  return Math.max(roundToNine(raw), MIN_PRICE_EUR);
+  return roundUp50(costEur + FIXED_MARGIN_EUR);
 }
 
 /**

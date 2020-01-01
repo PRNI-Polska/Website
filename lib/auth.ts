@@ -48,9 +48,10 @@ interface LoginAttempt {
 }
 
 const loginAttempts = new Map<string, LoginAttempt>();
-const MAX_LOGIN_ATTEMPTS = 3;
-const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 minutes base lockout
-const PROGRESSIVE_LOCKOUT = true; // Doubles each time: 5min → 10min → 20min → 30min (capped)
+const MAX_LOGIN_ATTEMPTS = 2;             // Only 2 tries before lockout
+const LOCKOUT_DURATION = 15 * 60 * 1000;  // 15 minutes base lockout (was 5)
+const PROGRESSIVE_LOCKOUT = true;          // Doubles each time: 15min → 30min → 60min → 120min (capped)
+const MAX_LOCKOUT = 2 * 60 * 60 * 1000;   // 2-hour cap (was 30 min)
 
 async function checkLoginRateLimit(email: string): Promise<{ allowed: boolean; remainingAttempts: number; lockoutRemaining?: number }> {
   const now = Date.now();
@@ -74,10 +75,10 @@ async function checkLoginRateLimit(email: string): Promise<{ allowed: boolean; r
       const attempts = (await redis.get<number>(attemptsKey)) || 0;
 
       if (attempts >= MAX_LOGIN_ATTEMPTS) {
-        // Progressive lockout: 5min → 10min → 20min → 30min (capped)
+        // Progressive lockout: 15min → 30min → 60min → 120min (capped)
         const excess = attempts - MAX_LOGIN_ATTEMPTS;
         const lockoutMultiplier = PROGRESSIVE_LOCKOUT ? Math.pow(2, Math.min(excess, 3)) : 1;
-        const lockoutMs = Math.min(LOCKOUT_DURATION * lockoutMultiplier, 30 * 60 * 1000);
+        const lockoutMs = Math.min(LOCKOUT_DURATION * lockoutMultiplier, MAX_LOCKOUT);
 
         await redis.set(blockKey, now + lockoutMs, { px: lockoutMs });
         const lockoutRemaining = Math.ceil(lockoutMs / 1000 / 60);
@@ -130,7 +131,7 @@ async function checkLoginRateLimit(email: string): Promise<{ allowed: boolean; r
 
   if (record.count >= MAX_LOGIN_ATTEMPTS) {
     const lockoutMultiplier = PROGRESSIVE_LOCKOUT ? Math.pow(2, Math.min(record.count - MAX_LOGIN_ATTEMPTS, 3)) : 1;
-    const lockoutMs = Math.min(LOCKOUT_DURATION * lockoutMultiplier, 30 * 60 * 1000);
+    const lockoutMs = Math.min(LOCKOUT_DURATION * lockoutMultiplier, MAX_LOCKOUT);
     record.blocked = true;
     record.blockExpiry = now + lockoutMs;
     const lockoutRemaining = Math.ceil((record.blockExpiry - now) / 1000 / 60);

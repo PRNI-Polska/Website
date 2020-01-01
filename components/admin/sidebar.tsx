@@ -9,9 +9,12 @@ import {
   Calendar,
   Book,
   Users,
+  PenLine,
   ExternalLink,
   Phone,
   BarChart3,
+  Mail,
+  Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +24,10 @@ const navigation = [
   { name: "Events", href: "/admin/events", icon: Calendar },
   { name: "Manifesto", href: "/admin/manifesto", icon: Book },
   { name: "Team", href: "/admin/team", icon: Users },
+  { name: "Blog", href: "/admin/blog", icon: PenLine },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  { name: "Newsletter", href: "/admin/newsletter", icon: Mail },
+  { name: "Members", href: "/admin/members", icon: Shield },
   { name: "Komunikator", href: "/admin/calls", icon: Phone },
 ];
 

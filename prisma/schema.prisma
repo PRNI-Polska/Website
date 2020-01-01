@@ -42,9 +42,15 @@ model User {
 model Announcement {
   id            String    @id @default(cuid())
   title         String
+  titleEn       String?
+  titleDe       String?
   slug          String    @unique
   excerpt       String
-  content       String    // Markdown content
+  excerptEn     String?
+  excerptDe     String?
+  content       String
+  contentEn     String?
+  contentDe     String?
   category      String    @default("NEWS") // NEWS, PRESS_RELEASE, POLICY, CAMPAIGN, COMMUNITY, OTHER
   featuredImage String?   // URL to featured image
   status        String    @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED
@@ -94,8 +100,12 @@ model Event {
 model ManifestoSection {
   id            String              @id @default(cuid())
   title         String
+  titleEn       String?
+  titleDe       String?
   slug          String              @unique
-  content       String              // Markdown content
+  content       String
+  contentEn     String?
+  contentDe     String?
   order         Int                 // For sorting sections
   parentId      String?             // For sub-sections
   parent        ManifestoSection?   @relation("SubSections", fields: [parentId], references: [id])
@@ -150,6 +160,108 @@ model AuditLog {
   @@index([userId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ============================================================================
+// BLOG POST MODEL - Articles and opinion pieces
+// ============================================================================
+model BlogPost {
+  id            String    @id @default(cuid())
+  title         String
+  titleEn       String?
+  titleDe       String?
+  slug          String    @unique
+  excerpt       String
+  excerptEn     String?
+  excerptDe     String?
+  content       String
+  contentEn     String?
+  contentDe     String?
+  authorName    String
+  authorRole    String?
+  featuredImage String?
+  category      String    @default("OPINION")
+  status        String    @default("DRAFT")
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@index([status, publishedAt])
+  @@index([slug])
+  @@map("blog_posts")
+}
+
+// ============================================================================
+// NEWSLETTER SUBSCRIBER MODEL
+// ============================================================================
+model Subscriber {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  confirmed       Boolean   @default(false)
+  confirmToken    String?   @unique
+  unsubscribeToken String   @unique
+  createdAt       DateTime  @default(now())
+  
+  @@index([email])
+  @@index([confirmed])
+  @@map("subscribers")
+}
+
+// ============================================================================
+// MEMBER MODEL - Secure members-only access
+// ============================================================================
+model Member {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  displayName   String
+  role          String    @default("MEMBER")
+  isActive      Boolean   @default(true)
+  inviteCode    String?
+  lastLoginAt   DateTime?
+  lastLoginIp   String?
+  failedLogins  Int       @default(0)
+  lockedUntil   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  @@index([email])
+  @@index([isActive])
+  @@map("members")
+}
+
+// ============================================================================
+// MEMBER INVITE MODEL - One-time invite codes
+// ============================================================================
+model MemberInvite {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  email       String?
+  used        Boolean   @default(false)
+  usedAt      DateTime?
+  usedBy      String?
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+  
+  @@index([code])
+  @@map("member_invites")
+}
+
+// ============================================================================
+// MEMBER DOCUMENT MODEL - Private documents for members
+// ============================================================================
+model MemberDocument {
+  id          String    @id @default(cuid())
+  title       String
+  content     String
+  category    String    @default("GENERAL")
+  pinned      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@index([category])
+  @@index([createdAt])
+  @@map("member_documents")
 }
 
 // ============================================================================

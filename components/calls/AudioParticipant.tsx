@@ -65,9 +65,39 @@ export function AudioParticipant({
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
-    if (audioRef.current && audioStream && !isLocal) {
-      audioRef.current.srcObject = audioStream;
-    }
+    const el = audioRef.current;
+    if (!el || !audioStream || isLocal) return;
+
+    el.srcObject = audioStream;
+    el.muted = false;
+    el.volume = 1;
+
+    const tryPlay = () => {
+      el.play().catch(() => {
+        // Autoplay blocked — retry on next user interaction
+        const resume = () => {
+          el.play().catch(() => {});
+          document.removeEventListener("click", resume);
+          document.removeEventListener("touchstart", resume);
+        };
+        document.addEventListener("click", resume, { once: true });
+        document.addEventListener("touchstart", resume, { once: true });
+      });
+    };
+
+    tryPlay();
+
+    // Recover from track ending (happens on ICE restart / stream replacement)
+    const tracks = audioStream.getAudioTracks();
+    const onEnded = () => {
+      if (el.srcObject !== audioStream) return;
+      tryPlay();
+    };
+    for (const t of tracks) t.addEventListener("ended", onEnded);
+
+    return () => {
+      for (const t of tracks) t.removeEventListener("ended", onEnded);
+    };
   }, [audioStream, isLocal]);
 
   const label = isLocal ? t("you") : peerId.slice(0, 6);

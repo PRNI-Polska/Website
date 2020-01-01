@@ -66,11 +66,15 @@ export function Footer() {
     // Simulate newsletter signup (you can connect this to an actual service later)
     await new Promise((resolve) => setTimeout(resolve, 1000));
     
+    const titles = { pl: "Dziękujemy!", en: "Thank you!", de: "Danke!" };
+    const descriptions = { 
+      pl: "Zostałeś zapisany do naszego newslettera.", 
+      en: "You have been subscribed to our newsletter.",
+      de: "Sie wurden für unseren Newsletter angemeldet."
+    };
     toast({
-      title: locale === "pl" ? "Dziękujemy!" : "Thank you!",
-      description: locale === "pl" 
-        ? "Zostałeś zapisany do naszego newslettera." 
-        : "You have been subscribed to our newsletter.",
+      title: titles[locale],
+      description: descriptions[locale],
     });
     
     setEmail("");
@@ -99,6 +103,8 @@ export function Footer() {
                 <span className="text-xs text-muted-foreground">
                   {locale === "pl" 
                     ? "Polski Ruch Narodowo-Integralistyczny" 
+                    : locale === "de"
+                    ? "Polnische National-Integralistische Bewegung"
                     : "Polish National-Integralist Movement"}
                 </span>
               </div>
@@ -106,6 +112,8 @@ export function Footer() {
             <p className="text-sm text-muted-foreground mb-4">
               {locale === "pl"
                 ? "Naród jako najwyższa wartość polityczna."
+                : locale === "de"
+                ? "Die Nation als höchster politischer Wert."
                 : "The nation as the highest political value."}
             </p>
             
@@ -182,12 +190,14 @@ export function Footer() {
             <p className="text-sm text-muted-foreground mb-4">
               {locale === "pl"
                 ? "Bądź na bieżąco z naszymi działaniami."
+                : locale === "de"
+                ? "Bleiben Sie über unsere Aktivitäten informiert."
                 : "Stay up to date with our activities."}
             </p>
             <form onSubmit={handleNewsletterSubmit} className="space-y-2">
               <Input
                 type="email"
-                placeholder={locale === "pl" ? "Twój email" : "Your email"}
+                placeholder={locale === "pl" ? "Twój email" : locale === "de" ? "Ihre E-Mail" : "Your email"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -200,8 +210,8 @@ export function Footer() {
                 disabled={isSubmitting}
               >
                 {isSubmitting 
-                  ? (locale === "pl" ? "Zapisywanie..." : "Subscribing...")
-                  : (locale === "pl" ? "Zapisz się" : "Subscribe")
+                  ? (locale === "pl" ? "Zapisywanie..." : locale === "de" ? "Abonnieren..." : "Subscribing...")
+                  : (locale === "pl" ? "Zapisz się" : locale === "de" ? "Abonnieren" : "Subscribe")
                 }
               </Button>
             </form>
@@ -215,11 +225,13 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             &copy; {currentYear} PRNI - {locale === "pl" 
               ? "Polski Ruch Narodowo-Integralistyczny" 
+              : locale === "de"
+              ? "Polnische National-Integralistische Bewegung"
               : "Polish National-Integralist Movement"}. {t("footer.rights")}
           </p>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span>
-              {locale === "pl" ? "Śledź nas:" : "Follow us:"}
+              {locale === "pl" ? "Śledź nas:" : locale === "de" ? "Folgen Sie uns:" : "Follow us:"}
             </span>
             {socialLinks.map((social) => (
               <a

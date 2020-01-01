@@ -58,6 +58,8 @@ export default function HomePage() {
               <h2 className="text-lg md:text-xl text-primary font-semibold tracking-widest uppercase mb-2">
                 {locale === "pl" 
                   ? "Polski Ruch Narodowo-Integralistyczny" 
+                  : locale === "de"
+                  ? "Polnische National-Integralistische Bewegung"
                   : "Polish National-Integralist Movement"}
               </h2>
             </div>
@@ -113,7 +115,7 @@ export default function HomePage() {
         <div className="container-custom">
           <AnimatedSection className="text-center mb-12">
             <Badge variant="secondary" className="mb-4">
-              {locale === "pl" ? "Deklaracja Ideowa" : "Declaration of Ideology"}
+              {locale === "pl" ? "Deklaracja Ideowa" : locale === "de" ? "Ideologische Erklärung" : "Declaration of Ideology"}
             </Badge>
             <h2 className="text-2xl md:text-3xl font-heading font-semibold">
               {t("ideology.title")}

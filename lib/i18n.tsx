@@ -3,190 +3,217 @@
 
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 
-export type Locale = "en" | "pl";
+export type Locale = "pl" | "en" | "de";
 
 interface Translations {
   [key: string]: {
-    en: string;
     pl: string;
+    en: string;
+    de: string;
   };
 }
 
 export const translations: Translations = {
   // Navigation
-  "nav.home": { en: "Home", pl: "Strona główna" },
-  "nav.announcements": { en: "Announcements", pl: "Komunikaty" },
-  "nav.events": { en: "Events", pl: "Wydarzenia" },
-  "nav.manifesto": { en: "Manifesto", pl: "Manifest" },
-  "nav.about": { en: "About", pl: "O nas" },
-  "nav.contact": { en: "Contact", pl: "Kontakt" },
+  "nav.home": { pl: "Strona główna", en: "Home", de: "Startseite" },
+  "nav.announcements": { pl: "Komunikaty", en: "Announcements", de: "Mitteilungen" },
+  "nav.events": { pl: "Wydarzenia", en: "Events", de: "Veranstaltungen" },
+  "nav.manifesto": { pl: "Manifest", en: "Manifesto", de: "Manifest" },
+  "nav.about": { pl: "O nas", en: "About", de: "Über uns" },
+  "nav.contact": { pl: "Kontakt", en: "Contact", de: "Kontakt" },
   
   // Party names
-  "party.name.short": { en: "PRNI", pl: "PRNI" },
+  "party.name.short": { pl: "PRNI", en: "PRNI", de: "PRNI" },
   "party.name.full.en": { 
-    en: "Polish National-Integralist Movement", 
-    pl: "Polish National-Integralist Movement" 
+    pl: "Polish National-Integralist Movement", 
+    en: "Polish National-Integralist Movement",
+    de: "Polnische National-Integralistische Bewegung"
   },
   "party.name.full.pl": { 
-    en: "Polski Ruch Narodowo-Integralistyczny", 
-    pl: "Polski Ruch Narodowo-Integralistyczny" 
+    pl: "Polski Ruch Narodowo-Integralistyczny", 
+    en: "Polski Ruch Narodowo-Integralistyczny",
+    de: "Polski Ruch Narodowo-Integralistyczny"
   },
   
   // Hero section
   "hero.title": { 
+    pl: "Naród Ponad Wszystkim",
     en: "Nation Above All", 
-    pl: "Naród Ponad Wszystkim" 
+    de: "Die Nation über allem"
   },
   "hero.subtitle": { 
+    pl: "Budujemy silną, zjednoczoną Polskę zakorzenioną w tradycji i tożsamości narodowej.",
     en: "Building a strong, unified Poland rooted in tradition and national identity.", 
-    pl: "Budujemy silną, zjednoczoną Polskę zakorzenioną w tradycji i tożsamości narodowej." 
+    de: "Wir bauen ein starkes, vereintes Polen, das in Tradition und nationaler Identität verwurzelt ist."
   },
-  "hero.cta.manifesto": { en: "Read Our Manifesto", pl: "Czytaj Manifest" },
-  "hero.cta.join": { en: "Join the Movement", pl: "Dołącz do Ruchu" },
+  "hero.cta.manifesto": { pl: "Czytaj Manifest", en: "Read Our Manifesto", de: "Unser Manifest lesen" },
+  "hero.cta.join": { pl: "Dołącz do Ruchu", en: "Join the Movement", de: "Der Bewegung beitreten" },
   
   // Mission section
-  "mission.title": { en: "Our Mission", pl: "Nasza Misja" },
+  "mission.title": { pl: "Nasza Misja", en: "Our Mission", de: "Unsere Mission" },
   "mission.text": { 
+    pl: "Wierzymy w naród jako najwyższą wartość polityczną. Nasz ruch stoi na straży zachowania polskiej tożsamości narodowej, jedności kulturowej oraz organicznego państwa służącego interesom narodu.",
     en: "We believe in the nation as the highest political value. Our movement stands for the preservation of Polish national identity, cultural unity, and the organic state that serves the interests of the nation.", 
-    pl: "Wierzymy w naród jako najwyższą wartość polityczną. Nasz ruch stoi na straży zachowania polskiej tożsamości narodowej, jedności kulturowej oraz organicznego państwa służącego interesom narodu." 
+    de: "Wir glauben an die Nation als höchsten politischen Wert. Unsere Bewegung steht für die Bewahrung der polnischen nationalen Identität, kultureller Einheit und des organischen Staates, der den Interessen der Nation dient."
   },
   
   // Ideology sections
-  "ideology.title": { en: "Our Ideology", pl: "Nasza Ideologia" },
+  "ideology.title": { pl: "Nasza Ideologia", en: "Our Ideology", de: "Unsere Ideologie" },
   "ideology.s1.title": { 
+    pl: "§ 1. Naród jako najwyższa wartość polityczna",
     en: "§ 1. The Nation as the Highest Political Value", 
-    pl: "§ 1. Naród jako najwyższa wartość polityczna" 
+    de: "§ 1. Die Nation als höchster politischer Wert"
   },
   "ideology.s1.text": { 
+    pl: "Uznajemy naród za najwyższą wartość polityczną. Naród pojmujemy jako byt historyczny i kulturowy, stojący ponad interesami jednostek oraz grup społecznych.",
     en: "We recognize the nation as the highest political value. We understand the nation as a historical and cultural entity, standing above the interests of individuals and social groups.", 
-    pl: "Uznajemy naród za najwyższą wartość polityczną. Naród pojmujemy jako byt historyczny i kulturowy, stojący ponad interesami jednostek oraz grup społecznych." 
+    de: "Wir erkennen die Nation als den höchsten politischen Wert an. Wir verstehen die Nation als eine historische und kulturelle Einheit, die über den Interessen von Einzelpersonen und sozialen Gruppen steht."
   },
   "ideology.s2.title": { 
+    pl: "§ 2. Jedność ideowa i kulturowa",
     en: "§ 2. Ideological and Cultural Unity", 
-    pl: "§ 2. Jedność ideowa i kulturowa" 
+    de: "§ 2. Ideologische und kulturelle Einheit"
   },
   "ideology.s2.text": { 
+    pl: "Opowiadamy się za zachowaniem jedności ideowej i kulturowej wspólnoty narodowej. Uznajemy konieczność obrony jednej, polskiej tradycji narodowej jako fundamentu tożsamości i ciągłości narodu.",
     en: "We advocate for the preservation of ideological and cultural unity of the national community. We recognize the necessity of defending one Polish national tradition as the foundation of identity and continuity of the nation.", 
-    pl: "Opowiadamy się za zachowaniem jedności ideowej i kulturowej wspólnoty narodowej. Uznajemy konieczność obrony jednej, polskiej tradycji narodowej jako fundamentu tożsamości i ciągłości narodu." 
+    de: "Wir setzen uns für die Bewahrung der ideologischen und kulturellen Einheit der nationalen Gemeinschaft ein. Wir erkennen die Notwendigkeit an, eine polnische nationale Tradition als Grundlage der Identität und Kontinuität der Nation zu verteidigen."
   },
   "ideology.s3.title": { 
+    pl: "§ 3. Antyliberalizm",
     en: "§ 3. Anti-Liberalism", 
-    pl: "§ 3. Antyliberalizm" 
+    de: "§ 3. Antiliberalismus"
   },
   "ideology.s3.text": { 
+    pl: "Odrzucamy liberalizm polityczny, oparty na skrajnym pluralizmie i indywidualizmie, jak również liberalizm kulturowy, prowadzący do relatywizacji wartości i osłabienia więzi narodowych.",
     en: "We reject political liberalism based on extreme pluralism and individualism, as well as cultural liberalism leading to relativization of values and weakening of national bonds.", 
-    pl: "Odrzucamy liberalizm polityczny, oparty na skrajnym pluralizmie i indywidualizmie, jak również liberalizm kulturowy, prowadzący do relatywizacji wartości i osłabienia więzi narodowych." 
+    de: "Wir lehnen den politischen Liberalismus ab, der auf extremem Pluralismus und Individualismus basiert, sowie den kulturellen Liberalismus, der zur Relativierung von Werten und zur Schwächung nationaler Bindungen führt."
   },
   "ideology.s4.title": { 
+    pl: "§ 4. Państwo organiczne",
     en: "§ 4. The Organic State", 
-    pl: "§ 4. Państwo organiczne" 
+    de: "§ 4. Der organische Staat"
   },
   "ideology.s4.text": { 
+    pl: "Uznajemy państwo za organiczny wyraz woli narodu. Państwo nie jest neutralnym arbitrem pomiędzy konkurującymi interesami, lecz narzędziem realizacji interesu narodowego.",
     en: "We recognize the state as an organic expression of the nation's will. The state is not a neutral arbiter between competing interests, but a tool for realizing the national interest.", 
-    pl: "Uznajemy państwo za organiczny wyraz woli narodu. Państwo nie jest neutralnym arbitrem pomiędzy konkurującymi interesami, lecz narzędziem realizacji interesu narodowego." 
+    de: "Wir erkennen den Staat als organischen Ausdruck des Willens der Nation an. Der Staat ist kein neutraler Schiedsrichter zwischen konkurrierenden Interessen, sondern ein Werkzeug zur Verwirklichung des nationalen Interesses."
   },
   "ideology.s5.title": { 
+    pl: "§ 5. Gospodarka podporządkowana narodowi",
     en: "§ 5. Economy Subordinated to the Nation", 
-    pl: "§ 5. Gospodarka podporządkowana narodowi" 
+    de: "§ 5. Der Nation untergeordnete Wirtschaft"
   },
   "ideology.s5.text": { 
+    pl: "Uznajemy, że gospodarka powinna służyć narodowi. Nie opowiadamy się ani za skrajnym wolnym rynkiem, ani za socjalizmem. Dopuszczamy interwencję państwa tam, gdzie wymaga tego interes narodowy lub stabilność społeczna.",
     en: "We recognize that the economy should serve the nation. We advocate neither for extreme free market nor for socialism. We permit state intervention where national interest or social stability requires it.", 
-    pl: "Uznajemy, że gospodarka powinna służyć narodowi. Nie opowiadamy się ani za skrajnym wolnym rynkiem, ani za socjalizmem. Dopuszczamy interwencję państwa tam, gdzie wymaga tego interes narodowy lub stabilność społeczna." 
+    de: "Wir erkennen an, dass die Wirtschaft der Nation dienen sollte. Wir befürworten weder einen extremen freien Markt noch den Sozialismus. Wir erlauben staatliche Intervention, wo es das nationale Interesse oder die soziale Stabilität erfordert."
   },
   
   // Sections
-  "section.news": { en: "Latest News", pl: "Najnowsze Wiadomości" },
-  "section.news.subtitle": { en: "Stay updated with our latest announcements", pl: "Bądź na bieżąco z naszymi komunikatami" },
-  "section.events": { en: "Upcoming Events", pl: "Nadchodzące Wydarzenia" },
-  "section.events.subtitle": { en: "Join us at our upcoming events", pl: "Dołącz do nas na nadchodzących wydarzeniach" },
-  "section.manifesto": { en: "Our Manifesto", pl: "Nasz Manifest" },
+  "section.news": { pl: "Najnowsze Wiadomości", en: "Latest News", de: "Neueste Nachrichten" },
+  "section.news.subtitle": { pl: "Bądź na bieżąco z naszymi komunikatami", en: "Stay updated with our latest announcements", de: "Bleiben Sie über unsere neuesten Ankündigungen informiert" },
+  "section.events": { pl: "Nadchodzące Wydarzenia", en: "Upcoming Events", de: "Kommende Veranstaltungen" },
+  "section.events.subtitle": { pl: "Dołącz do nas na nadchodzących wydarzeniach", en: "Join us at our upcoming events", de: "Nehmen Sie an unseren kommenden Veranstaltungen teil" },
+  "section.manifesto": { pl: "Nasz Manifest", en: "Our Manifesto", de: "Unser Manifest" },
   "section.manifesto.subtitle": { 
+    pl: "Poznaj naszą wizję i politykę budowania silniejszej Polski.",
     en: "Explore our vision and policies for building a stronger Poland.", 
-    pl: "Poznaj naszą wizję i politykę budowania silniejszej Polski." 
+    de: "Entdecken Sie unsere Vision und Politik für den Aufbau eines stärkeren Polens."
   },
   
   // CTA
-  "cta.title": { en: "Join Our Movement", pl: "Dołącz do Naszego Ruchu" },
+  "cta.title": { pl: "Dołącz do Naszego Ruchu", en: "Join Our Movement", de: "Treten Sie unserer Bewegung bei" },
   "cta.text": { 
+    pl: "Bądź częścią narodowego odrodzenia. Razem zbudujemy silną, zjednoczoną Polskę.",
     en: "Be part of the national revival. Together we will build a strong, unified Poland.", 
-    pl: "Bądź częścią narodowego odrodzenia. Razem zbudujemy silną, zjednoczoną Polskę." 
+    de: "Seien Sie Teil der nationalen Erneuerung. Gemeinsam werden wir ein starkes, vereintes Polen aufbauen."
   },
-  "cta.contact": { en: "Contact Us", pl: "Skontaktuj się" },
-  "cta.learn": { en: "Learn About Us", pl: "Poznaj Nas" },
+  "cta.contact": { pl: "Skontaktuj się", en: "Contact Us", de: "Kontaktieren Sie uns" },
+  "cta.learn": { pl: "Poznaj Nas", en: "Learn About Us", de: "Erfahren Sie mehr" },
   
   // Footer
-  "footer.quicklinks": { en: "Quick Links", pl: "Szybkie Linki" },
-  "footer.contact": { en: "Contact Us", pl: "Kontakt" },
-  "footer.rights": { en: "All rights reserved.", pl: "Wszelkie prawa zastrzeżone." },
+  "footer.quicklinks": { pl: "Szybkie Linki", en: "Quick Links", de: "Schnelllinks" },
+  "footer.contact": { pl: "Kontakt", en: "Contact Us", de: "Kontakt" },
+  "footer.rights": { pl: "Wszelkie prawa zastrzeżone.", en: "All rights reserved.", de: "Alle Rechte vorbehalten." },
   
   // Common
-  "common.viewAll": { en: "View All", pl: "Zobacz Wszystko" },
-  "common.readMore": { en: "Read More", pl: "Czytaj Więcej" },
-  "common.back": { en: "Back", pl: "Wstecz" },
-  "common.loading": { en: "Loading...", pl: "Ładowanie..." },
+  "common.viewAll": { pl: "Zobacz Wszystko", en: "View All", de: "Alle anzeigen" },
+  "common.readMore": { pl: "Czytaj Więcej", en: "Read More", de: "Mehr lesen" },
+  "common.back": { pl: "Wstecz", en: "Back", de: "Zurück" },
+  "common.loading": { pl: "Ładowanie...", en: "Loading...", de: "Laden..." },
   
   // Contact form
-  "contact.title": { en: "Contact Us", pl: "Kontakt" },
+  "contact.title": { pl: "Kontakt", en: "Contact Us", de: "Kontakt" },
   "contact.subtitle": { 
+    pl: "Masz pytanie lub chcesz się zaangażować? Chętnie Cię wysłuchamy.",
     en: "Have a question or want to get involved? We'd love to hear from you.", 
-    pl: "Masz pytanie lub chcesz się zaangażować? Chętnie Cię wysłuchamy." 
+    de: "Haben Sie eine Frage oder möchten Sie sich engagieren? Wir freuen uns von Ihnen zu hören."
   },
-  "contact.form.name": { en: "Name", pl: "Imię i nazwisko" },
-  "contact.form.email": { en: "Email", pl: "E-mail" },
-  "contact.form.subject": { en: "Subject", pl: "Temat" },
-  "contact.form.message": { en: "Message", pl: "Wiadomość" },
-  "contact.form.send": { en: "Send Message", pl: "Wyślij Wiadomość" },
-  "contact.form.sending": { en: "Sending...", pl: "Wysyłanie..." },
-  "contact.form.success": { en: "Message Sent!", pl: "Wiadomość Wysłana!" },
+  "contact.form.name": { pl: "Imię i nazwisko", en: "Name", de: "Name" },
+  "contact.form.email": { pl: "E-mail", en: "Email", de: "E-Mail" },
+  "contact.form.subject": { pl: "Temat", en: "Subject", de: "Betreff" },
+  "contact.form.message": { pl: "Wiadomość", en: "Message", de: "Nachricht" },
+  "contact.form.send": { pl: "Wyślij Wiadomość", en: "Send Message", de: "Nachricht senden" },
+  "contact.form.sending": { pl: "Wysyłanie...", en: "Sending...", de: "Senden..." },
+  "contact.form.success": { pl: "Wiadomość Wysłana!", en: "Message Sent!", de: "Nachricht gesendet!" },
   
   // About
   "about.title": { 
+    pl: "O Narodowym Integralizmie",
     en: "About National Integralism", 
-    pl: "O Narodowym Integralizmie" 
+    de: "Über den Nationalen Integralismus"
   },
   "about.subtitle": { 
+    pl: "Budujemy silną i suwerenną przyszłość opartą na odpowiedzialności, porządku oraz lojalności wobec wspólnoty narodowej.",
     en: "We are building a strong and sovereign future founded on responsibility, order, and loyalty to the national community.", 
-    pl: "Budujemy silną i suwerenną przyszłość opartą na odpowiedzialności, porządku oraz lojalności wobec wspólnoty narodowej." 
+    de: "Wir bauen eine starke und souveräne Zukunft auf, die auf Verantwortung, Ordnung und Loyalität gegenüber der nationalen Gemeinschaft gegründet ist."
   },
-  "about.mission.title": { en: "Our Mission", pl: "Nasza Misja" },
+  "about.mission.title": { pl: "Nasza Misja", en: "Our Mission", de: "Unsere Mission" },
   "about.mission.text": { 
+    pl: "Naszą misją jest odbudowa państwa opartego na konserwatywnych zasadach, stabilnym porządku społecznym oraz zdecydowanych, radykalnych rozwiązaniach wobec problemów, które przez lata były ignorowane.\nDziałamy w interesie narodu polskiego, wzmacniając jego tożsamość, bezpieczeństwo oraz zdolność do samostanowienia. Państwo powinno służyć narodowi, chronić jego interesy i zapewniać ciągłość kulturową oraz instytucjonalną.",
     en: "Our mission is to rebuild the state on conservative principles, a stable social order, and decisive, radical solutions to problems that have been ignored for years.\nWe act in the interest of the Polish nation by strengthening its identity, security, and capacity for self-determination. The state must serve the nation, protect its interests, and ensure cultural and institutional continuity.", 
-    pl: "Naszą misją jest odbudowa państwa opartego na konserwatywnych zasadach, stabilnym porządku społecznym oraz zdecydowanych, radykalnych rozwiązaniach wobec problemów, które przez lata były ignorowane.\nDziałamy w interesie narodu polskiego, wzmacniając jego tożsamość, bezpieczeństwo oraz zdolność do samostanowienia. Państwo powinno służyć narodowi, chronić jego interesy i zapewniać ciągłość kulturową oraz instytucjonalną." 
+    de: "Unsere Mission ist es, den Staat auf konservativen Prinzipien, einer stabilen sozialen Ordnung und entschlossenen, radikalen Lösungen für Probleme, die jahrelang ignoriert wurden, wieder aufzubauen.\nWir handeln im Interesse der polnischen Nation, indem wir ihre Identität, Sicherheit und Fähigkeit zur Selbstbestimmung stärken. Der Staat muss der Nation dienen, ihre Interessen schützen und kulturelle sowie institutionelle Kontinuität gewährleisten."
   },
-  "about.vision.title": { en: "Our Vision", pl: "Nasza Wizja" },
+  "about.vision.title": { pl: "Nasza Wizja", en: "Our Vision", de: "Unsere Vision" },
   "about.vision.text": { 
+    pl: "Widzimy Polskę jako państwo oparte na moralności, odpowiedzialności i jasno określonych normach społecznych.\nNaszą wizją jest kraj, w którym bezpieczeństwo obywateli stanowi absolutny priorytet, a władza publiczna działa stanowczo i skutecznie.\nDążymy do państwa wolnego od nadmiernego wpływu międzynarodowych korporacji, które podporządkowują gospodarkę i politykę interesom zewnętrznym kosztem suwerenności narodowej.",
     en: "We see Poland as a state founded on morality, responsibility, and clearly defined social norms.\nOur vision is a country where the security of citizens is an absolute priority and public authority acts decisively and effectively.\nWe strive for a state free from excessive influence of international corporations that subordinate the economy and politics to external interests at the expense of national sovereignty.", 
-    pl: "Widzimy Polskę jako państwo oparte na moralności, odpowiedzialności i jasno określonych normach społecznych.\nNaszą wizją jest kraj, w którym bezpieczeństwo obywateli stanowi absolutny priorytet, a władza publiczna działa stanowczo i skutecznie.\nDążymy do państwa wolnego od nadmiernego wpływu międzynarodowych korporacji, które podporządkowują gospodarkę i politykę interesom zewnętrznym kosztem suwerenności narodowej." 
+    de: "Wir sehen Polen als einen Staat, der auf Moral, Verantwortung und klar definierten sozialen Normen gegründet ist.\nUnsere Vision ist ein Land, in dem die Sicherheit der Bürger absolute Priorität hat und die öffentliche Autorität entschlossen und effektiv handelt.\nWir streben nach einem Staat, der frei von übermäßigem Einfluss internationaler Konzerne ist, die Wirtschaft und Politik externen Interessen auf Kosten der nationalen Souveränität unterordnen."
   },
-  "about.values.title": { en: "Our Values", pl: "Nasze Wartości" },
+  "about.values.title": { pl: "Nasze Wartości", en: "Our Values", de: "Unsere Werte" },
   
   // Values
-  "about.value.nationalism.title": { en: "Nationalism", pl: "Nacjonalizm" },
+  "about.value.nationalism.title": { pl: "Nacjonalizm", en: "Nationalism", de: "Nationalismus" },
   "about.value.nationalism.text": { 
+    pl: "Prymat interesu narodowego we wszystkich działaniach państwa. Ochrona tożsamości, kultury, języka oraz ciągłości historycznej narodu polskiego.",
     en: "The primacy of the national interest in all actions of the state. Protection of the identity, culture, language, and historical continuity of the Polish nation.", 
-    pl: "Prymat interesu narodowego we wszystkich działaniach państwa. Ochrona tożsamości, kultury, języka oraz ciągłości historycznej narodu polskiego." 
+    de: "Der Vorrang des nationalen Interesses in allen Handlungen des Staates. Schutz der Identität, Kultur, Sprache und historischen Kontinuität der polnischen Nation."
   },
-  "about.value.integralism.title": { en: "Integralism", pl: "Integralizm" },
+  "about.value.integralism.title": { pl: "Integralizm", en: "Integralism", de: "Integralismus" },
   "about.value.integralism.text": { 
+    pl: "Jedność narodu i państwa, spójność wspólnoty narodowej z instytucjami publicznymi oraz nierozerwalność interesu społecznego i państwowego. Integralizm oznacza silne, jednolite państwo wolne od wewnętrznych podziałów, partykularyzmu i chaosu ustrojowego.",
     en: "The unity of nation and state, cohesion between the national community and public institutions, and the inseparability of social and state interests. Integralism means a strong, unified state free from internal divisions, particularism, and systemic chaos.", 
-    pl: "Jedność narodu i państwa, spójność wspólnoty narodowej z instytucjami publicznymi oraz nierozerwalność interesu społecznego i państwowego. Integralizm oznacza silne, jednolite państwo wolne od wewnętrznych podziałów, partykularyzmu i chaosu ustrojowego." 
+    de: "Die Einheit von Nation und Staat, der Zusammenhalt zwischen der nationalen Gemeinschaft und öffentlichen Institutionen sowie die Untrennbarkeit von sozialen und staatlichen Interessen. Integralismus bedeutet einen starken, einheitlichen Staat, frei von internen Spaltungen, Partikularismus und systemischem Chaos."
   },
-  "about.value.sovereignty.title": { en: "Sovereignty", pl: "Suwerenność" },
+  "about.value.sovereignty.title": { pl: "Suwerenność", en: "Sovereignty", de: "Souveränität" },
   "about.value.sovereignty.text": { 
+    pl: "Pełna niezależność polityczna, gospodarcza i prawna, umożliwiająca samodzielne podejmowanie decyzji zgodnych z interesem narodu.",
     en: "Full political, economic, and legal independence enabling independent decision-making in accordance with the national interest.", 
-    pl: "Pełna niezależność polityczna, gospodarcza i prawna, umożliwiająca samodzielne podejmowanie decyzji zgodnych z interesem narodu." 
+    de: "Volle politische, wirtschaftliche und rechtliche Unabhängigkeit, die eine unabhängige Entscheidungsfindung im Einklang mit dem nationalen Interesse ermöglicht."
   },
-  "about.value.order.title": { en: "Order and Authority", pl: "Porządek i Autorytet" },
+  "about.value.order.title": { pl: "Porządek i Autorytet", en: "Order and Authority", de: "Ordnung und Autorität" },
   "about.value.order.text": { 
+    pl: "Skuteczne prawo, stabilne instytucje oraz jasna hierarchia odpowiedzialności, gwarantujące bezpieczeństwo i ład społeczny.",
     en: "Effective law, stable institutions, and a clear hierarchy of responsibility ensuring security and social order.", 
-    pl: "Skuteczne prawo, stabilne instytucje oraz jasna hierarchia odpowiedzialności, gwarantujące bezpieczeństwo i ład społeczny." 
+    de: "Effektives Recht, stabile Institutionen und eine klare Verantwortungshierarchie, die Sicherheit und soziale Ordnung gewährleisten."
   },
   
-  "about.leadership": { en: "Our Leadership", pl: "Nasze Kierownictwo" },
-  "about.leadership.subtitle": { en: "Meet the dedicated individuals leading our movement forward.", pl: "Poznaj oddanych liderów naszego ruchu." },
-  "about.team": { en: "Our Team", pl: "Nasz Zespół" },
-  "about.team.subtitle": { en: "The dedicated people working to make our vision a reality.", pl: "Oddani ludzie pracujący nad realizacją naszej wizji." },
-  "about.team.coming": { en: "Team information coming soon.", pl: "Informacje o zespole wkrótce." },
+  "about.leadership": { pl: "Nasze Kierownictwo", en: "Our Leadership", de: "Unsere Führung" },
+  "about.leadership.subtitle": { pl: "Poznaj oddanych liderów naszego ruchu.", en: "Meet the dedicated individuals leading our movement forward.", de: "Lernen Sie die engagierten Persönlichkeiten kennen, die unsere Bewegung vorantreiben." },
+  "about.team": { pl: "Nasz Zespół", en: "Our Team", de: "Unser Team" },
+  "about.team.subtitle": { pl: "Oddani ludzie pracujący nad realizacją naszej wizji.", en: "The dedicated people working to make our vision a reality.", de: "Die engagierten Menschen, die daran arbeiten, unsere Vision Wirklichkeit werden zu lassen." },
+  "about.team.coming": { pl: "Informacje o zespole wkrótce.", en: "Team information coming soon.", de: "Teaminformationen folgen in Kürze." },
 };
 
 interface I18nContextType {
@@ -237,6 +264,7 @@ export function LanguageSwitcher() {
             ? "bg-primary text-primary-foreground" 
             : "text-muted-foreground hover:text-foreground"
         }`}
+        aria-label="Polski"
       >
         PL
       </button>
@@ -248,8 +276,21 @@ export function LanguageSwitcher() {
             ? "bg-primary text-primary-foreground" 
             : "text-muted-foreground hover:text-foreground"
         }`}
+        aria-label="English"
       >
         EN
+      </button>
+      <span className="text-muted-foreground">/</span>
+      <button
+        onClick={() => setLocale("de")}
+        className={`px-2 py-1 rounded transition-colors ${
+          locale === "de" 
+            ? "bg-primary text-primary-foreground" 
+            : "text-muted-foreground hover:text-foreground"
+        }`}
+        aria-label="Deutsch"
+      >
+        DE
       </button>
     </div>
   );

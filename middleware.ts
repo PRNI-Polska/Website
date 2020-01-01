@@ -142,20 +142,20 @@ function checkRateLimit(
 
 // STRICT Rate limit configurations for political website
 const RATE_LIMITS = {
-  // Auth: 3 attempts per minute, block for 30 min after abuse
-  auth: { maxRequests: 3, interval: 60 * 1000, blockDuration: 30 * 60 * 1000 },
-  // Contact form: 3 per hour
-  contact: { maxRequests: 3, interval: 60 * 60 * 1000, blockDuration: 0 },
+  // Auth: 3 attempts per minute, progressive block (5 min → 30 min)
+  auth: { maxRequests: 3, interval: 60 * 1000, blockDuration: 5 * 60 * 1000 },
+  // Contact form: 2 per hour, block for 1 hour after abuse
+  contact: { maxRequests: 2, interval: 60 * 60 * 1000, blockDuration: 60 * 60 * 1000 },
   // Admin API: 50 per minute
   admin: { maxRequests: 50, interval: 60 * 1000, blockDuration: 0 },
-  // Public pages: 100 per minute per IP
-  public: { maxRequests: 100, interval: 60 * 1000, blockDuration: 5 * 60 * 1000 },
-  // Analytics: 30 per minute (prevent DB spam)
-  analytics: { maxRequests: 30, interval: 60 * 1000, blockDuration: 5 * 60 * 1000 },
-  // International join: 5 per 30 minutes
-  internationalJoin: { maxRequests: 5, interval: 30 * 60 * 1000, blockDuration: 0 },
-  // Recruitment: 5 per 30 minutes
-  recruitment: { maxRequests: 5, interval: 30 * 60 * 1000, blockDuration: 0 },
+  // Public pages: 60 per minute per IP, block for 10 min
+  public: { maxRequests: 60, interval: 60 * 1000, blockDuration: 10 * 60 * 1000 },
+  // Analytics: 20 per minute
+  analytics: { maxRequests: 20, interval: 60 * 1000, blockDuration: 5 * 60 * 1000 },
+  // International join: 2 per hour, block for 1 hour
+  internationalJoin: { maxRequests: 2, interval: 60 * 60 * 1000, blockDuration: 60 * 60 * 1000 },
+  // Recruitment: 2 per hour, block for 1 hour
+  recruitment: { maxRequests: 2, interval: 60 * 60 * 1000, blockDuration: 60 * 60 * 1000 },
 };
 
 // ============================================

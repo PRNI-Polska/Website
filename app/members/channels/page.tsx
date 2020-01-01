@@ -46,6 +46,7 @@ export default function ChannelsPage() {
   const shouldAutoScroll = useRef(true);
   const prevMsgCount = useRef(0);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const didAutoSelect = useRef(false);
 
   const selectedChannel = channels.find((c) => c.id === selectedId);
 
@@ -68,13 +69,14 @@ export default function ChannelsPage() {
     init();
   }, [fetchChannels]);
 
-  // Auto-select default channel on first load
+  // Auto-select default channel only on initial load
   useEffect(() => {
-    if (!selectedId && channels.length > 0) {
+    if (!didAutoSelect.current && channels.length > 0) {
       const def = channels.find((c) => c.isDefault);
       setSelectedId(def ? def.id : channels[0].id);
+      didAutoSelect.current = true;
     }
-  }, [channels, selectedId]);
+  }, [channels]);
 
   const fetchMessages = useCallback(
     async (channelId: string, opts?: { silent?: boolean }) => {

@@ -213,7 +213,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       console.warn(`Missing translation for key: ${key}`);
       return key;
     }
-    return translation[locale];
+    // Fallback: de -> en -> pl -> key
+    return translation[locale] ?? translation.en ?? translation.pl ?? key;
   }, [locale]);
 
   return (

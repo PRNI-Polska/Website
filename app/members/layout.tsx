@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, Loader2, Shield } from "lucide-react";
+import Link from "next/link";
+import { LogOut, Loader2, Shield, Hash, MessageCircle, FileText } from "lucide-react";
 
 interface MemberInfo {
   id: string;
@@ -79,11 +80,31 @@ export default function MembersLayout({
     <div className="min-h-screen bg-[#090909] text-[#e8e8e8]">
       <header className="border-b border-[#1a1a1a] bg-[#090909]/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-14">
-          <div className="flex items-center gap-3">
-            <Shield className="h-5 w-5 text-[#888]" />
-            <span className="font-semibold text-sm tracking-wide">
-              PRNI Members
-            </span>
+          <div className="flex items-center gap-6">
+            <Link href="/members" className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-[#888]" />
+              <span className="font-semibold text-sm tracking-wide">PRNI</span>
+            </Link>
+            <nav className="flex items-center gap-1">
+              {[
+                { href: "/members", icon: FileText, label: "Dokumenty" },
+                { href: "/members/channels", icon: Hash, label: "Kanały" },
+                { href: "/members/messages", icon: MessageCircle, label: "Wiadomości" },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm transition-colors ${
+                    pathname === item.href || (item.href !== "/members" && pathname.startsWith(item.href))
+                      ? "bg-[#1a1a1a] text-white"
+                      : "text-[#666] hover:text-[#e8e8e8] hover:bg-[#111]"
+                  }`}
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span className="hidden sm:inline">{item.label}</span>
+                </Link>
+              ))}
+            </nav>
           </div>
           {member && (
             <div className="flex items-center gap-4">
@@ -102,7 +123,7 @@ export default function MembersLayout({
           )}
         </div>
       </header>
-      <main className="max-w-6xl mx-auto px-6 py-8">{children}</main>
+      <main className={pathname.startsWith("/members/channels") || pathname.startsWith("/members/messages") ? "" : "max-w-6xl mx-auto px-6 py-8"}>{children}</main>
     </div>
   );
 }

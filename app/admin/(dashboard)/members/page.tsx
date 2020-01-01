@@ -56,6 +56,11 @@ export default function AdminMembersPage() {
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [channels, setChannels] = useState<Array<{id:string;name:string;description:string|null;messageCount:number;createdAt:string}>>([]);
+  const [loadingChannels, setLoadingChannels] = useState(true);
+  const [newChannelName, setNewChannelName] = useState("");
+  const [newChannelDesc, setNewChannelDesc] = useState("");
+  const [creatingChannel, setCreatingChannel] = useState(false);
 
   const fetchMembers = useCallback(async () => {
     setLoadingMembers(true);
@@ -85,10 +90,48 @@ export default function AdminMembersPage() {
     }
   }, []);
 
+  const fetchChannels = useCallback(async () => {
+    setLoadingChannels(true);
+    try {
+      const res = await fetch("/api/admin/members/channels");
+      if (!res.ok) throw new Error("Failed");
+      const data = await res.json();
+      setChannels(data.channels);
+    } catch { /* ignore */ }
+    finally { setLoadingChannels(false); }
+  }, []);
+
   useEffect(() => {
     fetchMembers();
     fetchInvites();
-  }, [fetchMembers, fetchInvites]);
+    fetchChannels();
+  }, [fetchMembers, fetchInvites, fetchChannels]);
+
+  async function createChannel() {
+    if (!newChannelName.trim()) return;
+    setCreatingChannel(true);
+    try {
+      const res = await fetch("/api/admin/members/channels", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newChannelName.trim(), description: newChannelDesc.trim() || null }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      setNewChannelName(""); setNewChannelDesc("");
+      fetchChannels();
+    } catch { /* ignore */ }
+    finally { setCreatingChannel(false); }
+  }
+
+  async function deleteChannel(id: string) {
+    if (!confirm("Delete this channel and all its messages?")) return;
+    setActionLoading(id);
+    try {
+      await fetch(`/api/admin/members/channels?id=${id}`, { method: "DELETE" });
+      fetchChannels();
+    } catch { /* ignore */ }
+    finally { setActionLoading(null); }
+  }
 
   async function generateInvite() {
     setGeneratingInvite(true);
@@ -210,6 +253,9 @@ export default function AdminMembersPage() {
           </TabsTrigger>
           <TabsTrigger value="invites">
             Invites ({invites.length})
+          </TabsTrigger>
+          <TabsTrigger value="channels">
+            Channels ({channels.length})
           </TabsTrigger>
         </TabsList>
 
@@ -510,6 +556,51 @@ export default function AdminMembersPage() {
                     No invite codes created yet.
                   </p>
                 </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="channels" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Create Channel</CardTitle>
+              <CardDescription>Add a new group chat channel for members.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-3">
+                <Input placeholder="Channel name" value={newChannelName} onChange={(e) => setNewChannelName(e.target.value)} className="max-w-[200px]" />
+                <Input placeholder="Description (optional)" value={newChannelDesc} onChange={(e) => setNewChannelDesc(e.target.value)} className="flex-1" />
+                <Button onClick={createChannel} disabled={creatingChannel || !newChannelName.trim()}>
+                  {creatingChannel ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Channels</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingChannels ? (
+                <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+              ) : channels.length > 0 ? (
+                <div className="space-y-3">
+                  {channels.map((ch) => (
+                    <div key={ch.id} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+                      <div>
+                        <p className="font-medium">#{ch.name}</p>
+                        {ch.description && <p className="text-sm text-muted-foreground">{ch.description}</p>}
+                        <p className="text-xs text-muted-foreground mt-1">{ch.messageCount} messages</p>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => deleteChannel(ch.id)} disabled={actionLoading === ch.id}>
+                        {actionLoading === ch.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4 text-destructive" />}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center py-8 text-muted-foreground">No channels yet. Create one above.</p>
               )}
             </CardContent>
           </Card>

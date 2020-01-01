@@ -37,30 +37,51 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-// Site metadata - customize these for SEO
 export const metadata: Metadata = {
+  metadataBase: new URL("https://prni.org.pl"),
   title: {
-    default: "PRNI - Political Party",
+    default: "PRNI — Polski Ruch Narodowo-Integralistyczny",
     template: "%s | PRNI",
   },
-  description: "Building a better future together. Join our movement for positive change in our community and nation.",
-  keywords: ["political party", "politics", "community", "change", "manifesto", "elections"],
+  description: "Polski Ruch Narodowo-Integralistyczny — Naród Ponad Wszystkim. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
+  keywords: [
+    "PRNI", "Polski Ruch Narodowo-Integralistyczny", "narodowy integralizm",
+    "ruch narodowy", "polska polityka", "suwerenność", "tradycja", "naród",
+    "integralizm", "manifest", "ruch polityczny", "Poland", "National Integralism",
+  ],
   authors: [{ name: "PRNI" }],
+  creator: "PRNI",
+  publisher: "PRNI",
   openGraph: {
     type: "website",
-    locale: "en_US",
-    siteName: "PRNI Political Party",
-    title: "PRNI - Political Party",
-    description: "Building a better future together. Join our movement for positive change.",
+    locale: "pl_PL",
+    alternateLocale: ["en_US", "de_DE"],
+    url: "https://prni.org.pl",
+    siteName: "PRNI — Polski Ruch Narodowo-Integralistyczny",
+    title: "PRNI — Naród Ponad Wszystkim",
+    description: "Polski Ruch Narodowo-Integralistyczny — ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej.",
+    images: [{ url: "/logo.png", width: 512, height: 512, alt: "PRNI Logo" }],
   },
   twitter: {
-    card: "summary_large_image",
-    title: "PRNI - Political Party",
-    description: "Building a better future together. Join our movement for positive change.",
+    card: "summary",
+    title: "PRNI — Polski Ruch Narodowo-Integralistyczny",
+    description: "Naród Ponad Wszystkim — ruch polityczny na rzecz suwerenności i tradycji.",
+    images: ["/logo.png"],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {},
+  alternates: {
+    canonical: "https://prni.org.pl",
   },
 };
 

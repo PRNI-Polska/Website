@@ -72,24 +72,23 @@ export async function POST(request: NextRequest) {
 }
 
 // ============================================
-// All other HTTP methods → 405
+// All other HTTP methods → 404 (hide the route)
 // ============================================
-function methodNotAllowed() {
-  return new NextResponse(null, {
-    status: 405,
-    headers: { Allow: "POST" },
-  });
+// SECURITY: Return 404 instead of 405 to hide the existence of
+// this internal endpoint from scanners and browsers.
+function notFound() {
+  return new NextResponse(null, { status: 404 });
 }
 
 export async function GET() {
-  return methodNotAllowed();
+  return notFound();
 }
 export async function PUT() {
-  return methodNotAllowed();
+  return notFound();
 }
 export async function DELETE() {
-  return methodNotAllowed();
+  return notFound();
 }
 export async function PATCH() {
-  return methodNotAllowed();
+  return notFound();
 }

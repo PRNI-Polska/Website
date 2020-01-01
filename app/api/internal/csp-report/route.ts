@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Only POST is allowed
+// SECURITY: Return 404 to hide the route from scanners/browsers
 export async function GET() {
-  return new NextResponse(null, { status: 405, headers: { Allow: "POST" } });
+  return new NextResponse(null, { status: 404 });
 }

@@ -73,6 +73,11 @@ async function sendEmail(data: {
   return { success: true };
 }
 
+// SECURITY: Hide this route from browsers — return 404 for non-POST
+export async function GET() {
+  return NextResponse.json(null, { status: 404 });
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Origin validation (CSRF protection)

@@ -37,16 +37,6 @@ interface AnalyticsData {
   }[];
 }
 
-// Country code to flag emoji
-function countryToFlag(countryCode: string): string {
-  if (!countryCode || countryCode === "Unknown") return "🌍";
-  const codePoints = countryCode
-    .toUpperCase()
-    .split("")
-    .map((char) => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
-}
-
 // Country code to name (comprehensive list)
 const countryNames: Record<string, string> = {
   // Europe
@@ -462,7 +452,7 @@ export default function AnalyticsPage() {
   const countryBarData = useMemo(() => {
     if (!data?.viewsByCountry) return [];
     return data.viewsByCountry.slice(0, 8).map((c) => ({
-      label: countryToFlag(c.country),
+      label: c.country || "?",
       value: c.count,
     }));
   }, [data?.viewsByCountry]);
@@ -515,12 +505,10 @@ export default function AnalyticsPage() {
               <SelectValue placeholder="Filter by country" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">
-                🌍 All Countries
-              </SelectItem>
+              <SelectItem value="all">All Countries</SelectItem>
               {data.viewsByCountry.map((c) => (
                 <SelectItem key={c.country} value={c.country}>
-                  {countryToFlag(c.country)} {countryNames[c.country] || c.country}
+                  {countryNames[c.country] || c.country}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -592,9 +580,19 @@ export default function AnalyticsPage() {
         <Card className="bg-gradient-to-br from-green-50 to-white dark:from-green-950/30 dark:to-gray-900 border-green-200 dark:border-green-900">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Top Country</CardTitle>
-            <span className="text-2xl">
-              {countryToFlag(data.viewsByCountry[0]?.country || "Unknown")}
-            </span>
+            <svg
+              className="h-5 w-5 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
           </CardHeader>
           <CardContent>
             <div className="text-xl font-bold text-green-700 dark:text-green-400">
@@ -680,7 +678,6 @@ export default function AnalyticsPage() {
                   {data.viewsByCountry.map((item, index) => (
                     <div key={item.country} className="flex items-center gap-3">
                       <span className="text-sm text-muted-foreground w-6">{index + 1}</span>
-                      <span className="text-xl">{countryToFlag(item.country)}</span>
                       <span className="flex-1 font-medium">
                         {countryNames[item.country] || item.country}
                       </span>
@@ -720,12 +717,11 @@ export default function AnalyticsPage() {
                     return (
                       <div key={`${item.city}-${item.country}`} className="flex items-center gap-3">
                         <span className="text-sm text-muted-foreground w-6">{index + 1}</span>
-                        <span className="text-xl">{countryToFlag(item.country)}</span>
                         <div className="flex-1">
                           <span className="font-medium">{item.city}</span>
                           {selectedCountry === "all" && (
                             <span className="text-sm text-muted-foreground ml-2">
-                              {countryNames[item.country] || item.country}
+                              ({countryNames[item.country] || item.country})
                             </span>
                           )}
                         </div>
@@ -899,15 +895,12 @@ export default function AnalyticsPage() {
                       </td>
                       <td className="py-3 px-2 font-mono text-xs">{view.path}</td>
                       <td className="py-3 px-2">
-                        <div className="flex items-center gap-1">
-                          <span>{countryToFlag(view.country || "Unknown")}</span>
-                          <span>
-                            {view.city ? `${view.city}` : ""}
-                            {view.city && view.region ? ", " : ""}
-                            {view.region || ""}
-                            {!view.city && !view.region ? (countryNames[view.country || ""] || view.country || "Unknown") : ""}
-                          </span>
-                        </div>
+                        <span>
+                          {view.city ? `${view.city}` : ""}
+                          {view.city && view.region ? ", " : ""}
+                          {view.region || ""}
+                          {!view.city && !view.region ? (countryNames[view.country || ""] || view.country || "Unknown") : ""}
+                        </span>
                       </td>
                       <td className="py-3 px-2 capitalize">{view.device || "Unknown"}</td>
                       <td className="py-3 px-2">{view.browser || "Unknown"}</td>

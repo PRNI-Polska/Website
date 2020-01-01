@@ -212,7 +212,7 @@
     background-repeat: no-repeat;
   }
   
-  /* Overlay for better text readability over background */
+  /* Light overlay - flag clearly visible */
   body::before {
     content: '';
     position: fixed;
@@ -220,7 +220,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: hsl(var(--background) / 0.92);
+    background: hsl(var(--background) / 0.6);
     z-index: -1;
     pointer-events: none;
   }

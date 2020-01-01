@@ -23,6 +23,7 @@ type AppState =
 export default function CallsPage() {
   const { t } = useCallsLang();
   const [state, setState] = useState<AppState>({ phase: "join" });
+  const [displayName, setDisplayName] = useState("");
   const [transcriptLang, setTranscriptLang] = useState("pl-PL");
   const [emailStatus, setEmailStatus] = useState<"idle"|"sending"|"sent"|"error">("idle");
   const transcriptRef = useRef<TranscriptEntry[]>([]);
@@ -35,8 +36,9 @@ export default function CallsPage() {
     }
   }, []);
 
-  const handleJoined = useCallback((s: SessionData) => {
+  const handleJoined = useCallback((s: SessionData, name: string) => {
     transcriptRef.current = [];
+    setDisplayName(name);
     setState({ phase: "in-meeting", session: s });
   }, []);
   const handleError = useCallback((_m: string) => {}, []);
@@ -84,7 +86,7 @@ export default function CallsPage() {
           </div>
         </div>
       )}
-      {state.phase === "in-meeting" && <MeetingRoom session={state.session} onLeave={handleLeave} onTranscriptUpdate={handleTranscriptUpdate} transcriptLang={transcriptLang} />}
+      {state.phase === "in-meeting" && <MeetingRoom session={state.session} displayName={displayName} onLeave={handleLeave} onTranscriptUpdate={handleTranscriptUpdate} transcriptLang={transcriptLang} />}
       {state.phase === "ended" && (
         <div className="w-full max-w-md text-center calls-animate-fade-up">
           {/* eslint-disable-next-line @next/next/no-img-element */}

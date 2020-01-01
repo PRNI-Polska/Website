@@ -12,9 +12,10 @@ interface AdminControlsProps {
   onDenySpeak: (peerId: string) => void;
   onRevokeSpeak: (peerId: string) => void;
   onKick: (peerId: string) => void;
+  getName?: (peerId: string) => string;
 }
 
-export function AdminControls({ speakRequests, peers, onCreatePoll, onApproveSpeak, onDenySpeak, onRevokeSpeak, onKick }: AdminControlsProps) {
+export function AdminControls({ speakRequests, peers, onCreatePoll, onApproveSpeak, onDenySpeak, onRevokeSpeak, onKick, getName }: AdminControlsProps) {
   const { t } = useCallsLang();
   const [showPollForm, setShowPollForm] = useState(false);
   const [question, setQuestion] = useState("");
@@ -52,7 +53,7 @@ export function AdminControls({ speakRequests, peers, onCreatePoll, onApproveSpe
           </span>
           {speakRequests.map((req) => (
             <div key={req.peerId} className="flex items-center justify-between gap-2">
-              <span className="text-xs text-neutral-300 font-mono">{req.peerId.slice(0, 8)}</span>
+              <span className="text-xs text-neutral-300 font-mono">{getName ? getName(req.peerId) : req.peerId.slice(0, 8)}</span>
               <div className="flex gap-1">
                 <button onClick={() => onApproveSpeak(req.peerId)} className="px-3 py-1.5 text-[9px] uppercase tracking-wider border border-emerald-700/50 text-emerald-400 hover:bg-emerald-500 hover:text-black transition-all">
                   {t("approve")}
@@ -71,7 +72,7 @@ export function AdminControls({ speakRequests, peers, onCreatePoll, onApproveSpe
           <span className="text-[10px] text-neutral-500 uppercase tracking-[0.15em]">{t("activeSpeakers")}</span>
           {speakers.map((s) => (
             <div key={s.peerId} className="flex items-center justify-between">
-              <span className="text-xs text-neutral-400 font-mono">{s.peerId.slice(0, 8)}</span>
+              <span className="text-xs text-neutral-400 font-mono">{getName ? getName(s.peerId) : s.peerId.slice(0, 8)}</span>
               <button onClick={() => onRevokeSpeak(s.peerId)} className="px-3 py-1.5 text-[9px] uppercase tracking-wider border border-[#222] text-neutral-600 hover:border-red-800 hover:text-red-400 transition-all">
                 {t("revokeMic")}
               </button>
@@ -86,7 +87,7 @@ export function AdminControls({ speakRequests, peers, onCreatePoll, onApproveSpe
           {peers.map((p) => (
             <div key={p.peerId} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-neutral-400 font-mono">{p.peerId.slice(0, 8)}</span>
+                <span className="text-xs text-neutral-400 font-mono">{getName ? getName(p.peerId) : p.peerId.slice(0, 8)}</span>
                 <span className="text-[9px] text-neutral-700 uppercase">{p.role}</span>
               </div>
               {p.role !== "admin" && (

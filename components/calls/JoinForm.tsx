@@ -4,10 +4,11 @@ import { useState, useCallback, type FormEvent } from "react";
 import { joinMeeting, type SessionData } from "@/lib/calls/api";
 import { useCallsLang } from "@/lib/calls/LangContext";
 
-interface JoinFormProps { onJoined: (s: SessionData) => void; onError: (m: string) => void; }
+interface JoinFormProps { onJoined: (s: SessionData, displayName: string) => void; onError: (m: string) => void; }
 
 export function JoinForm({ onJoined, onError }: JoinFormProps) {
   const { t } = useCallsLang();
+  const [displayName, setDisplayName] = useState("");
   const [roomCode, setRoomCode] = useState("");
   const [password, setPassword] = useState("");
   const [pin, setPin] = useState("");
@@ -17,25 +18,32 @@ export function JoinForm({ onJoined, onError }: JoinFormProps) {
 
   const handleSubmit = useCallback(async (e: FormEvent) => {
     e.preventDefault();
-    if (!roomCode.trim() || !password.trim()) return;
+    if (!displayName.trim() || !roomCode.trim() || !password.trim()) return;
     setLoading(true); setError(null);
     try {
       const session = await joinMeeting(roomCode, password, pinType === "speaker" ? pin : undefined, pinType === "admin" ? pin : undefined);
-      onJoined(session);
+      onJoined(session, displayName.trim());
     } catch (err) { const msg = err instanceof Error ? err.message : "Error"; setError(msg); onError(msg); }
     finally { setLoading(false); }
-  }, [roomCode, password, pin, pinType, onJoined, onError]);
+  }, [displayName, roomCode, password, pin, pinType, onJoined, onError]);
 
   const roles = { none: t("listener"), speaker: t("speaker"), admin: t("admin") };
-  const canSubmit = roomCode.trim() && password.trim() && (pinType === "none" || pin.trim());
+  const canSubmit = displayName.trim() && roomCode.trim() && password.trim() && (pinType === "none" || pin.trim());
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
+        <label htmlFor="calls-displayName" className="block text-sm font-medium text-neutral-400 mb-2">{t("displayName")}</label>
+        <input id="calls-displayName" type="text" value={displayName}
+          onChange={(e) => { setDisplayName(e.target.value.slice(0, 30)); setError(null); }}
+          placeholder={t("namePlaceholder")} autoComplete="off" autoFocus spellCheck={false} maxLength={30}
+          className={`w-full px-5 py-3 bg-[#090909] border rounded text-white text-base focus:outline-none transition-colors ${error?"border-red-800":"border-[#252525] focus:border-neutral-500"}`} />
+      </div>
+      <div>
         <label htmlFor="calls-roomCode" className="block text-sm font-medium text-neutral-400 mb-2">{t("roomCode")}</label>
         <input id="calls-roomCode" type="text" value={roomCode}
           onChange={(e) => { setRoomCode(e.target.value.toUpperCase()); setError(null); }}
-          placeholder="VAULT-XXXX-XXXX" autoComplete="off" autoFocus spellCheck={false}
+          placeholder="VAULT-XXXX-XXXX" autoComplete="off" spellCheck={false}
           className={`w-full px-5 py-4 bg-[#090909] text-center border rounded text-white font-[var(--font-mono)] text-lg tracking-widest focus:outline-none transition-colors ${error?"border-red-800":"border-[#252525] focus:border-neutral-500"}`} />
       </div>
       <div>

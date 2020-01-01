@@ -7,6 +7,8 @@ export const translations = {
   anonymous: { pl: "Anonimowe", en: "Anonymous", de: "Anonym" },
   secure: { pl: "Bezpieczne", en: "Secure", de: "Sicher" },
 
+  displayName: { pl: "Twoje imię", en: "Your name", de: "Dein Name" },
+  namePlaceholder: { pl: "Jak chcesz się nazywać?", en: "What should we call you?", de: "Wie möchtest du genannt werden?" },
   roomCode: { pl: "Kod spotkania", en: "Room code", de: "Raumcode" },
   meetingPassword: { pl: "Hasło spotkania", en: "Meeting password", de: "Meeting-Passwort" },
   passwordRequired: { pl: "Wymagane", en: "Required", de: "Erforderlich" },

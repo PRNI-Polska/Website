@@ -9,14 +9,14 @@ import { AdminControls } from "./AdminControls";
 import { ChatPanel, type ChatMessage } from "./ChatPanel";
 import { useCallsLang } from "@/lib/calls/LangContext";
 
-interface MeetingRoomProps { session: SessionData; onLeave: () => void; onTranscriptUpdate?: (entries: TranscriptEntry[]) => void; transcriptLang?: string; }
+interface MeetingRoomProps { session: SessionData; displayName: string; onLeave: () => void; onTranscriptUpdate?: (entries: TranscriptEntry[]) => void; transcriptLang?: string; }
 interface PeerState { peerId: string; role: Role; isSpeaking: boolean; audioStream: MediaStream | null; }
 export interface TranscriptEntry { peerId: string; role: string; text: string; timestamp: number; }
 function canSpeak(r: Role) { return r === "admin" || r === "speaker"; }
 
 const LANG_MAP: Record<string, string> = { pl: "pl-PL", de: "de-DE", en: "en-US" };
 
-export function MeetingRoom({ session, onLeave, onTranscriptUpdate, transcriptLang }: MeetingRoomProps) {
+export function MeetingRoom({ session, displayName, onLeave, onTranscriptUpdate, transcriptLang }: MeetingRoomProps) {
   const { t } = useCallsLang();
   const managerRef = useRef<WebRTCManager | null>(null);
   const [peers, setPeers] = useState<Map<string, PeerState>>(new Map());
@@ -32,6 +32,7 @@ export function MeetingRoom({ session, onLeave, onTranscriptUpdate, transcriptLa
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatCooldown, setChatCooldown] = useState(0);
   const [notification, setNotification] = useState<string | null>(null);
+  const [nameMap, setNameMap] = useState<Map<string, string>>(new Map());
   const localAnalyserRef = useRef<{interval:ReturnType<typeof setInterval>;ctx:AudioContext}|null>(null);
 
   const [currentCaption, setCurrentCaption] = useState<{peerId:string;text:string;isFinal:boolean}|null>(null);
@@ -58,7 +59,9 @@ export function MeetingRoom({ session, onLeave, onTranscriptUpdate, transcriptLa
       switch (ev.type) {
         case "connected": setIsConnected(true); setError(null);
           if(ev.activePolls){const m=new Map<string,PollData>();for(const p of ev.activePolls as Array<{pollId:string;question:string;options:string[];endsAt:number;currentResults:number[]}>){m.set(p.pollId,{pollId:p.pollId,question:p.question,options:p.options,results:p.currentResults,totalVotes:p.currentResults.reduce((a:number,b:number)=>a+b,0),endsAt:p.endsAt,ended:false,voted:false});}setPolls(m);}
-          if(ev.pendingSpeakRequests)setSpeakRequests(ev.pendingSpeakRequests as Array<{peerId:string}>); break;
+          if(ev.pendingSpeakRequests)setSpeakRequests(ev.pendingSpeakRequests as Array<{peerId:string}>);
+          mgr.getSignaling().send({type:"set-name",name:displayName});
+          break;
         case "peer-added": setPeers(p=>{const n=new Map(p);n.set(ev.peerId,{peerId:ev.peerId,role:ev.role as Role,isSpeaking:false,audioStream:null});return n;}); break;
         case "peer-removed": setPeers(p=>{const n=new Map(p);n.delete(ev.peerId);return n;}); break;
         case "remote-stream": setPeers(p=>{const n=new Map(p);const x=n.get(ev.peerId);if(x)n.set(ev.peerId,{...x,audioStream:ev.stream});return n;}); break;
@@ -90,6 +93,10 @@ export function MeetingRoom({ session, onLeave, onTranscriptUpdate, transcriptLa
       }
     });
     mgr.start();
+
+    const nameUnsub = mgr.getSignaling().on("name-announce" as never, (data: {peerId:string;name:string}) => {
+      if(data.peerId && data.name) setNameMap(prev=>{const n=new Map(prev);n.set(data.peerId,data.name);return n;});
+    });
 
     let lci:ReturnType<typeof setInterval>|null=null;
     if(canSpeak(session.role)){lci=setInterval(()=>{const s=mgr.getLocalStream();if(!s||localAnalyserRef.current)return;try{const ac=new AudioContext();if(ac.state==="suspended")ac.resume().catch(()=>{});const src=ac.createMediaStreamSource(s);const an=ac.createAnalyser();an.fftSize=512;src.connect(an);const d=new Uint8Array(an.frequencyBinCount);const pi=setInterval(()=>{if(ac.state==="suspended"){ac.resume().catch(()=>{});return;}an.getByteFrequencyData(d);let sum=0;for(let i=0;i<d.length;i++)sum+=d[i];setLocalSpeaking(sum/d.length>15);},100);localAnalyserRef.current={interval:pi,ctx:ac};if(lci)clearInterval(lci);}catch{}},500);}
@@ -129,7 +136,7 @@ export function MeetingRoom({ session, onLeave, onTranscriptUpdate, transcriptLa
       if(localAnalyserRef.current){clearInterval(localAnalyserRef.current.interval);localAnalyserRef.current.ctx.close();}
       if(recognitionRef.current){try{recognitionRef.current.stop();}catch{}}
       if(captionTimeoutRef.current)clearTimeout(captionTimeoutRef.current);
-      unsub();mgr.destroy();
+      nameUnsub();unsub();mgr.destroy();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
@@ -146,6 +153,11 @@ export function MeetingRoom({ session, onLeave, onTranscriptUpdate, transcriptLa
   const revSpeak=useCallback((id:string)=>{managerRef.current?.getSignaling().revokeSpeak(id);},[]);
   const kickPeer=useCallback((id:string)=>{managerRef.current?.getSignaling().kick(id);},[]);
   const sendChat=useCallback((text:string)=>{managerRef.current?.getSignaling().sendChat(text);},[]);
+
+  const getName = useCallback((peerId: string, isLocal?: boolean) => {
+    if (isLocal) return displayName || t("you");
+    return nameMap.get(peerId) || peerId.slice(0, 6);
+  }, [displayName, nameMap, t]);
 
   const count = peers.size + 1;
   const all = [{peerId:"local",role:myRole,isSpeaking:localSpeaking&&!isMuted,audioStream:null as MediaStream|null,isLocal:true},...Array.from(peers.values()).map(p=>({...p,isLocal:false}))];
@@ -192,7 +204,7 @@ export function MeetingRoom({ session, onLeave, onTranscriptUpdate, transcriptLa
                 <span className="flex-1 h-px bg-[#1a1a1a]" />
               </div>
               <div className={`grid gap-3 ${spk.length <= 2 ? "grid-cols-1 sm:grid-cols-2 max-w-xl" : "grid-cols-2 md:grid-cols-3"}`}>
-                {spk.map(p => <AudioParticipant key={p.peerId} peerId={p.peerId} role={p.role} isSpeaking={p.isSpeaking} audioStream={p.audioStream} isLocal={p.isLocal} isMuted={p.isLocal ? isMuted : false} />)}
+                {spk.map(p => <AudioParticipant key={p.peerId} peerId={p.peerId} role={p.role} isSpeaking={p.isSpeaking} audioStream={p.audioStream} isLocal={p.isLocal} isMuted={p.isLocal ? isMuted : false} displayName={getName(p.peerId, p.isLocal)} />)}
               </div>
             </div>
           )}
@@ -205,7 +217,7 @@ export function MeetingRoom({ session, onLeave, onTranscriptUpdate, transcriptLa
                 <span className="flex-1 h-px bg-[#141414]" />
               </div>
               <div className="grid gap-2 grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
-                {lis.map(p => <AudioParticipant key={p.peerId} peerId={p.peerId} role={p.role} isSpeaking={false} audioStream={p.audioStream} isLocal={p.isLocal} isMuted={false} compact />)}
+                {lis.map(p => <AudioParticipant key={p.peerId} peerId={p.peerId} role={p.role} isSpeaking={false} audioStream={p.audioStream} isLocal={p.isLocal} isMuted={false} compact displayName={getName(p.peerId, p.isLocal)} />)}
               </div>
             </div>
           )}
@@ -240,7 +252,7 @@ export function MeetingRoom({ session, onLeave, onTranscriptUpdate, transcriptLa
           {currentCaption && (
             <div className="mt-6 text-center calls-animate-fade-in">
               <div className="inline-block bg-black/80 border border-[#333] rounded-lg px-6 py-3 max-w-2xl">
-                <span className="text-[10px] text-neutral-500 font-mono mr-2">{currentCaption.peerId==="local"?t("you"):currentCaption.peerId.slice(0,6)}</span>
+                <span className="text-[10px] text-neutral-500 font-mono mr-2">{getName(currentCaption.peerId, currentCaption.peerId==="local")}</span>
                 <span className={`text-sm ${currentCaption.isFinal?"text-white":"italic text-neutral-400"}`}>{currentCaption.text}</span>
               </div>
             </div>
@@ -274,7 +286,7 @@ export function MeetingRoom({ session, onLeave, onTranscriptUpdate, transcriptLa
                           {new Date(entry.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                         </span>
                         <span className={`text-[9px] uppercase tracking-wider font-medium ${entry.role === "admin" ? "text-white" : "text-neutral-500"}`}>
-                          {entry.peerId === "local" ? t("you") : entry.peerId.slice(0, 6)}
+                          {getName(entry.peerId, entry.peerId === "local")}
                         </span>
                       </div>
                       <p className="text-[12px] text-neutral-300 leading-relaxed mt-0.5">{entry.text}</p>
@@ -285,10 +297,10 @@ export function MeetingRoom({ session, onLeave, onTranscriptUpdate, transcriptLa
             )}
           </div>
 
-          <ChatPanel messages={chatMessages} onSend={sendChat} cooldownRemaining={chatCooldown} />
+          <ChatPanel messages={chatMessages} onSend={sendChat} cooldownRemaining={chatCooldown} getName={(id) => getName(id)} />
           {Array.from(polls.values()).map(p => <PollCard key={p.pollId} poll={p} onVote={vote} />)}
           {myRole === "admin" && (
-            <AdminControls speakRequests={speakRequests} peers={Array.from(peers.values()).map(p => ({peerId:p.peerId,role:p.role}))} onCreatePoll={createPoll} onApproveSpeak={appSpeak} onDenySpeak={denSpeak} onRevokeSpeak={revSpeak} onKick={kickPeer} />
+            <AdminControls speakRequests={speakRequests} peers={Array.from(peers.values()).map(p => ({peerId:p.peerId,role:p.role}))} onCreatePoll={createPoll} onApproveSpeak={appSpeak} onDenySpeak={denSpeak} onRevokeSpeak={revSpeak} onKick={kickPeer} getName={(id) => getName(id)} />
           )}
           <div className="pt-4 text-center">
             <p className="text-xs text-neutral-800 italic font-[var(--font-heading)]">&ldquo;Przyszłość zaczyna się teraz&rdquo;</p>

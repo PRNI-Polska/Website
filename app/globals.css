@@ -233,8 +233,8 @@
 
 @media (max-width: 768px) {
   .hero-flag-bg::before {
-    background-position: 35% 30%;
-    opacity: 0.12;
+    background-position: 60% 20%;
+    opacity: 0.14;
   }
 }
 

@@ -54,23 +54,27 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    try {
-      const { sendEmail } = await import("@/lib/email");
-      await sendEmail({
-        to: email,
-        subject: "PRNI — Potwierdź subskrypcję / Confirm subscription",
-        html: `
-          <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-            <h2>PRNI — Polski Ruch Narodowo-Integralistyczny</h2>
-            <p>Dziękujemy za zapisanie się do naszego newslettera!</p>
-            <p>Kliknij poniższy link, aby potwierdzić subskrypcję:</p>
-            <p><a href="https://www.prni.org.pl/api/newsletter/confirm?token=${confirmToken}" style="display:inline-block;padding:10px 24px;background:#dc2626;color:#fff;text-decoration:none;border-radius:6px;">Potwierdź subskrypcję</a></p>
-            <p style="color:#888;font-size:12px;">Jeśli nie zapisywałeś/aś się do newslettera PRNI, zignoruj tę wiadomość.</p>
-          </div>
-        `,
-      });
-    } catch (err) {
-      console.error("Failed to send confirmation email:", err);
+    if (process.env.RESEND_API_KEY) {
+      try {
+        const { Resend } = await import("resend");
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        await resend.emails.send({
+          from: "PRNI <noreply@prni.org.pl>",
+          to: email,
+          subject: "PRNI — Potwierdź subskrypcję / Confirm subscription",
+          html: `
+            <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+              <h2>PRNI — Polski Ruch Narodowo-Integralistyczny</h2>
+              <p>Dziękujemy za zapisanie się do naszego newslettera!</p>
+              <p>Kliknij poniższy link, aby potwierdzić subskrypcję:</p>
+              <p><a href="https://www.prni.org.pl/api/newsletter/confirm?token=${confirmToken}" style="display:inline-block;padding:10px 24px;background:#dc2626;color:#fff;text-decoration:none;border-radius:6px;">Potwierdź subskrypcję</a></p>
+              <p style="color:#888;font-size:12px;">Jeśli nie zapisywałeś/aś się do newslettera PRNI, zignoruj tę wiadomość.</p>
+            </div>
+          `,
+        });
+      } catch (err) {
+        console.error("Failed to send confirmation email:", err);
+      }
     }
 
     return NextResponse.json({

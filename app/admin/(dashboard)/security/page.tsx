@@ -366,9 +366,9 @@ export default function SecurityPage() {
                             </span>
                             {alert.metadata?.country && (
                               <span className="flex items-center gap-1 font-medium text-foreground/70">
-                                {alert.metadata.city && `${alert.metadata.city as string}, `}
-                                {alert.metadata.region && `${alert.metadata.region as string}, `}
-                                {alert.metadata.country as string}
+                                {alert.metadata.city ? `${String(alert.metadata.city)}, ` : ""}
+                                {alert.metadata.region ? `${String(alert.metadata.region)}, ` : ""}
+                                {String(alert.metadata.country)}
                               </span>
                             )}
                             {alert.path && (

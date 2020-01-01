@@ -329,6 +329,144 @@ export const translations: Translations = {
     en: "Polish National-Integralist Movement",
     de: "Polnische National-Integralistische Bewegung"
   },
+
+  // ============================================================================
+  // WINGS GATEWAY
+  // ============================================================================
+  
+  // Navigation
+  "nav.wings": { pl: "Skrzydła", en: "Wings", de: "Flügel" },
+  "nav.positions": { pl: "Nasze Stanowiska", en: "Our Positions", de: "Unsere Positionen" },
+  "nav.news": { pl: "Aktualności", en: "News", de: "Nachrichten" },
+  "nav.join": { pl: "Dołącz", en: "Join", de: "Beitreten" },
+  
+  // Wings Gateway Homepage
+  "wings.gateway.title": { 
+    pl: "Wybierz swoje Skrzydło", 
+    en: "Choose Your Wing", 
+    de: "Wähle deinen Flügel" 
+  },
+  "wings.gateway.subtitle": { 
+    pl: "Trzy filary jednego ruchu", 
+    en: "Three pillars of one movement", 
+    de: "Drei Säulen einer Bewegung" 
+  },
+  
+  // Main Wing
+  "wings.main.title": { pl: "Skrzydło Główne", en: "Main Wing", de: "Hauptflügel" },
+  "wings.main.tagline": { 
+    pl: "Serce ruchu narodowego", 
+    en: "The heart of the national movement", 
+    de: "Das Herz der nationalen Bewegung" 
+  },
+  "wings.main.cta": { pl: "Wejdź", en: "Enter", de: "Eintreten" },
+  "wings.main.purpose.title": { pl: "Cel", en: "Purpose", de: "Zweck" },
+  "wings.main.purpose.text": { 
+    pl: "Skrzydło Główne stanowi centralny organ operacyjny Polskiego Ruchu Narodowo-Integralistycznego. Odpowiada za kształtowanie doktryny, koordynację działań na poziomie krajowym oraz rozwój struktury organizacyjnej.", 
+    en: "The Main Wing serves as the central operational body of the Polish National-Integralist Movement. It is responsible for shaping doctrine, coordinating activities at the national level, and developing the organizational structure.", 
+    de: "Der Hauptflügel dient als zentrales operatives Organ der Polnischen National-Integralistischen Bewegung. Er ist verantwortlich für die Gestaltung der Doktrin, die Koordination der Aktivitäten auf nationaler Ebene und die Entwicklung der Organisationsstruktur." 
+  },
+  "wings.main.responsibilities.title": { pl: "Zakres działań", en: "Responsibilities", de: "Aufgabenbereiche" },
+  "wings.main.responsibilities.1": { 
+    pl: "Opracowanie i realizacja programu politycznego", 
+    en: "Development and implementation of the political program", 
+    de: "Entwicklung und Umsetzung des politischen Programms" 
+  },
+  "wings.main.responsibilities.2": { 
+    pl: "Koordynacja struktur regionalnych", 
+    en: "Coordination of regional structures", 
+    de: "Koordination regionaler Strukturen" 
+  },
+  "wings.main.responsibilities.3": { 
+    pl: "Rekrutacja i szkolenie członków", 
+    en: "Member recruitment and training", 
+    de: "Rekrutierung und Schulung von Mitgliedern" 
+  },
+  "wings.main.responsibilities.4": { 
+    pl: "Planowanie kampanii i wydarzeń", 
+    en: "Campaign and event planning", 
+    de: "Kampagnen- und Veranstaltungsplanung" 
+  },
+  "wings.main.engage.title": { pl: "Zaangażuj się", en: "Get Involved", de: "Engagiere dich" },
+  "wings.main.engage.text": { 
+    pl: "Dołącz do Skrzydła Głównego i weź aktywny udział w budowaniu silnego ruchu narodowego.", 
+    en: "Join the Main Wing and take an active part in building a strong national movement.", 
+    de: "Tritt dem Hauptflügel bei und nimm aktiv am Aufbau einer starken nationalen Bewegung teil." 
+  },
+  
+  // International Wing
+  "wings.international.title": { pl: "Skrzydło Międzynarodowe", en: "International Wing", de: "Internationaler Flügel" },
+  "wings.international.tagline": { 
+    pl: "Głos Polski za granicą", 
+    en: "Poland's voice abroad", 
+    de: "Polens Stimme im Ausland" 
+  },
+  "wings.international.cta": { pl: "Wejdź", en: "Enter", de: "Eintreten" },
+  "wings.international.purpose.title": { pl: "Cel", en: "Purpose", de: "Zweck" },
+  "wings.international.purpose.text": { 
+    pl: "Skrzydło Międzynarodowe odpowiada za komunikację zewnętrzną, budowanie relacji z ruchami pokrewnymi za granicą oraz reprezentowanie stanowiska PRNI na arenie międzynarodowej.", 
+    en: "The International Wing is responsible for external communications, building relationships with like-minded movements abroad, and representing PRNI's position on the international stage.", 
+    de: "Der Internationale Flügel ist verantwortlich für externe Kommunikation, den Aufbau von Beziehungen zu gleichgesinnten Bewegungen im Ausland und die Vertretung der Position der PRNI auf internationaler Ebene." 
+  },
+  "wings.international.responsibilities.title": { pl: "Zakres działań", en: "Responsibilities", de: "Aufgabenbereiche" },
+  "wings.international.responsibilities.1": { 
+    pl: "Tłumaczenia materiałów i komunikatów", 
+    en: "Translation of materials and communications", 
+    de: "Übersetzung von Materialien und Mitteilungen" 
+  },
+  "wings.international.responsibilities.2": { 
+    pl: "Budowanie partnerstw zagranicznych", 
+    en: "Building foreign partnerships", 
+    de: "Aufbau ausländischer Partnerschaften" 
+  },
+  "wings.international.responsibilities.3": { 
+    pl: "Publikacje i oświadczenia międzynarodowe", 
+    en: "International publications and statements", 
+    de: "Internationale Publikationen und Erklärungen" 
+  },
+  "wings.international.responsibilities.4": { 
+    pl: "Koordynacja z Polonią", 
+    en: "Coordination with the Polish diaspora", 
+    de: "Koordination mit der polnischen Diaspora" 
+  },
+  "wings.international.engage.title": { pl: "Jak pomóc", en: "How to Help", de: "Wie man helfen kann" },
+  "wings.international.engage.text": { 
+    pl: "Posługujesz się językami obcymi? Masz kontakty za granicą? Skrzydło Międzynarodowe potrzebuje Twoich umiejętności.", 
+    en: "Do you speak foreign languages? Have contacts abroad? The International Wing needs your skills.", 
+    de: "Sprichst du Fremdsprachen? Hast du Kontakte im Ausland? Der Internationale Flügel braucht deine Fähigkeiten." 
+  },
+  
+  // Female Wing
+  "wings.female.title": { pl: "Skrzydło Kobiece", en: "Female Wing", de: "Frauenflügel" },
+  "wings.female.tagline": { 
+    pl: "Siła narodu w jedności kobiet", 
+    en: "The nation's strength in women's unity", 
+    de: "Die Stärke der Nation in der Einheit der Frauen" 
+  },
+  "wings.female.cta": { pl: "Wkrótce", en: "Coming Soon", de: "Bald verfügbar" },
+  "wings.female.comingSoon": { 
+    pl: "Strona w przygotowaniu", 
+    en: "Page under construction", 
+    de: "Seite im Aufbau" 
+  },
+  "wings.female.notify": { pl: "Powiadom mnie", en: "Notify me", de: "Benachrichtige mich" },
+  "wings.female.purpose.text": { 
+    pl: "Skrzydło Kobiece powstaje, aby zjednoczyć głos polskich kobiet w ruchu narodowym. Szczegóły wkrótce.", 
+    en: "The Female Wing is being established to unite the voice of Polish women in the national movement. Details coming soon.", 
+    de: "Der Frauenflügel wird gegründet, um die Stimme der polnischen Frauen in der nationalen Bewegung zu vereinen. Details folgen in Kürze." 
+  },
+  
+  // Wing page common
+  "wings.back": { pl: "Powrót do Skrzydeł", en: "Back to Wings", de: "Zurück zu Flügeln" },
+  "wings.joinCta": { pl: "Dołącz teraz", en: "Join now", de: "Jetzt beitreten" },
+  "wings.contactCta": { pl: "Skontaktuj się", en: "Get in touch", de: "Kontakt aufnehmen" },
+  
+  // Mission summary (homepage)
+  "mission.summary": { 
+    pl: "Budujemy silną, zjednoczoną Polskę zakorzenioną w tradycji i tożsamości narodowej. Odrzucamy liberalizm i globalizm. Stawiamy naród ponad wszystkim.", 
+    en: "We are building a strong, unified Poland rooted in tradition and national identity. We reject liberalism and globalism. We place the nation above all.", 
+    de: "Wir bauen ein starkes, vereintes Polen auf, das in Tradition und nationaler Identität verwurzelt ist. Wir lehnen Liberalismus und Globalismus ab. Wir stellen die Nation über alles." 
+  },
 };
 
 interface I18nContextType {

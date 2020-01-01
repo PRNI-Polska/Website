@@ -4,8 +4,15 @@ import { prisma } from "@/lib/db";
 import { decrypt } from "@/lib/encryption";
 
 export async function GET(request: NextRequest) {
+  let admin;
   try {
-    await requireAdmin();
+    admin = await requireAdmin();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    void admin;
 
     const type = request.nextUrl.searchParams.get("type") || "dms";
     const memberId = request.nextUrl.searchParams.get("member");
@@ -93,7 +100,8 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ error: "Invalid type" }, { status: 400 });
-  } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  } catch (err) {
+    console.error("Oversight error:", err);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

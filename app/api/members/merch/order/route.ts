@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMemberFromRequest } from "@/lib/member-auth";
-import { createOrder, type PrintfulRecipient, type PrintfulOrderItem } from "@/lib/printful";
+import { createOrder, type GelatoShippingAddress, type GelatoOrderItem } from "@/lib/gelato";
 import { prisma } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
@@ -13,7 +13,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { items, recipient } = body as {
       items: {
-        variantId: number;
+        variantId: string;
+        productUid: string;
         qty: number;
         productName?: string;
         variantName?: string;
@@ -38,34 +39,53 @@ export async function POST(request: NextRequest) {
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "No items" }, { status: 400 });
     }
-    if (!recipient || !recipient.name || !recipient.address1 || !recipient.city || !recipient.zip || !recipient.country_code) {
+    if (!recipient?.name || !recipient?.address1 || !recipient?.city || !recipient?.zip || !recipient?.country_code) {
       return NextResponse.json({ error: "Missing shipping info" }, { status: 400 });
     }
 
-    const pfRecipient: PrintfulRecipient = {
-      name: recipient.name,
-      address1: recipient.address1,
-      address2: recipient.address2 || undefined,
+    const nameParts = recipient.name.trim().split(/\s+/);
+    const firstName = nameParts[0] || "";
+    const lastName = nameParts.slice(1).join(" ") || firstName;
+
+    const shippingAddress: GelatoShippingAddress = {
+      firstName,
+      lastName,
+      addressLine1: recipient.address1,
+      addressLine2: recipient.address2 || undefined,
       city: recipient.city,
-      state_code: recipient.state_code || undefined,
-      country_code: recipient.country_code,
-      zip: recipient.zip,
-      phone: recipient.phone || undefined,
+      state: recipient.state_code || undefined,
+      postCode: recipient.zip,
+      country: recipient.country_code,
       email: recipient.email || member.email,
+      phone: recipient.phone || undefined,
     };
 
-    const pfItems: PrintfulOrderItem[] = items.map((i) => ({
-      sync_variant_id: i.variantId,
-      quantity: i.qty,
+    const orderRefId = `order-${member.id}-${Date.now()}`;
+
+    // Build Gelato order items — each needs a productUid and design files.
+    // The design files come from the product's files stored in Gelato,
+    // so we pass the productUid and Gelato handles the rest.
+    const gelatoItems: GelatoOrderItem[] = items.map((item, idx) => ({
+      itemReferenceId: `item-${idx}-${item.variantId}`,
+      productUid: item.productUid,
+      files: [],
+      quantity: item.qty,
     }));
 
-    const pfOrder = await createOrder(pfRecipient, pfItems);
+    const currency = items[0]?.currency || "PLN";
+
+    const gelatoOrder = await createOrder(
+      orderRefId,
+      member.id,
+      shippingAddress,
+      gelatoItems,
+      currency
+    );
 
     const totalAmount = items.reduce(
       (sum, item) => sum + parseFloat(item.price || "0") * (item.qty || 1),
       0
     );
-    const currency = items[0]?.currency || "CHF";
 
     try {
       await prisma.merchOrder.create({
@@ -75,17 +95,17 @@ export async function POST(request: NextRequest) {
           totalAmount: totalAmount.toFixed(2),
           currency,
           status: "DRAFT",
-          note: `Printful order #${pfOrder.id}`,
+          note: `Gelato order ${gelatoOrder.id}`,
         },
       });
     } catch (dbErr) {
-      console.error("DB order write failed (table may not exist):", dbErr);
+      console.error("DB order write failed:", dbErr);
     }
 
     return NextResponse.json({
       order: {
-        id: pfOrder.id,
-        status: pfOrder.status,
+        id: gelatoOrder.id,
+        status: gelatoOrder.fulfillmentStatus || "created",
       },
     });
   } catch (err) {

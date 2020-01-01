@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMemberFromRequest } from "@/lib/member-auth";
-import { getProducts, getProduct, getPreviewImage } from "@/lib/printful";
+import { getStoreProducts } from "@/lib/gelato";
+import { getRetailPrice } from "@/lib/gelato-prices";
 
 export async function GET(request: NextRequest) {
   const member = await getMemberFromRequest(request);
@@ -9,43 +10,27 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const products = await getProducts();
+    const products = await getStoreProducts();
 
-    const enriched = await Promise.all(
-      products.map(async (p) => {
-        try {
-          const detail = await getProduct(p.id);
-          const variants = detail.sync_variants;
-          const firstVariant = variants[0];
-
-          const mockupImage = firstVariant
-            ? getPreviewImage(firstVariant)
-            : p.thumbnail_url;
-
-          const prices = variants.map((v) => parseFloat(v.retail_price));
-          const minPrice = Math.min(...prices);
-          const currency = firstVariant?.currency || "PLN";
-
-          return {
-            ...p,
-            preview_image: mockupImage,
-            price_from: minPrice.toFixed(2),
-            currency,
-          };
-        } catch {
-          return {
-            ...p,
-            preview_image: p.thumbnail_url,
-            price_from: null,
-            currency: "PLN",
-          };
-        }
-      })
-    );
+    const enriched = products
+      .filter((p) => p.status === "active")
+      .map((p) => {
+        const pricing = getRetailPrice(p.id);
+        return {
+          id: p.id,
+          name: p.title,
+          description: p.description,
+          preview_image: p.previewUrl || p.externalPreviewUrl || p.externalThumbnailUrl,
+          variants: p.variants.length,
+          variantOptions: p.productVariantOptions,
+          price_from: pricing?.price || null,
+          currency: pricing?.currency || "PLN",
+        };
+      });
 
     return NextResponse.json({ products: enriched });
   } catch (err) {
-    console.error("Printful products error:", err);
+    console.error("Gelato products error:", err);
     return NextResponse.json({ error: "Failed to load products" }, { status: 500 });
   }
 }

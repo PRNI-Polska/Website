@@ -45,6 +45,22 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'files.cdn.printful.com',
       },
+      {
+        protocol: 'https',
+        hostname: '*.gelato.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.gelatoapis.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'gelato-api-test.s3.eu-west-1.amazonaws.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.amazonaws.com',
+      },
     ],
   },
 

@@ -6,42 +6,36 @@ import Image from "next/image";
 import { useMemberLang } from "@/lib/members/LangContext";
 import type { MemberTranslationKey } from "@/lib/members/i18n";
 
-interface ProductFile {
-  type: string;
-  preview_url: string;
-  thumbnail_url: string;
-  visible: boolean;
-}
-
 interface ProductVariant {
-  id: number;
+  id: string;
   name: string;
-  retail_price: string;
+  productUid: string;
+  retail_price: string | null;
   currency: string;
   size: string;
   color: string;
-  availability_status: string;
-  product: { image: string; name: string };
-  files: ProductFile[];
 }
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   variants: number;
-  thumbnail_url: string;
   preview_image?: string;
   price_from?: string | null;
   currency?: string;
 }
 
 interface ProductDetail {
-  sync_product: Product;
-  sync_variants: ProductVariant[];
+  id: string;
+  name: string;
+  description: string;
+  preview_image: string;
+  variants: ProductVariant[];
 }
 
 interface CartItem {
-  variantId: number;
+  variantId: string;
+  productUid: string;
   productName: string;
   variantName: string;
   size: string;
@@ -85,14 +79,6 @@ const COUNTRIES = [
   { code: "RO", name: "Romania" }, { code: "BG", name: "Bulgaria" },
   { code: "HR", name: "Croatia" }, { code: "SI", name: "Slovenia" },
 ];
-
-function getVariantImage(variant: ProductVariant): string {
-  const preview = variant.files.find((f) => f.type === "preview");
-  if (preview) return preview.preview_url;
-  const def = variant.files.find((f) => f.type === "default");
-  if (def) return def.preview_url;
-  return variant.product.image;
-}
 
 const CURRENCY_LOCALES: Record<string, string> = {
   PLN: "pl-PL", EUR: "de-DE", USD: "en-US", GBP: "en-GB", CHF: "de-CH",
@@ -151,7 +137,7 @@ export default function MembersMerchPage() {
 
   const [detail, setDetail] = useState<ProductDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [selectedVariant, setSelectedVariant] = useState<number | null>(null);
+  const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
@@ -210,7 +196,7 @@ export default function MembersMerchPage() {
 
   useEffect(() => { loadProducts(); }, [loadProducts]);
 
-  async function openProduct(id: number) {
+  async function openProduct(id: string) {
     setDetailLoading(true);
     setDetail(null);
     setSelectedVariant(null);
@@ -219,8 +205,8 @@ export default function MembersMerchPage() {
       if (!res.ok) throw new Error();
       const data = await res.json();
       setDetail(data.product);
-      if (data.product.sync_variants.length > 0) {
-        setSelectedVariant(data.product.sync_variants[0].id);
+      if (data.product.variants.length > 0) {
+        setSelectedVariant(data.product.variants[0].id);
       }
     } catch {
       setError(t("merch.error"));
@@ -240,21 +226,22 @@ export default function MembersMerchPage() {
       }
       return [...prev, {
         variantId: variant.id,
-        productName: detail.sync_product.name,
+        productUid: variant.productUid,
+        productName: detail.name,
         variantName: variant.name,
         size: variant.size,
         color: variant.color,
-        price: variant.retail_price,
+        price: variant.retail_price || "0",
         currency: variant.currency,
         qty: 1,
-        image: getVariantImage(variant),
+        image: detail.preview_image,
       }];
     });
     setCartOpen(true);
     setCheckoutStep("cart");
   }
 
-  function updateQty(variantId: number, delta: number) {
+  function updateQty(variantId: string, delta: number) {
     setCart((prev) =>
       prev.map((c) =>
         c.variantId === variantId ? { ...c, qty: Math.max(0, c.qty + delta) } : c
@@ -262,7 +249,7 @@ export default function MembersMerchPage() {
     );
   }
 
-  function removeFromCart(variantId: number) {
+  function removeFromCart(variantId: string) {
     setCart((prev) => prev.filter((c) => c.variantId !== variantId));
   }
 
@@ -285,7 +272,17 @@ export default function MembersMerchPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          items: cart,
+          items: cart.map((c) => ({
+            variantId: c.variantId,
+            productUid: c.productUid,
+            qty: c.qty,
+            productName: c.productName,
+            variantName: c.variantName,
+            size: c.size,
+            color: c.color,
+            price: c.price,
+            currency: c.currency,
+          })),
           recipient: {
             name: address.name,
             address1: address.address1,
@@ -321,8 +318,8 @@ export default function MembersMerchPage() {
   };
 
   if (detail || detailLoading) {
-    const currentVariant = detail?.sync_variants.find((v) => v.id === selectedVariant);
-    const mainImage = currentVariant ? getVariantImage(currentVariant) : detail?.sync_product.thumbnail_url;
+    const currentVariant = detail?.variants.find((v) => v.id === selectedVariant);
+    const mainImage = detail?.preview_image;
 
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
@@ -345,31 +342,31 @@ export default function MembersMerchPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="relative aspect-square bg-[#111] rounded-lg overflow-hidden border border-[#1a1a1a]">
               {mainImage && (
-                <Image src={mainImage} alt={detail.sync_product.name} fill
+                <Image src={mainImage} alt={detail.name} fill
                   sizes="(max-width: 768px) 100vw, 50vw" className="object-contain p-4" />
               )}
             </div>
 
             <div className="flex flex-col">
-              <h1 className="text-2xl font-semibold mb-2">{detail.sync_product.name}</h1>
-              {currentVariant && (
+              <h1 className="text-2xl font-semibold mb-2">{detail.name}</h1>
+              {currentVariant && currentVariant.retail_price && (
                 <p className="text-xl text-white font-medium mb-6">
                   {displayPrice(currentVariant.retail_price, currentVariant.currency)}
                 </p>
               )}
 
-              {detail.sync_variants.length > 1 && (
+              {detail.variants.length > 1 && (
                 <div className="mb-6">
                   <label className="text-sm text-[#888] mb-2 block">{t("merch.selectVariant")}</label>
                   <div className="flex flex-wrap gap-2">
-                    {detail.sync_variants.map((v) => (
+                    {detail.variants.map((v) => (
                       <button key={v.id} onClick={() => setSelectedVariant(v.id)}
                         className={`px-4 py-2 rounded-lg text-sm border transition ${
                           selectedVariant === v.id
                             ? "border-white bg-white text-black"
                             : "border-[#333] text-[#888] hover:border-[#555] hover:text-white"
                         }`}
-                      >{v.size}</button>
+                      >{v.size || v.name}</button>
                     ))}
                   </div>
                 </div>
@@ -393,22 +390,6 @@ export default function MembersMerchPage() {
                   className="w-full py-3 bg-white text-black font-semibold rounded-lg hover:bg-[#ddd] transition text-sm">
                   {t("merch.addToCart")}
                 </button>
-              )}
-
-              {detail.sync_variants.length > 1 && (
-                <div className="flex gap-2 mt-6">
-                  {detail.sync_variants.map((v) => {
-                    const img = getVariantImage(v);
-                    return (
-                      <button key={v.id} onClick={() => setSelectedVariant(v.id)}
-                        className={`relative w-16 h-16 rounded border overflow-hidden ${
-                          selectedVariant === v.id ? "border-white" : "border-[#333]"
-                        }`}>
-                        <Image src={img} alt={v.name} fill sizes="64px" className="object-contain p-1" />
-                      </button>
-                    );
-                  })}
-                </div>
               )}
             </div>
           </div>
@@ -465,7 +446,7 @@ export default function MembersMerchPage() {
             <button key={product.id} onClick={() => openProduct(product.id)}
               className="group text-left border border-[#1a1a1a] rounded-lg overflow-hidden hover:border-[#333] transition bg-[#0d0d0d]">
               <div className="relative aspect-square bg-[#111]">
-                <Image src={product.preview_image || product.thumbnail_url} alt={product.name}
+                <Image src={product.preview_image || ""} alt={product.name}
                   fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className="object-contain p-6 group-hover:scale-105 transition-transform duration-300" />
               </div>
@@ -520,8 +501,8 @@ function CartDrawer({
   cart: CartItem[];
   cartOpen: boolean;
   setCartOpen: (v: boolean) => void;
-  updateQty: (id: number, delta: number) => void;
-  removeFromCart: (id: number) => void;
+  updateQty: (id: string, delta: number) => void;
+  removeFromCart: (id: string) => void;
   cartTotal: number;
   cartCurrency: string;
   orderState: "idle" | "loading" | "success" | "error";

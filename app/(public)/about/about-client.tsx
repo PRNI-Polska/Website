@@ -32,16 +32,17 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
 
   return (
     <div className="relative min-h-screen">
-      {/* Fixed sword background — stationary behind all content */}
+      {/* Fixed sword background — stationary, black bg, full-screen fit */}
       <div
         className="fixed inset-0 pointer-events-none z-0"
         aria-hidden="true"
         style={{
+          backgroundColor: "#000",
           backgroundImage: "url('/sword.png')",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
-          backgroundSize: "220px auto",
-          opacity: 0.04,
+          backgroundSize: "contain",
+          opacity: 0.06,
         }}
       />
 

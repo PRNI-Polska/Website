@@ -75,7 +75,7 @@ export const metadata: Metadata = {
     images: [{ url: "/logo.png", width: 512, height: 512, alt: "PRNI — Polski Ruch Narodowo-Integralistyczny" }],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "PRNI — Polski Ruch Narodowo-Integralistyczny",
     description: "PRNI (Polski Ruch Narodowo-Integralistyczny) — Naród Ponad Wszystkim. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
     images: ["/logo.png"],
@@ -124,6 +124,7 @@ export default function RootLayout({
     <html lang="pl" data-theme={theme} suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
+        <link rel="alternate" type="application/rss+xml" title="PRNI — Komunikaty" href="/feed.xml" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="PRNI" />

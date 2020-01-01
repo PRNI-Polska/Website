@@ -55,6 +55,7 @@ export default function AdminMembersPage() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [customCode, setCustomCode] = useState("");
   const [expiryHours, setExpiryHours] = useState(168);
+  const [inviteRole, setInviteRole] = useState("MEMBER");
   const [generatingInvite, setGeneratingInvite] = useState(false);
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
   const [generatedExpiry, setGeneratedExpiry] = useState<string | null>(null);
@@ -159,6 +160,7 @@ export default function AdminMembersPage() {
           email: inviteEmail.trim() || undefined,
           code: customCode.trim() || undefined,
           expiryHours,
+          role: inviteRole,
         }),
       });
       if (!res.ok) {
@@ -475,19 +477,32 @@ export default function AdminMembersPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="inviteRoleSelect">Assign role</Label>
+                  <select
+                    id="inviteRoleSelect"
+                    value={inviteRole}
+                    onChange={(e) => setInviteRole(e.target.value)}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    {MEMBER_ROLES.map((r) => (
+                      <option key={r.value} value={r.value}>{r.label}</option>
+                    ))}
+                  </select>
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="customCode">Custom code (optional)</Label>
                   <Input
                     id="customCode"
-                    placeholder="e.g. PRNI-VIP"
+                    placeholder="e.g. PRNI-INT"
                     value={customCode}
                     onChange={(e) => setCustomCode(e.target.value.toUpperCase())}
                     maxLength={20}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="inviteEmail">Restrict to email (optional)</Label>
+                  <Label htmlFor="inviteEmail">Email (optional)</Label>
                   <Input
                     id="inviteEmail"
                     type="email"
@@ -537,7 +552,7 @@ export default function AdminMembersPage() {
                       {generatedCode}
                     </p>
                     <p className="text-xs text-green-400/60 mt-1">
-                      Expires {generatedExpiry ? new Date(generatedExpiry).toLocaleString() : "—"}
+                      Role: {MEMBER_ROLES.find((r) => r.value === inviteRole)?.label || inviteRole} &middot; Expires {generatedExpiry ? new Date(generatedExpiry).toLocaleString() : "—"}
                     </p>
                   </div>
                   <Button

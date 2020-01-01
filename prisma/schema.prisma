@@ -241,6 +241,7 @@ model MemberInvite {
   id          String    @id @default(cuid())
   code        String    @unique
   email       String?
+  role        String    @default("MEMBER")
   used        Boolean   @default(false)
   usedAt      DateTime?
   usedBy      String?

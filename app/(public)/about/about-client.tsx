@@ -30,8 +30,8 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
   const values = ["nationalism", "integralism", "sovereignty", "order"];
 
   return (
-    <div className="relative min-h-screen bg-black">
-      {/* Fixed sword background — stationary, solid black, full-screen fit */}
+    <div className="relative min-h-screen">
+      {/* Fixed sword background — stationary, covers full viewport */}
       <div
         className="fixed inset-0 pointer-events-none z-0"
         aria-hidden="true"
@@ -39,129 +39,129 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
           backgroundImage: "url('/sword.png')",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
-          backgroundSize: "contain",
-          opacity: 0.08,
+          backgroundSize: "auto 90vh",
+          opacity: 0.07,
         }}
       />
 
       <div className="relative z-10 container-custom py-12">
-      {/* Header */}
-      <div className="max-w-3xl mx-auto text-center mb-16">
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold mb-4 text-white">
-          {t("about.title")}
-        </h1>
-        <p className="text-xl text-neutral-400">
-          {t("about.subtitle")}
-        </p>
-      </div>
-
-      {/* Mission & Vision */}
-      <section className="max-w-4xl mx-auto mb-16">
-        <div className="grid md:grid-cols-2 gap-8">
-          <Card className="bg-neutral-900 border-neutral-800">
-            <CardHeader>
-              <CardTitle className="text-white">{t("about.mission.title")}</CardTitle>
-            </CardHeader>
-            <CardContent className="text-neutral-400">
-              {t("about.mission.text").split("\n").map((paragraph, i) => (
-                <p key={i} className={i > 0 ? "mt-4" : ""}>
-                  {paragraph}
-                </p>
-              ))}
-            </CardContent>
-          </Card>
-
-          <Card className="bg-neutral-900 border-neutral-800">
-            <CardHeader>
-              <CardTitle className="text-white">{t("about.vision.title")}</CardTitle>
-            </CardHeader>
-            <CardContent className="text-neutral-400">
-              {t("about.vision.text").split("\n").map((paragraph, i) => (
-                <p key={i} className={i > 0 ? "mt-4" : ""}>
-                  {paragraph}
-                </p>
-              ))}
-            </CardContent>
-          </Card>
+        {/* Header */}
+        <div className="max-w-3xl mx-auto text-center mb-16">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold mb-4">
+            {t("about.title")}
+          </h1>
+          <p className="text-xl text-muted-foreground">
+            {t("about.subtitle")}
+          </p>
         </div>
-      </section>
 
-      {/* Core Values */}
-      <section className="max-w-4xl mx-auto mb-16">
-        <h2 className="text-2xl md:text-3xl font-heading font-semibold text-center mb-8 text-white">
-          {t("about.values.title")}
-        </h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {values.map((key) => (
-            <Card key={key} className="text-center bg-neutral-900 border-neutral-800">
+        {/* Mission & Vision */}
+        <section className="max-w-4xl mx-auto mb-16">
+          <div className="grid md:grid-cols-2 gap-8">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-lg text-white">
-                  {t(`about.value.${key}.title`)}
-                </CardTitle>
+                <CardTitle>{t("about.mission.title")}</CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-neutral-400">
-                  {t(`about.value.${key}.text`)}
-                </p>
+              <CardContent className="text-muted-foreground">
+                {t("about.mission.text").split("\n").map((paragraph, i) => (
+                  <p key={i} className={i > 0 ? "mt-4" : ""}>
+                    {paragraph}
+                  </p>
+                ))}
               </CardContent>
             </Card>
-          ))}
-        </div>
-      </section>
 
-      <Separator className="my-16 bg-neutral-800" />
-
-      {/* Leadership Team */}
-      {leadership.length > 0 && (
-        <section className="mb-16">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-2 text-white">
-              {t("about.leadership")}
-            </h2>
-            <p className="text-neutral-400">
-              {t("about.leadership.subtitle")}
-            </p>
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("about.vision.title")}</CardTitle>
+              </CardHeader>
+              <CardContent className="text-muted-foreground">
+                {t("about.vision.text").split("\n").map((paragraph, i) => (
+                  <p key={i} className={i > 0 ? "mt-4" : ""}>
+                    {paragraph}
+                  </p>
+                ))}
+              </CardContent>
+            </Card>
           </div>
+        </section>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {leadership.map((member) => (
-              <TeamMemberCard key={member.id} member={member} featured />
+        {/* Core Values */}
+        <section className="max-w-4xl mx-auto mb-16">
+          <h2 className="text-2xl md:text-3xl font-heading font-semibold text-center mb-8">
+            {t("about.values.title")}
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {values.map((key) => (
+              <Card key={key} className="text-center">
+                <CardHeader>
+                  <CardTitle className="text-lg">
+                    {t(`about.value.${key}.title`)}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    {t(`about.value.${key}.text`)}
+                  </p>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </section>
-      )}
 
-      {/* Team Members */}
-      {team.length > 0 && (
-        <section>
-          <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-2 text-white">
-              {t("about.team")}
-            </h2>
-            <p className="text-neutral-400">
-              {t("about.team.subtitle")}
-            </p>
-          </div>
+        <Separator className="my-16" />
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {team.map((member) => (
-              <TeamMemberCard key={member.id} member={member} />
-            ))}
-          </div>
-        </section>
-      )}
+        {/* Leadership Team */}
+        {leadership.length > 0 && (
+          <section className="mb-16">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-2">
+                {t("about.leadership")}
+              </h2>
+              <p className="text-muted-foreground">
+                {t("about.leadership.subtitle")}
+              </p>
+            </div>
 
-      {/* No team members message */}
-      {teamMembers.length === 0 && (
-        <Card className="max-w-xl mx-auto bg-neutral-900 border-neutral-800">
-          <CardContent className="py-12 text-center">
-            <Users className="mx-auto h-12 w-12 text-neutral-500 mb-4" />
-            <p className="text-neutral-400">
-              {t("about.team.coming")}
-            </p>
-          </CardContent>
-        </Card>
-      )}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              {leadership.map((member) => (
+                <TeamMemberCard key={member.id} member={member} featured />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Team Members */}
+        {team.length > 0 && (
+          <section>
+            <div className="text-center mb-8">
+              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-2">
+                {t("about.team")}
+              </h2>
+              <p className="text-muted-foreground">
+                {t("about.team.subtitle")}
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+              {team.map((member) => (
+                <TeamMemberCard key={member.id} member={member} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* No team members message */}
+        {teamMembers.length === 0 && (
+          <Card className="max-w-xl mx-auto">
+            <CardContent className="py-12 text-center">
+              <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">
+                {t("about.team.coming")}
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
@@ -188,31 +188,31 @@ function TeamMemberCard({ member, featured }: TeamMemberCardProps) {
     .slice(0, 2);
 
   return (
-    <Card className={`bg-neutral-900 border-neutral-800 ${featured ? "text-center" : ""}`}>
+    <Card className={featured ? "text-center" : ""}>
       <CardHeader className={featured ? "items-center" : ""}>
         <Avatar className={featured ? "h-24 w-24 mb-4" : "h-16 w-16"}>
           {member.photoUrl && (
             <AvatarImage src={member.photoUrl} alt={member.name} />
           )}
-          <AvatarFallback className={`${featured ? "text-2xl" : "text-lg"} bg-neutral-800 text-neutral-300`}>
+          <AvatarFallback className={featured ? "text-2xl" : "text-lg"}>
             {initials}
           </AvatarFallback>
         </Avatar>
-        <CardTitle className={`text-white ${featured ? "text-xl" : "text-lg"}`}>
+        <CardTitle className={featured ? "text-xl" : "text-lg"}>
           {member.name}
         </CardTitle>
-        <CardDescription className="font-medium text-neutral-400">
+        <CardDescription className="font-medium">
           {member.role}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <p className={`text-neutral-400 ${featured ? "" : "text-sm"} line-clamp-3`}>
+        <p className={`text-muted-foreground ${featured ? "" : "text-sm"} line-clamp-3`}>
           {member.bio}
         </p>
         {member.email && (
           <a
             href={`mailto:${member.email}`}
-            className="inline-flex items-center gap-1 mt-3 text-sm text-white hover:underline"
+            className="inline-flex items-center gap-1 mt-3 text-sm text-foreground hover:underline"
           >
             <Mail className="h-4 w-4" />
             Contact

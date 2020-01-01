@@ -34,49 +34,49 @@
     --text-display: 2.5rem;
     --leading-display: 1.1;
     
-    /* Colors - neutral grey/white palette */
-    --primary: 220 15% 12%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 220 10% 92%;
-    --secondary-foreground: 220 15% 14%;
+    /* Colors - dark palette (black bg, white text) */
+    --primary: 0 0% 95%;
+    --primary-foreground: 0 0% 5%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 90%;
     
-    /* Cool off-white background */
-    --background: 220 20% 98%;
-    --foreground: 220 20% 10%;
+    /* Black background */
+    --background: 0 0% 3%;
+    --foreground: 0 0% 95%;
     
-    --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 92%;
     
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 30% 15%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 92%;
     
-    --muted: 220 12% 95%;
-    --muted-foreground: 220 10% 38%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 60%;
     
-    --accent: 220 12% 94%;
-    --accent-foreground: 220 20% 12%;
+    --accent: 0 0% 14%;
+    --accent-foreground: 0 0% 92%;
     
-    --destructive: 0 72% 51%;
+    --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 98%;
     
-    --success: 142 72% 29%;
+    --success: 142 72% 40%;
     --success-foreground: 0 0% 98%;
     
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 10%;
     
-    --border: 220 12% 88%;
-    --input: 220 12% 88%;
-    --ring: 220 15% 12%;
+    --border: 0 0% 16%;
+    --input: 0 0% 16%;
+    --ring: 0 0% 80%;
     
     --section-spacing: 6rem;
     --container-padding: 1.5rem;
     --radius: 0.25rem;
     
-    /* Shadows - visible but premium */
-    --shadow-card: 0 1px 3px 0 rgb(16 24 39 / 0.04);
-    --shadow-elevated: 0 4px 16px -2px rgb(16 24 39 / 0.08);
-    --shadow-stage: 0 4px 24px -4px rgb(16 24 39 / 0.1);
+    /* Shadows - subtle on dark */
+    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.3);
+    --shadow-elevated: 0 4px 16px -2px rgb(0 0 0 / 0.4);
+    --shadow-stage: 0 4px 24px -4px rgb(0 0 0 / 0.5);
   }
 
   .dark {
@@ -210,13 +210,13 @@
 .hero-flag-bg {
   position: relative;
   background: linear-gradient(180deg, 
-    #ffffff 0%, 
-    #ffffff 48%,
-    /* keep a very subtle national accent, but overall neutral */
-    #f8fafc 50%,
-    #f1f5f9 62%,
-    #fff1f2 75%,
-    #ffe4e6 100%
+    hsl(var(--background)) 0%, 
+    hsl(var(--background)) 48%,
+    /* subtle national accent on dark */
+    hsl(0 0% 5%) 50%,
+    hsl(0 0% 6%) 62%,
+    hsl(0 10% 8%) 75%,
+    hsl(0 15% 12%) 100%
   );
 }
 
@@ -224,7 +224,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(255,255,255,0.9), transparent);
+  background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(0,0,0,0.5), transparent);
   pointer-events: none;
 }
 
@@ -371,7 +371,7 @@
     @apply relative cursor-pointer;
     min-height: 200px;
     padding: 24px;
-    background: #ffffff;
+    background: hsl(var(--card));
     border-radius: 16px;
     transition: 
       transform var(--dur-2) var(--ease-out),
@@ -406,7 +406,7 @@
   
   /* Main panel (center, dominant) */
   .wing-panel-main {
-    background: hsl(220 20% 99%);
+    background: hsl(var(--card));
     border: 1px solid rgba(16, 24, 39, 0.14);
     box-shadow: 0 6px 28px -4px rgba(16, 24, 39, 0.12);
   }
@@ -690,7 +690,7 @@
   
   /* Activity cards */
   .int-activity-card {
-    @apply relative bg-white border border-slate-200/80 rounded-xl;
+    @apply relative bg-card border border-border rounded-xl;
     transition: 
       transform var(--dur-2) var(--ease-out),
       box-shadow var(--dur-2) var(--ease-out),
@@ -744,7 +744,7 @@
   
   /* Disclaimer callout */
   .int-disclaimer {
-    @apply relative bg-slate-50/80 border-l-4 border-slate-400/50 rounded-r-lg;
+    @apply relative bg-muted/50 border-l-4 border-muted-foreground/30 rounded-r-lg;
     @apply py-4 px-5;
   }
   
@@ -761,10 +761,8 @@
   
   /* Form card */
   .int-form-card {
-    @apply bg-white rounded-2xl border border-slate-200/80;
-    box-shadow: 
-      0 4px 24px -8px rgba(30, 64, 175, 0.08),
-      0 0 0 1px rgba(59, 130, 246, 0.04);
+    @apply bg-card rounded-2xl border border-border;
+    box-shadow: var(--shadow-elevated);
   }
   
   /* Reduced motion */

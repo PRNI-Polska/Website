@@ -22,7 +22,7 @@ export function Footer() {
   const { t } = useI18n();
 
   return (
-    <footer className="bg-white border-t" role="contentinfo">
+    <footer className="bg-black border-t border-neutral-800" role="contentinfo">
       <div className="container-custom py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}

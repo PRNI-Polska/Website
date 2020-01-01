@@ -34,27 +34,27 @@
     --text-display: 2.5rem;
     --leading-display: 1.1;
     
-    /* Colors - Institutional warm palette */
-    --primary: 0 45% 35%;
+    /* Colors - neutral grey/white palette */
+    --primary: 220 15% 12%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 38 70% 50%;
-    --secondary-foreground: 0 0% 10%;
+    --secondary: 220 10% 92%;
+    --secondary-foreground: 220 15% 14%;
     
-    /* Warm off-white background */
-    --background: 40 30% 97%;
-    --foreground: 220 30% 12%;
+    /* Cool off-white background */
+    --background: 220 20% 98%;
+    --foreground: 220 20% 10%;
     
-    --card: 40 25% 99%;
-    --card-foreground: 220 30% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 10%;
     
     --popover: 0 0% 100%;
     --popover-foreground: 220 30% 15%;
     
-    --muted: 40 15% 94%;
-    --muted-foreground: 220 15% 42%;
+    --muted: 220 12% 95%;
+    --muted-foreground: 220 10% 38%;
     
-    --accent: 40 20% 96%;
-    --accent-foreground: 220 40% 15%;
+    --accent: 220 12% 94%;
+    --accent-foreground: 220 20% 12%;
     
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
@@ -65,9 +65,9 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 10%;
     
-    --border: 40 15% 85%;
-    --input: 40 15% 85%;
-    --ring: 0 45% 35%;
+    --border: 220 12% 88%;
+    --input: 220 12% 88%;
+    --ring: 220 15% 12%;
     
     --section-spacing: 6rem;
     --container-padding: 1.5rem;
@@ -112,7 +112,7 @@
   
   body {
     @apply text-foreground antialiased;
-    background: #f6f5f2;
+    background: hsl(var(--background));
     font-feature-settings: "rlig" 1, "calt" 1;
     line-height: 1.7;
   }
@@ -130,21 +130,21 @@
   /* Focus states */
   :focus-visible {
     @apply outline-none;
-    box-shadow: 0 0 0 2px #f6f5f2, 0 0 0 4px hsl(var(--primary));
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary));
   }
   
   button:focus-visible,
   a:focus-visible,
   [role="button"]:focus-visible {
     @apply outline-none;
-    box-shadow: 0 0 0 2px #f6f5f2, 0 0 0 4px hsl(var(--primary));
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary));
   }
   
   input:focus-visible,
   textarea:focus-visible,
   select:focus-visible {
     @apply outline-none;
-    box-shadow: 0 0 0 2px #f6f5f2, 0 0 0 4px hsl(var(--primary));
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary));
   }
   
   .skip-link {
@@ -211,12 +211,12 @@
   position: relative;
   background: linear-gradient(180deg, 
     #ffffff 0%, 
-    #ffffff 48%, 
-    #fef2f2 50%,
-    #fee2e2 55%,
-    #fecaca 65%,
-    #fca5a5 80%,
-    #f87171 100%
+    #ffffff 48%,
+    /* keep a very subtle national accent, but overall neutral */
+    #f8fafc 50%,
+    #f1f5f9 62%,
+    #fff1f2 75%,
+    #ffe4e6 100%
   );
 }
 
@@ -316,7 +316,7 @@
     @apply flex-1 flex items-center justify-center;
     min-height: calc(100vh - 80px);
     padding: 3rem 1rem;
-    background: #f6f5f2;
+    background: hsl(var(--background));
   }
   
   .wings-gateway-hero {
@@ -325,7 +325,7 @@
     min-height: 100dvh;
     padding: 2.5rem 1rem 4rem;
     /* Subtle radial highlight */
-    background: radial-gradient(ellipse 70% 40% at 50% 35%, rgba(180, 120, 80, 0.04), transparent);
+    background: radial-gradient(ellipse 70% 40% at 50% 35%, rgba(15, 23, 42, 0.035), transparent);
   }
   
   /* STAGE: Anchoring surface */
@@ -334,7 +334,7 @@
     max-width: 1080px;
     margin: 0 auto;
     padding: 40px 28px 32px;
-    background: #faf9f7;
+    background: hsl(var(--card));
     border: 1px solid rgba(16, 24, 39, 0.08);
     border-radius: 22px;
     box-shadow: 0 4px 24px -4px rgba(16, 24, 39, 0.1);
@@ -406,7 +406,7 @@
   
   /* Main panel (center, dominant) */
   .wing-panel-main {
-    background: hsl(40 30% 98%);
+    background: hsl(220 20% 99%);
     border: 1px solid rgba(16, 24, 39, 0.14);
     box-shadow: 0 6px 28px -4px rgba(16, 24, 39, 0.12);
   }

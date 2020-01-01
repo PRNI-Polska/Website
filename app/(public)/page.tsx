@@ -3,19 +3,85 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Calendar, FileText, Users, Shield, Flag, Scale, Building, Landmark } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, Calendar, FileText, Users, Shield, Flag, Scale, Building, Landmark, TrendingUp, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/lib/i18n";
-import { AnimatedSection, StaggeredContainer } from "@/components/ui/animated-section";
+import { AnimatedSection } from "@/components/ui/animated-section";
 import { useParallax } from "@/lib/use-scroll-animation";
+import { FloatingActionButton } from "@/components/ui/floating-action-button";
+import { formatDate } from "@/lib/utils";
 
 const ideologyIcons = [Shield, Flag, Scale, Building, Landmark];
+
+interface Announcement {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  category: string;
+  publishedAt: string;
+}
+
+// Animated counter component
+function AnimatedCounter({ end, duration = 2000, suffix = "" }: { end: number; duration?: number; suffix?: string }) {
+  const [count, setCount] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    if (hasAnimated) return;
+    
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHasAnimated(true);
+          let start = 0;
+          const increment = end / (duration / 16);
+          const timer = setInterval(() => {
+            start += increment;
+            if (start >= end) {
+              setCount(end);
+              clearInterval(timer);
+            } else {
+              setCount(Math.floor(start));
+            }
+          }, 16);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    const element = document.getElementById("stats-section");
+    if (element) observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [end, duration, hasAnimated]);
+
+  return (
+    <span className="stat-number">
+      {count.toLocaleString()}{suffix}
+    </span>
+  );
+}
 
 export default function HomePage() {
   const { t, locale } = useI18n();
   const parallaxRef = useParallax(0.3);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+
+  useEffect(() => {
+    // Fetch recent announcements
+    fetch("/api/admin/announcements?limit=3&status=PUBLISHED")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setAnnouncements(data.slice(0, 3));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const ideologySections = [
     { titleKey: "ideology.s1.title", textKey: "ideology.s1.text" },
@@ -24,6 +90,33 @@ export default function HomePage() {
     { titleKey: "ideology.s4.title", textKey: "ideology.s4.text" },
     { titleKey: "ideology.s5.title", textKey: "ideology.s5.text" },
   ];
+
+  const stats = [
+    { 
+      value: 500, 
+      suffix: "+",
+      label: { pl: "Sympatyków", en: "Supporters", de: "Unterstützer" }
+    },
+    { 
+      value: 15, 
+      suffix: "",
+      label: { pl: "Wydarzeń", en: "Events", de: "Veranstaltungen" }
+    },
+    { 
+      value: 5, 
+      suffix: "",
+      label: { pl: "Wartości", en: "Core Values", de: "Kernwerte" }
+    },
+  ];
+
+  const categoryLabels: Record<string, { pl: string; en: string; de: string }> = {
+    NEWS: { pl: "Wiadomość", en: "News", de: "Nachricht" },
+    PRESS_RELEASE: { pl: "Komunikat", en: "Press Release", de: "Pressemitteilung" },
+    POLICY: { pl: "Polityka", en: "Policy", de: "Politik" },
+    CAMPAIGN: { pl: "Kampania", en: "Campaign", de: "Kampagne" },
+    COMMUNITY: { pl: "Społeczność", en: "Community", de: "Gemeinschaft" },
+    OTHER: { pl: "Inne", en: "Other", de: "Sonstiges" },
+  };
 
   return (
     <div className="flex flex-col">
@@ -85,13 +178,31 @@ export default function HomePage() {
               <Button size="xl" asChild className="btn-glow group">
                 <Link href="/manifesto">
                   {t("hero.cta.manifesto")}
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
                 </Link>
               </Button>
               <Button size="xl" variant="outline" asChild className="hover-lift">
                 <Link href="/contact">{t("hero.cta.join")}</Link>
               </Button>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats / Social Proof Section */}
+      <section id="stats-section" className="py-12 bg-primary/5 border-y border-primary/10">
+        <div className="container-custom">
+          <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto text-center">
+            {stats.map((stat, index) => (
+              <AnimatedSection key={index} delay={index * 100} animation="scale">
+                <div className="space-y-1">
+                  <AnimatedCounter end={stat.value} suffix={stat.suffix} />
+                  <p className="text-sm text-muted-foreground font-medium">
+                    {stat.label[locale]}
+                  </p>
+                </div>
+              </AnimatedSection>
+            ))}
           </div>
         </div>
       </section>
@@ -110,8 +221,68 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Recent Announcements */}
+      {announcements.length > 0 && (
+        <section className="section-spacing">
+          <div className="container-custom">
+            <AnimatedSection className="text-center mb-12">
+              <Badge variant="secondary" className="mb-4">
+                <Megaphone className="w-3 h-3 mr-1" aria-hidden="true" />
+                {locale === "pl" ? "Aktualności" : locale === "de" ? "Aktuelles" : "Latest"}
+              </Badge>
+              <h2 className="text-2xl md:text-3xl font-heading font-semibold">
+                {t("section.news")}
+              </h2>
+              <p className="text-muted-foreground mt-2">
+                {t("section.news.subtitle")}
+              </p>
+            </AnimatedSection>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+              {announcements.map((announcement, index) => (
+                <AnimatedSection key={announcement.id} delay={index * 100}>
+                  <Link href={`/announcements/${announcement.slug}`}>
+                    <Card className="h-full hover-lift cursor-pointer group">
+                      <CardHeader>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="outline" className="text-xs">
+                            {categoryLabels[announcement.category]?.[locale] || announcement.category}
+                          </Badge>
+                          {announcement.publishedAt && (
+                            <span className="text-xs text-muted-foreground">
+                              {formatDate(new Date(announcement.publishedAt))}
+                            </span>
+                          )}
+                        </div>
+                        <CardTitle className="text-lg group-hover:text-primary transition-colors line-clamp-2">
+                          {announcement.title}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-muted-foreground text-sm line-clamp-3">
+                          {announcement.excerpt}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                </AnimatedSection>
+              ))}
+            </div>
+
+            <AnimatedSection className="text-center">
+              <Button variant="outline" asChild className="group">
+                <Link href="/announcements">
+                  {t("common.viewAll")}
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                </Link>
+              </Button>
+            </AnimatedSection>
+          </div>
+        </section>
+      )}
+
       {/* Ideology Declaration */}
-      <section className="section-spacing">
+      <section className="section-spacing bg-muted/30">
         <div className="container-custom">
           <AnimatedSection className="text-center mb-12">
             <Badge variant="secondary" className="mb-4">
@@ -136,7 +307,7 @@ export default function HomePage() {
                   >
                     <CardHeader>
                       <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-3 transition-transform group-hover:scale-110">
-                        <Icon className="h-6 w-6 text-primary" />
+                        <Icon className="h-6 w-6 text-primary" aria-hidden="true" />
                       </div>
                       <CardTitle className="text-lg leading-tight">
                         {t(section.titleKey)}
@@ -156,7 +327,7 @@ export default function HomePage() {
       </section>
 
       {/* Manifesto Highlights */}
-      <section className="section-spacing bg-muted/30">
+      <section className="section-spacing">
         <div className="container-custom">
           <AnimatedSection className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-4">
@@ -171,7 +342,7 @@ export default function HomePage() {
             <Button size="lg" asChild className="btn-glow group">
               <Link href="/manifesto">
                 {t("hero.cta.manifesto")}
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
               </Link>
             </Button>
           </AnimatedSection>
@@ -181,14 +352,14 @@ export default function HomePage() {
       {/* Call to Action */}
       <section className="py-20 bg-primary text-primary-foreground relative overflow-hidden">
         {/* Subtle decorative elements with animation */}
-        <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 animate-pulse" style={{ animationDuration: "4s" }} />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-1/2 translate-y-1/2 animate-pulse" style={{ animationDuration: "5s", animationDelay: "1s" }} />
+        <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2 animate-pulse" style={{ animationDuration: "4s" }} aria-hidden="true" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-1/2 translate-y-1/2 animate-pulse" style={{ animationDuration: "5s", animationDelay: "1s" }} aria-hidden="true" />
         {/* Very subtle flag stripe at top */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-white/20" />
+        <div className="absolute top-0 left-0 right-0 h-1 bg-white/20" aria-hidden="true" />
         
         <div className="container-custom text-center relative">
           <AnimatedSection animation="scale">
-            <Users className="mx-auto h-12 w-12 mb-6 opacity-80" />
+            <Users className="mx-auto h-12 w-12 mb-6 opacity-80" aria-hidden="true" />
             <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-4">
               {t("cta.title")}
             </h2>
@@ -210,6 +381,9 @@ export default function HomePage() {
           </AnimatedSection>
         </div>
       </section>
+
+      {/* Floating Action Button */}
+      <FloatingActionButton />
     </div>
   );
 }

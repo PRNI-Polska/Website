@@ -11,7 +11,6 @@ import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 // Wing panel data - Main in center, International left, Female right
-// NO ICONS per user requirement
 const wings = [
   {
     id: "international",
@@ -34,7 +33,7 @@ const wings = [
     href: "/wings/female",
     titleKey: "wings.female.title",
     taglineKey: "wings.female.tagline",
-    disabled: true,
+    disabled: false, // ENABLED
     isMain: false,
   },
 ];
@@ -72,7 +71,6 @@ export default function HomePage() {
       ? "Drei Arme. Eine Bewegung." 
       : "Three branches. One movement.",
     enter: locale === "pl" ? "Wejdź" : locale === "de" ? "Eintreten" : "Enter",
-    comingSoon: locale === "pl" ? "Wkrótce" : locale === "de" ? "Demnächst" : "Coming soon",
   };
 
   return (
@@ -117,7 +115,6 @@ export default function HomePage() {
             {wings.map((wing, index) => {
               const isSelected = selectedPanel === wing.id;
               const isFading = selectedPanel && selectedPanel !== wing.id;
-              const isDisabledPanel = wing.disabled;
               const isMainPanel = wing.isMain;
               
               return (
@@ -134,12 +131,10 @@ export default function HomePage() {
                     wing.id === "international" && "wing-panel-international",
                     wing.id === "main" && "wing-panel-poland",
                     wing.id === "female" && "wing-panel-female",
-                    isDisabledPanel && "wing-panel-disabled",
                     isSelected && "is-selected",
                     isFading && (index === 0 ? "is-fading-left" : "is-fading-right")
                   )}
                   aria-label={t(wing.titleKey)}
-                  aria-disabled={isDisabledPanel}
                 >
                   {/* Title */}
                   <h2 className={cn(
@@ -163,21 +158,15 @@ export default function HomePage() {
                   {/* Divider */}
                   <div className="wing-panel-divider" />
                   
-                  {/* Footer with CTA or Badge */}
+                  {/* Footer with CTA */}
                   <div className="wing-panel-footer">
-                    {isDisabledPanel ? (
-                      <span className="wing-panel-badge">
-                        {gatewayText.comingSoon}
-                      </span>
-                    ) : (
-                      <span className={cn(
-                        "wing-panel-cta",
-                        isMainPanel && "text-[15px]"
-                      )}>
-                        {gatewayText.enter}
-                        <ArrowRight className="wing-panel-cta-arrow" />
-                      </span>
-                    )}
+                    <span className={cn(
+                      "wing-panel-cta",
+                      isMainPanel && "text-[15px]"
+                    )}>
+                      {gatewayText.enter}
+                      <ArrowRight className="wing-panel-cta-arrow" />
+                    </span>
                   </div>
                 </button>
               );

@@ -215,6 +215,8 @@ model Member {
   email         String    @unique
   passwordHash  String
   displayName   String
+  fullName      String?
+  location      String?
   bio           String?
   photoUrl      String?
   role          String    @default("MEMBER")

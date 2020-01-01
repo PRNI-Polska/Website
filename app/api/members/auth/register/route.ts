@@ -7,17 +7,21 @@ const BCRYPT_ROUNDS = 12;
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { inviteCode, email, password, displayName } = body;
+    const { inviteCode, email, password, displayName, fullName, location } = body;
 
     if (
       !inviteCode ||
       !email ||
       !password ||
       !displayName ||
+      !fullName ||
+      !location ||
       typeof inviteCode !== "string" ||
       typeof email !== "string" ||
       typeof password !== "string" ||
-      typeof displayName !== "string"
+      typeof displayName !== "string" ||
+      typeof fullName !== "string" ||
+      typeof location !== "string"
     ) {
       return NextResponse.json(
         { error: "All fields are required" },
@@ -102,6 +106,8 @@ export async function POST(request: NextRequest) {
           email: trimmedEmail,
           passwordHash,
           displayName: trimmedName,
+          fullName: fullName.trim(),
+          location: location.trim(),
           inviteCode: trimmedCode,
           role: invite.role || "MEMBER",
         },

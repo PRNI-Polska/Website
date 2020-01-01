@@ -30,6 +30,8 @@ interface Member {
   id: string;
   email: string;
   displayName: string;
+  fullName: string | null;
+  location: string | null;
   role: string;
   isActive: boolean;
   lastLoginAt: string | null;
@@ -366,6 +368,12 @@ export default function AdminMembersPage() {
                           Email
                         </th>
                         <th className="text-left py-3 px-4 font-medium text-sm">
+                          Full Name
+                        </th>
+                        <th className="text-left py-3 px-4 font-medium text-sm">
+                          Location
+                        </th>
+                        <th className="text-left py-3 px-4 font-medium text-sm">
                           Status
                         </th>
                         <th className="text-left py-3 px-4 font-medium text-sm">
@@ -407,6 +415,12 @@ export default function AdminMembersPage() {
                           </td>
                           <td className="py-3 px-4 text-sm text-muted-foreground">
                             {member.email}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-muted-foreground">
+                            {member.fullName || <span className="text-[#333]">—</span>}
+                          </td>
+                          <td className="py-3 px-4 text-sm text-muted-foreground">
+                            {member.location || <span className="text-[#333]">—</span>}
                           </td>
                           <td className="py-3 px-4">
                             <select

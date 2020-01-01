@@ -16,6 +16,8 @@ export async function GET() {
         id: true,
         email: true,
         displayName: true,
+        fullName: true,
+        location: true,
         role: true,
         isActive: true,
         lastLoginAt: true,

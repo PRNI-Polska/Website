@@ -34,16 +34,8 @@ const UsersIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// Wing panel data
+// Wing panel data - Main in center (larger), International left, Female right
 const wings = [
-  {
-    id: "main",
-    href: "/wings/main",
-    titleKey: "wings.main.title",
-    taglineKey: "wings.main.tagline",
-    Icon: ShieldIcon,
-    disabled: false,
-  },
   {
     id: "international",
     href: "/wings/international",
@@ -51,6 +43,16 @@ const wings = [
     taglineKey: "wings.international.tagline",
     Icon: GlobeIcon,
     disabled: false,
+    isMain: false,
+  },
+  {
+    id: "main",
+    href: "/wings/main",
+    titleKey: "wings.main.title",
+    taglineKey: "wings.main.tagline",
+    Icon: ShieldIcon,
+    disabled: false,
+    isMain: true, // Center panel, larger
   },
   {
     id: "female",
@@ -59,6 +61,7 @@ const wings = [
     taglineKey: "wings.female.tagline",
     Icon: UsersIcon,
     disabled: true,
+    isMain: false,
   },
 ];
 
@@ -146,12 +149,13 @@ export default function HomePage() {
             </p>
           </header>
 
-          {/* Wing Panels */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          {/* Wing Panels - Main in center (larger) */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 items-stretch">
             {wings.map((wing, index) => {
               const isSelected = selectedPanel === wing.id;
               const isFading = selectedPanel && selectedPanel !== wing.id;
               const isDisabledPanel = wing.disabled;
+              const isMainPanel = wing.isMain;
               
               return (
                 <button
@@ -162,6 +166,10 @@ export default function HomePage() {
                   className={cn(
                     "wing-panel text-left",
                     `panel-entrance panel-entrance-${index + 1}`,
+                    // Main panel spans 6 columns, side panels span 3 each
+                    isMainPanel ? "md:col-span-6" : "md:col-span-3",
+                    // Main panel is visually larger
+                    isMainPanel && "wing-panel-main",
                     isDisabledPanel && "wing-panel-disabled",
                     isSelected && "is-selected",
                     isFading && (index === 0 ? "is-fading-left" : "is-fading-right")
@@ -177,22 +185,34 @@ export default function HomePage() {
                   )}
                   
                   {/* Icon */}
-                  <wing.Icon className="wing-panel-icon" />
+                  <wing.Icon className={cn(
+                    "wing-panel-icon",
+                    isMainPanel && "w-12 h-12 mb-8"
+                  )} />
                   
                   {/* Title */}
-                  <h2 className="wing-panel-title">
+                  <h2 className={cn(
+                    "wing-panel-title",
+                    isMainPanel && "text-2xl md:text-3xl"
+                  )}>
                     {t(wing.titleKey)}
                   </h2>
                   
                   {/* Description */}
-                  <p className="wing-panel-desc">
+                  <p className={cn(
+                    "wing-panel-desc",
+                    isMainPanel && "text-base mb-8"
+                  )}>
                     {t(wing.taglineKey)}
                   </p>
                   
                   {/* CTA */}
-                  <span className="wing-panel-cta">
+                  <span className={cn(
+                    "wing-panel-cta",
+                    isMainPanel && "text-base"
+                  )}>
                     {isDisabledPanel ? gatewayText.comingSoon : gatewayText.enter}
-                    {!isDisabledPanel && <ArrowRight />}
+                    {!isDisabledPanel && <ArrowRight className={isMainPanel ? "w-5 h-5" : undefined} />}
                   </span>
                 </button>
               );

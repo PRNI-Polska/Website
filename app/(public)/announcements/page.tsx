@@ -11,9 +11,12 @@ import { formatDate } from "@/lib/utils";
 import type { Metadata } from "next";
 import type { AnnouncementCategory } from "@/lib/types";
 
+// Force dynamic rendering - no caching
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
-  title: "Announcements",
-  description: "Stay updated with the latest news and announcements from our party.",
+  title: "Komunikaty",
+  description: "Bądź na bieżąco z najnowszymi wiadomościami i komunikatami naszej partii.",
 };
 
 const ITEMS_PER_PAGE = 9;

@@ -76,94 +76,72 @@ export const translations: Translations = {
   // Ideology sections
   "home.ideology.badge": { en: "Ideological Declaration", pl: "Deklaracja Ideowa", de: "Ideologische Erklärung" },
   "home.ideology.title": {
-    en: "Declaration of National Integralism",
-    pl: "Deklaracja Ideowa Narodowego Integralizmu",
-    de: "Erklärung des Nationalen Integralismus",
+    en: "PRNI Ideological Declaration",
+    pl: "Deklaracja Ideowa PRNI",
+    de: "Ideologische Erklärung der PRNI",
   },
 
   "ideology.title": { en: "Our Ideology", pl: "Nasza Ideologia", de: "Unsere Ideologie" },
-  "ideology.s1.title": { 
-    en: "§ 1. The Nation as the Highest Political Value", 
+  "ideology.s1.title": {
+    en: "§ 1. The Nation as the Highest Political Value",
     pl: "§ 1. Naród jako najwyższa wartość polityczna",
     de: "§ 1. Die Nation als höchster politischer Wert",
   },
-  "ideology.s1.text": { 
-    en: "We recognize the nation as the highest political value. We understand the nation as a historical and cultural entity, standing above the interests of individuals and social groups.", 
-    pl: "Uznajemy naród za najwyższą wartość polityczną. Naród pojmujemy jako byt historyczny i kulturowy, stojący ponad interesami jednostek oraz grup społecznych.",
-    de: "Wir erkennen die Nation als höchsten politischen Wert an. Wir verstehen die Nation als ein historisches und kulturelles Wesen, das über den Interessen von Einzelnen sowie gesellschaftlichen Gruppen steht.",
+  "ideology.s1.text": {
+    en: "We recognize the Nation as the highest political value. We understand the Nation as a historical, cultural, racial and ethnic being, standing above the interests of individuals and social groups.",
+    pl: "Uznajemy Naród za najwyższą wartość polityczną. Naród pojmujemy jako byt historyczny, kulturowy, rasowy i etniczny, stojący ponad interesem jednostek i grup społecznych.",
+    de: "Wir erkennen die Nation als höchsten politischen Wert an. Wir verstehen die Nation als ein historisches, kulturelles, rassisches und ethnisches Wesen, das über den Interessen von Einzelnen und gesellschaftlichen Gruppen steht.",
   },
-  "ideology.s2.title": { 
-    en: "§ 2. Ideological and Cultural Unity", 
-    pl: "§ 2. Jedność ideowa i kulturowa",
-    de: "§ 2. Ideologische und kulturelle Einheit",
+  "ideology.s2.title": {
+    en: "§ 2. Anti-Capitalism",
+    pl: "§ 2. Antykapitalizm",
+    de: "§ 2. Antikapitalismus",
   },
-  "ideology.s2.text": { 
-    en: "We advocate for the preservation of ideological and cultural unity of the national community. We recognize the necessity of defending one Polish national tradition as the foundation of identity and continuity of the nation.", 
-    pl: "Opowiadamy się za zachowaniem jedności ideowej i kulturowej wspólnoty narodowej. Uznajemy konieczność obrony jednej, polskiej tradycji narodowej jako fundamentu tożsamości i ciągłości narodu.",
-    de: "Wir treten für die Bewahrung der ideologischen und kulturellen Einheit der nationalen Gemeinschaft ein. Wir erkennen die Notwendigkeit an, eine polnische nationale Tradition als Fundament der Identität und Kontinuität der Nation zu verteidigen.",
+  "ideology.s2.text": {
+    en: "We reject international capitalism in every form. We reject the prioritization of profit over human needs. We reject all forms of Judeo-capitalist globalism.",
+    pl: "Odrzucamy międzynarodowy kapitalizm w każdej jego postaci. Odrzucamy priorytetyzowanie zysku nad potrzebami ludzkimi. Odrzucamy wszystkie formy judeo-kapitalistycznego globalizmu.",
+    de: "Wir lehnen den internationalen Kapitalismus in jeder Form ab. Wir lehnen es ab, den Profit über die menschlichen Bedürfnisse zu stellen. Wir lehnen alle Formen des judeo-kapitalistischen Globalismus ab.",
   },
-  "ideology.s3.title": { 
-    en: "§ 3. Anti-Liberalism", 
-    pl: "§ 3. Antyliberalizm",
-    de: "§ 3. Antiliberalismus",
+  "ideology.s3.title": {
+    en: "§ 3. Struggle Against the Moral Degeneration of the Modern World",
+    pl: "§ 3. Walka z degeneracją moralną współczesnego świata",
+    de: "§ 3. Kampf gegen die moralische Degeneration der modernen Welt",
   },
-  "ideology.s3.text": { 
-    en: "We reject political liberalism based on extreme pluralism and individualism, as well as cultural liberalism leading to relativization of values and weakening of national bonds.", 
-    pl: "Odrzucamy liberalizm polityczny, oparty na skrajnym pluralizmie i indywidualizmie, jak również liberalizm kulturowy, prowadzący do relatywizacji wartości i osłabienia więzi narodowych.",
-    de: "Wir lehnen den politischen Liberalismus ab, der auf extremem Pluralismus und Individualismus beruht, ebenso wie den kulturellen Liberalismus, der zur Relativierung von Werten und zur Schwächung nationaler Bindungen führt.",
+  "ideology.s3.text": {
+    en: "We oppose the globalism sweeping the world and the international corporations supporting liberal and progressive initiatives aimed at controlling society, destroying traditional values and nature, and the ethnic replacement of Europeans.",
+    pl: "Sprzeciwiamy się ogarniającemu świat globalizmowi oraz międzynarodowym korporacjom wspierającym liberalne i progresywne inicjatywy mające na celu kontrolę społeczeństwa, niszczenie tradycyjnych wartości, natury i etniczną podmianę Europejczyków.",
+    de: "Wir widersetzen uns dem die Welt erfassenden Globalismus sowie internationalen Konzernen, die liberale und progressive Initiativen unterstützen, die auf die Kontrolle der Gesellschaft, die Zerstörung traditioneller Werte und der Natur sowie den ethnischen Austausch der Europäer abzielen.",
   },
-  "ideology.s4.title": { 
-    en: "§ 4. Moral Degeneration of Contemporary Society",
-    pl: "§ 4. Degeneracja moralna współczesnego społeczeństwa",
-    de: "§ 4. Moralische Degeneration der gegenwärtigen Gesellschaft",
+  "ideology.s4.title": {
+    en: "§ 4. Acceleration of the Collapse of the Current System",
+    pl: "§ 4. Akceleracja upadku obecnego systemu",
+    de: "§ 4. Beschleunigung des Zusammenbruchs des gegenwärtigen Systems",
   },
-  "ideology.s4.text": { 
-    en: "We oppose globalism and international corporations that support liberal and progressive initiatives aimed at destabilizing and controlling nations. Contemporary societies are subjected to a process of deep moral and axiological erosion—if this process is not stopped, it will lead to the destruction of social order and national identity.",
-    pl: "Sprzeciwiamy się ogarniającym świat globalizmowi oraz międzynarodowym korporacjom wspierającym liberalne i progresywne inicjatywy mające na celu destabilizację i kontrolę narodów, w wyniku których współczesne społeczeństwa poddawane są procesowi głębokiej erozji moralnej i aksjologicznej — jeśli proces ten nie zostanie powstrzymany, doprowadzi on do destrukcji ładu społecznego i tożsamości narodowej.",
-    de: "Wir stellen uns dem Globalismus sowie internationalen Konzernen entgegen, die liberale und progressive Initiativen zur Destabilisierung und Kontrolle von Nationen unterstützen. Zeitgenössische Gesellschaften werden einem Prozess tiefgreifender moralischer und axiologischer Erosion unterworfen — wird dieser Prozess nicht gestoppt, führt er zur Zerstörung der sozialen Ordnung und der nationalen Identität.",
+  "ideology.s4.text": {
+    en: "We support the complete collapse of the current system (understood as international capitalism) and the acceleration of that collapse.",
+    pl: "Wspieramy kompletny upadek obecnego systemu (rozumianego jako międzynarodowy kapitalizm) jak i przyspieszenie jego upadku.",
+    de: "Wir unterstützen den vollständigen Zusammenbruch des gegenwärtigen Systems (verstanden als internationaler Kapitalismus) sowie die Beschleunigung dieses Zusammenbruchs.",
   },
-  "ideology.s5.title": { 
-    en: "§ 5. Economy Subordinated to the Nation", 
-    pl: "§ 5. Gospodarka podporządkowana narodowi",
-    de: "§ 5. Eine der Nation untergeordnete Wirtschaft",
+  "ideology.s5.title": {
+    en: "§ 5. Revolt Against Modernity",
+    pl: "§ 5. Rewolta przeciw nowoczesności",
+    de: "§ 5. Revolte gegen die Moderne",
   },
-  "ideology.s5.text": { 
-    en: "We recognize that the economy should serve the nation. We advocate neither for extreme free market nor for socialism. We permit state intervention where national interest or social stability requires it.", 
-    pl: "Uznajemy, że gospodarka powinna służyć narodowi. Nie opowiadamy się ani za skrajnym wolnym rynkiem, ani za socjalizmem. Dopuszczamy interwencję państwa tam, gdzie wymaga tego interes narodowy lub stabilność społeczna.",
-    de: "Wir erkennen an, dass die Wirtschaft der Nation dienen soll. Wir treten weder für einen extremen freien Markt noch für Sozialismus ein. Wir lassen staatliche Intervention zu, wo es das nationale Interesse oder die gesellschaftliche Stabilität erfordert.",
+  "ideology.s5.text": {
+    en: "Struggle against social progress and materialism, understood as products of a degenerate, anti-traditional world.",
+    pl: "Walka z progresem społecznym i materializmem rozumianych jako wytwory zdegenerowanego, anty-tradycyjnego świata.",
+    de: "Kampf gegen den gesellschaftlichen Fortschritt und den Materialismus, verstanden als Produkte einer degenerierten, anti-traditionellen Welt.",
   },
 
   "ideology.s6.title": {
-    en: "§ 6. Principles of International Cooperation",
-    pl: "§ 6. Zasady współpracy międzynarodowej",
-    de: "§ 6. Grundsätze der internationalen Zusammenarbeit",
+    en: "§ 6. Class Collaboration",
+    pl: "§ 6. Kolaboracja klas",
+    de: "§ 6. Klassenkollaboration",
   },
   "ideology.s6.text": {
-    en: "We advocate international cooperation based on respect for sovereignty, self-determination, and full political and economic independence of states. All forms of supranational integration are acceptable only when they do not violate the primacy of the national interest, do not limit state competencies in key areas, and remain based on voluntariness and equality of participants.",
-    pl: "Opowiadamy się za współpracą międzynarodową opartą na poszanowaniu suwerenności, samostanowienia oraz pełnej niezależności politycznej i gospodarczej państw. Wszelkie formy integracji ponadnarodowej uznajemy za dopuszczalne wyłącznie wówczas, gdy nie naruszają one nadrzędności interesu narodowego, nie ograniczają kompetencji państwa w kluczowych obszarach oraz pozostają oparte na dobrowolności i równoprawności uczestników.",
-    de: "Wir befürworten internationale Zusammenarbeit, die auf dem Respekt vor Souveränität, Selbstbestimmung sowie voller politischer und wirtschaftlicher Unabhängigkeit der Staaten beruht. Jede Form supranationaler Integration ist nur dann zulässig, wenn sie den Vorrang des nationalen Interesses nicht verletzt, die Kompetenzen des Staates in Schlüsselbereichen nicht einschränkt und auf Freiwilligkeit sowie Gleichberechtigung der Teilnehmer beruht.",
-  },
-
-  "ideology.s7.title": {
-    en: "§ 7. Security and Defense of the State",
-    pl: "§ 7. Bezpieczeństwo i obronność państwa",
-    de: "§ 7. Sicherheit und Verteidigung des Staates",
-  },
-  "ideology.s7.text": {
-    en: "We recognize that state security should be based on the capacity for independent defense and on international cooperation of an exclusively defensive character. We oppose policies of military expansion, using military alliances as instruments of political pressure, and actions leading to destabilization of the international order. Lasting security can be built only on a balance of power, responsibility of states, and respect for their sovereignty.",
-    pl: "Uznajemy, że bezpieczeństwo państwa powinno opierać się na zdolności do samodzielnej obrony oraz na współpracy międzynarodowej o wyłącznie obronnym charakterze. Sprzeciwiamy się polityce ekspansji militarnej, wykorzystywaniu sojuszy wojskowych jako narzędzi presji politycznej oraz działaniom prowadzącym do destabilizacji ładu międzynarodowego. Trwałe bezpieczeństwo może być budowane jedynie w oparciu o równowagę sił, odpowiedzialność państw oraz poszanowanie ich suwerenności.",
-    de: "Wir erkennen an, dass die Sicherheit des Staates auf der Fähigkeit zur eigenständigen Verteidigung sowie auf internationaler Zusammenarbeit ausschließlich defensiven Charakters beruhen soll. Wir lehnen Politik militärischer Expansion, die Nutzung militärischer Bündnisse als Instrumente politischen Drucks sowie Handlungen ab, die zur Destabilisierung der internationalen Ordnung führen. Dauerhafte Sicherheit kann nur auf dem Kräftegleichgewicht, der Verantwortung der Staaten und dem Respekt vor ihrer Souveränität aufgebaut werden.",
-  },
-
-  "ideology.s8.title": {
-    en: "§ 8. The Organic State",
-    pl: "§ 8. Państwo organiczne",
-    de: "§ 8. Der organische Staat",
-  },
-  "ideology.s8.text": {
-    en: "We recognize the state as an organic expression of the nation's will. The state is not a neutral arbiter between competing interests, but a tool for realizing the national interest.",
-    pl: "Uznajemy państwo za organiczny wyraz woli narodu. Państwo nie jest neutralnym arbitrem pomiędzy konkurującymi interesami, lecz narzędziem realizacji interesu narodowego.",
-    de: "Wir erkennen den Staat als organischen Ausdruck des Willens der Nation an. Der Staat ist kein neutraler Schiedsrichter zwischen konkurrierenden Interessen, sondern ein Instrument zur Verwirklichung des nationalen Interesses.",
+    en: "We reject the concept of class struggle as outdated and harmful. We support the concept of an organic state and organic communities.",
+    pl: "Odrzucamy koncept walki klas, jako przestarzały i szkodliwy. Wspieramy koncept państwa lub społeczności organicznych.",
+    de: "Wir lehnen das Konzept des Klassenkampfes als überholt und schädlich ab. Wir befürworten das Konzept eines organischen Staates bzw. organischer Gemeinschaften.",
   },
 
   // Merch

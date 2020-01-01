@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Instagram } from "lucide-react";
+import { Instagram, Send } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useI18n } from "@/lib/i18n";
 import { NewsletterSignup } from "@/components/newsletter-signup";
@@ -28,10 +28,7 @@ const navigationKeys = [
   { key: "nav.gallery", href: "/gallery" },
   { key: "nav.manifesto", href: "/manifesto" },
   { key: "nav.recruitment", href: "/recruitment" },
-  { key: "nav.merch", href: "/merch" },
   { key: "nav.wings", href: "/wings" },
-  { key: "nav.about", href: "/about" },
-  { key: "nav.press", href: "/press" },
   { key: "nav.contact", href: "/contact" },
 ];
 
@@ -76,6 +73,15 @@ export function Footer() {
                 className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors"
               >
                 <Instagram className="h-5 w-5" />
+              </a>
+              <a
+                href="https://t.me/prni_official"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="PRNI on Telegram"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors"
+              >
+                <Send className="h-5 w-5" />
               </a>
               <a
                 href="https://www.tiktok.com/@prni_official"

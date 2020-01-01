@@ -20,8 +20,6 @@ export default function HomePage() {
     { id: "s4", title: t("ideology.s4.title"), text: t("ideology.s4.text") },
     { id: "s5", title: t("ideology.s5.title"), text: t("ideology.s5.text") },
     { id: "s6", title: t("ideology.s6.title"), text: t("ideology.s6.text") },
-    { id: "s7", title: t("ideology.s7.title"), text: t("ideology.s7.text") },
-    { id: "s8", title: t("ideology.s8.title"), text: t("ideology.s8.text") },
   ];
 
   const siteNavJsonLd = {
@@ -29,22 +27,20 @@ export default function HomePage() {
     "@type": "SiteNavigationElement",
     name: [
       "PRNI — Strona Główna",
-      "O PRNI",
       "Manifest PRNI",
       "Komunikaty PRNI",
       "Wydarzenia PRNI",
+      "Galeria PRNI",
       "Rekrutacja PRNI",
-      "Merch PRNI",
       "Kontakt PRNI",
     ],
     url: [
       "https://www.prni.org.pl",
-      "https://www.prni.org.pl/about",
       "https://www.prni.org.pl/manifesto",
       "https://www.prni.org.pl/announcements",
       "https://www.prni.org.pl/events",
+      "https://www.prni.org.pl/gallery",
       "https://www.prni.org.pl/recruitment",
-      "https://www.prni.org.pl/merch",
       "https://www.prni.org.pl/contact",
     ],
   };
@@ -200,7 +196,7 @@ export default function HomePage() {
               className="border-2 border-primary-foreground text-primary-foreground bg-transparent hover:bg-primary-foreground/10"
               asChild
             >
-              <Link href="/about">{t("cta.learn")}</Link>
+              <Link href="/manifesto">{t("cta.learn")}</Link>
             </Button>
           </div>
         </div>

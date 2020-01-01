@@ -3,13 +3,12 @@ const HOST = "www.prni.org.pl";
 
 const URLS = [
   `https://${HOST}`,
-  `https://${HOST}/about`,
   `https://${HOST}/manifesto`,
   `https://${HOST}/announcements`,
   `https://${HOST}/events`,
+  `https://${HOST}/gallery`,
   `https://${HOST}/recruitment`,
   `https://${HOST}/contact`,
-  `https://${HOST}/merch`,
   `https://${HOST}/wings`,
   `https://${HOST}/wings/main`,
   `https://${HOST}/wings/international`,

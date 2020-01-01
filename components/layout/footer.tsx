@@ -78,8 +78,8 @@ export function Footer() {
             </h3>
             <address className="not-italic text-muted-foreground space-y-2">
               <p>
-                <a href="mailto:kontakt@prni.pl" className="hover:text-primary transition-colors">
-                  kontakt@prni.pl
+                <a href="mailto:prni.official@gmail.com" className="hover:text-primary transition-colors">
+                  prni.official@gmail.com
                 </a>
               </p>
             </address>

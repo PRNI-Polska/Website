@@ -6,61 +6,102 @@ import { Toaster } from "@/components/ui/toaster";
 
 // Classic theme fonts
 const playfair = Playfair_Display({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   variable: "--font-playfair",
   display: "swap",
 });
 
 const crimson = Crimson_Pro({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   variable: "--font-crimson",
   display: "swap",
 });
 
 // Modern theme fonts
 const dmSans = DM_Sans({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   variable: "--font-dm-sans",
   display: "swap",
 });
 
 const syne = Syne({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   variable: "--font-syne",
   display: "swap",
 });
 
 // Monospace font for code
 const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   variable: "--font-mono",
   display: "swap",
 });
 
-// Site metadata - customize these for SEO
+// Site metadata - Polish SEO optimized
 export const metadata: Metadata = {
   title: {
-    default: "PRNI - Political Party",
+    default: "PRNI - Polski Ruch Narodowo-Integralistyczny",
     template: "%s | PRNI",
   },
-  description: "Building a better future together. Join our movement for positive change in our community and nation.",
-  keywords: ["political party", "politics", "community", "change", "manifesto", "elections"],
-  authors: [{ name: "PRNI" }],
+  description: "Polski Ruch Narodowo-Integralistyczny (PRNI) - Budujemy silną i suwerenną przyszłość opartą na odpowiedzialności, porządku oraz lojalności wobec wspólnoty narodowej. Dołącz do ruchu na rzecz Polski.",
+  keywords: [
+    "PRNI",
+    "Polski Ruch Narodowo-Integralistyczny",
+    "integralizm",
+    "nacjonalizm",
+    "Polska",
+    "ruch polityczny",
+    "suwerenność",
+    "narodowy integralizm",
+    "patriotyzm",
+    "tożsamość narodowa",
+  ],
+  authors: [{ name: "PRNI - Polski Ruch Narodowo-Integralistyczny" }],
+  creator: "PRNI",
+  publisher: "Polski Ruch Narodowo-Integralistyczny",
+  metadataBase: new URL("https://prni.org.pl"),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
-    locale: "en_US",
-    siteName: "PRNI Political Party",
-    title: "PRNI - Political Party",
-    description: "Building a better future together. Join our movement for positive change.",
+    locale: "pl_PL",
+    url: "https://prni.org.pl",
+    siteName: "PRNI - Polski Ruch Narodowo-Integralistyczny",
+    title: "PRNI - Polski Ruch Narodowo-Integralistyczny",
+    description: "Budujemy silną i suwerenną przyszłość opartą na odpowiedzialności, porządku oraz lojalności wobec wspólnoty narodowej.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "PRNI - Polski Ruch Narodowo-Integralistyczny",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "PRNI - Political Party",
-    description: "Building a better future together. Join our movement for positive change.",
+    site: "@PRNI_official",
+    creator: "@PRNI_official",
+    title: "PRNI - Polski Ruch Narodowo-Integralistyczny",
+    description: "Budujemy silną i suwerenną przyszłość opartą na odpowiedzialności, porządku oraz lojalności wobec wspólnoty narodowej.",
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    // Add these when you have them:
+    // google: "your-google-verification-code",
+    // yandex: "your-yandex-verification-code",
   },
 };
 
@@ -82,13 +123,19 @@ export default function RootLayout({
     : { "--font-sans": "'Crimson Pro', Georgia, serif", "--font-heading": "'Playfair Display', Georgia, serif" } as React.CSSProperties;
 
   return (
-    <html lang="en" data-theme={theme} suppressHydrationWarning>
+    <html lang="pl" data-theme={theme} suppressHydrationWarning>
+      <head>
+        {/* Additional meta tags for Polish locale */}
+        <meta name="geo.region" content="PL" />
+        <meta name="geo.placename" content="Polska" />
+        <meta name="content-language" content="pl" />
+      </head>
       <body
         className={`${fontVariables} antialiased min-h-screen flex flex-col`}
         style={fontStyles}
       >
         <a href="#main-content" className="skip-link">
-          Skip to main content
+          Przejdź do głównej treści
         </a>
         {children}
         <Toaster />

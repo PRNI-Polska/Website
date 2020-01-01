@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description:
     "Komunikaty PRNI (Polski Ruch Narodowo-Integralistyczny). Bądź na bieżąco z najnowszymi wiadomościami. PRNI announcements.",
   alternates: {
-    canonical: "https://prni.org.pl/announcements",
+    canonical: "https://www.prni.org.pl/announcements",
   },
 };
 

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description:
     "O PRNI (Polski Ruch Narodowo-Integralistyczny) — budujemy silną i suwerenną przyszłość. About PRNI — the Polish National-Integralist Movement.",
   alternates: {
-    canonical: "https://prni.org.pl/about",
+    canonical: "https://www.prni.org.pl/about",
   },
 };
 

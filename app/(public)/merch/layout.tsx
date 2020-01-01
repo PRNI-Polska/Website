@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description:
     "Oficjalny merch PRNI (Polski Ruch Narodowo-Integralistyczny). Official PRNI merchandise — support the movement. Offizielles PRNI-Merchandise.",
   alternates: {
-    canonical: "https://prni.org.pl/merch",
+    canonical: "https://www.prni.org.pl/merch",
   },
 };
 

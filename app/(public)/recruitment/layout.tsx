@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description:
     "Dołącz do PRNI (Polski Ruch Narodowo-Integralistyczny). Join PRNI — the Polish National-Integralist Movement. Naród Ponad Wszystkim.",
   alternates: {
-    canonical: "https://prni.org.pl/recruitment",
+    canonical: "https://www.prni.org.pl/recruitment",
   },
 };
 

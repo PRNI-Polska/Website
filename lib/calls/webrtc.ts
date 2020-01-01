@@ -202,7 +202,7 @@ export class WebRTCManager {
     this.cleanupFns.push(this.signaling.on("chat-cooldown", (data) => this.emit({ type: "chat-cooldown", ...data })));
     this.cleanupFns.push(this.signaling.on("transcription", (data) => this.emit({ type: "transcription", ...data })));
 
-    this.signaling.connect(this.session.session);
+    this.signaling.connect(this.session.session, this.session.displayName);
   }
 
   private createPeerConnection(remotePeerId: string, remoteRole: Role, isInitiator: boolean): void {

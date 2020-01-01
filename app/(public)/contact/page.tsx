@@ -13,7 +13,7 @@ export default function ContactPage() {
   return (
     <div className="container-custom py-12">
       {/* Header */}
-      <div className="max-w-3xl mx-auto text-center mb-12">
+      <div className="max-w-3xl mx-auto text-center mb-12 animate-fade-in-up">
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold mb-4">
           Kontakt
         </h1>
@@ -24,8 +24,8 @@ export default function ContactPage() {
 
       <div className="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
         {/* Contact Information */}
-        <div className="lg:col-span-1">
-          <Card>
+        <div className="lg:col-span-1 animate-fade-in-up animation-delay-100">
+          <Card className="hover-lift">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="h-5 w-5 text-primary" />
@@ -44,8 +44,8 @@ export default function ContactPage() {
         </div>
 
         {/* Contact Form */}
-        <div className="lg:col-span-2">
-          <Card>
+        <div className="lg:col-span-2 animate-fade-in-up animation-delay-200">
+          <Card className="hover-lift">
             <CardHeader>
               <CardTitle>Wyślij wiadomość</CardTitle>
               <CardDescription>

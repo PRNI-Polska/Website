@@ -33,15 +33,15 @@ export function GlobalBackdrop({
       )}
       aria-hidden="true"
     >
-      {/* Base gradient layer - neutral greys/whites */}
+      {/* Base gradient layer - dark neutrals */}
       <div
         className={cn(
           "absolute inset-0",
           variant === "hero"
-            ? "bg-gradient-to-br from-slate-50 via-slate-50 to-slate-100/70"
+            ? "bg-gradient-to-br from-transparent via-white/[0.02] to-white/[0.04]"
             : variant === "full"
-            ? "bg-gradient-to-b from-slate-50/60 via-slate-100/30 to-slate-50/60"
-            : "bg-gradient-to-b from-transparent via-slate-100/20 to-transparent"
+            ? "bg-gradient-to-b from-white/[0.01] via-white/[0.02] to-white/[0.01]"
+            : "bg-gradient-to-b from-transparent via-white/[0.015] to-transparent"
         )}
       />
 
@@ -51,8 +51,8 @@ export function GlobalBackdrop({
         style={{
           background:
             variant === "hero"
-              ? "radial-gradient(ellipse 90% 60% at 50% 20%, rgba(148, 163, 184, 0.16), transparent 70%)"
-              : "radial-gradient(ellipse 70% 50% at 50% 50%, rgba(148, 163, 184, 0.1), transparent 60%)",
+              ? "radial-gradient(ellipse 90% 60% at 50% 20%, rgba(255, 255, 255, 0.04), transparent 70%)"
+              : "radial-gradient(ellipse 70% 50% at 50% 50%, rgba(255, 255, 255, 0.03), transparent 60%)",
         }}
       />
 
@@ -78,7 +78,7 @@ export function GlobalBackdrop({
                 y2="25"
                 stroke="currentColor"
                 strokeWidth="0.5"
-                className="text-slate-500"
+                className="text-white"
               />
             </pattern>
 
@@ -96,7 +96,7 @@ export function GlobalBackdrop({
                 y2="100"
                 stroke="currentColor"
                 strokeWidth="0.5"
-                className="text-slate-500"
+                className="text-white"
               />
             </pattern>
           </defs>
@@ -125,7 +125,7 @@ export function GlobalBackdrop({
                 cy="2"
                 r="0.8"
                 fill="currentColor"
-                className="text-slate-600"
+                className="text-white"
               />
             </pattern>
           </defs>
@@ -146,12 +146,12 @@ export function GlobalBackdrop({
       {/* Floating decorative dots - positioned absolutely */}
       {showFloatingDots && (
         <>
-          <div className="absolute top-[15%] left-[10%] w-2 h-2 rounded-full bg-slate-400/20" />
-          <div className="absolute top-[25%] right-[15%] w-3 h-3 rounded-full bg-slate-400/15" />
-          <div className="absolute top-[45%] left-[5%] w-1.5 h-1.5 rounded-full bg-slate-300/25" />
-          <div className="absolute bottom-[30%] right-[8%] w-2.5 h-2.5 rounded-full bg-slate-400/20" />
-          <div className="absolute bottom-[20%] left-[20%] w-2 h-2 rounded-full bg-slate-400/15" />
-          <div className="absolute top-[60%] right-[25%] w-1.5 h-1.5 rounded-full bg-slate-300/20" />
+          <div className="absolute top-[15%] left-[10%] w-2 h-2 rounded-full bg-white/10" />
+          <div className="absolute top-[25%] right-[15%] w-3 h-3 rounded-full bg-white/8" />
+          <div className="absolute top-[45%] left-[5%] w-1.5 h-1.5 rounded-full bg-white/12" />
+          <div className="absolute bottom-[30%] right-[8%] w-2.5 h-2.5 rounded-full bg-white/10" />
+          <div className="absolute bottom-[20%] left-[20%] w-2 h-2 rounded-full bg-white/8" />
+          <div className="absolute top-[60%] right-[25%] w-1.5 h-1.5 rounded-full bg-white/10" />
         </>
       )}
 
@@ -160,7 +160,7 @@ export function GlobalBackdrop({
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at center, transparent 50%, rgba(241, 245, 249, 0.4) 100%)",
+            "radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.3) 100%)",
         }}
       />
     </div>
@@ -180,7 +180,7 @@ export function SectionDivider({ className }: { className?: string }) {
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(90deg, transparent 0%, rgba(148, 163, 184, 0.3) 20%, rgba(148, 163, 184, 0.3) 80%, transparent 100%)",
+            "linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 20%, rgba(255, 255, 255, 0.1) 80%, transparent 100%)",
         }}
       />
     </div>
@@ -202,8 +202,8 @@ export function FloatingAccent({
       className={cn(
         "absolute pointer-events-none",
         variant === "circle"
-          ? "w-32 h-32 rounded-full bg-gradient-to-br from-slate-300/10 to-transparent"
-          : "w-40 h-40 rounded-full border border-slate-300/10",
+          ? "w-32 h-32 rounded-full bg-gradient-to-br from-white/5 to-transparent"
+          : "w-40 h-40 rounded-full border border-white/5",
         className
       )}
       aria-hidden="true"

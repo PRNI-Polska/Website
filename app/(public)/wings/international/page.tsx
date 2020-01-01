@@ -155,7 +155,7 @@ export default function InternationalWingPage() {
 
           <div className="max-w-4xl">
             {/* Overline */}
-            <p className="text-sm font-medium text-blue-600/80 tracking-widest uppercase mb-4">
+            <p className="text-sm font-medium text-muted-foreground tracking-widest uppercase mb-4">
               PRNI · Global Network
             </p>
             
@@ -181,7 +181,7 @@ export default function InternationalWingPage() {
                 size="lg" 
                 variant="outline" 
                 asChild
-                className="border-2 hover:bg-slate-50 transition-all hover:-translate-y-0.5"
+                className="border-2 hover:bg-white/5 transition-all hover:-translate-y-0.5"
               >
                 <Link href="/contact">
                   <MessageSquare className="w-4 h-4 mr-2" />
@@ -235,11 +235,11 @@ export default function InternationalWingPage() {
                   <div className="text-center group">
                     {/* Step number + icon */}
                     <div className="relative inline-flex items-center justify-center mb-6">
-                      <div className="absolute -inset-3 rounded-full bg-blue-100/50 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-100 to-blue-50 border border-slate-200/80 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
-                        <Icon className="w-7 h-7 text-blue-600" />
+                      <div className="absolute -inset-3 rounded-full bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="relative w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                        <Icon className="w-7 h-7 text-foreground" />
                       </div>
-                      <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-slate-800 text-white text-xs font-semibold flex items-center justify-center">
+                      <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white text-black text-xs font-semibold flex items-center justify-center">
                         {index + 1}
                       </span>
                     </div>
@@ -258,13 +258,13 @@ export default function InternationalWingPage() {
 
           {/* Connecting lines (desktop only) */}
           <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl pointer-events-none" aria-hidden="true">
-            <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+            <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           </div>
         </div>
       </section>
 
       {/* ====== COOPERATION AREAS STRIP ====== */}
-      <section className="py-12 md:py-16 bg-gradient-to-r from-slate-50 via-blue-50/40 to-slate-50 border-y border-slate-100">
+      <section className="py-12 md:py-16 bg-white/[0.02] border-y border-white/5">
         <div className="container-custom">
           <RevealSection>
             <p className="text-center text-sm font-medium text-muted-foreground uppercase tracking-widest mb-8">
@@ -277,11 +277,11 @@ export default function InternationalWingPage() {
                 return (
                   <div
                     key={area.key}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white border border-slate-200/80 shadow-sm hover:shadow-md hover:border-blue-200/50 transition-all cursor-default"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all cursor-default"
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <Icon className="w-4 h-4 text-blue-600/70" />
-                    <span className="text-sm font-medium text-slate-700">
+                    <Icon className="w-4 h-4 text-foreground/70" />
+                    <span className="text-sm font-medium text-foreground">
                       {t(`wings.international.areas.${area.key}`)}
                     </span>
                   </div>
@@ -314,8 +314,8 @@ export default function InternationalWingPage() {
                 <RevealSection key={index} delay={getDelay(index)}>
                   <div className="int-activity-card h-full p-6">
                     <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/5 flex items-center justify-center border border-blue-200/50 group-hover:border-blue-300/60 transition-colors">
-                        <Icon className="w-5 h-5 text-blue-600" />
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 transition-colors">
+                        <Icon className="w-5 h-5 text-foreground" />
                       </div>
                       <div className="flex-1 pt-1">
                         <p className="text-foreground leading-relaxed font-medium">
@@ -354,7 +354,7 @@ export default function InternationalWingPage() {
                   <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
                     <CheckCircle2 className="w-5 h-5 text-green-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-green-800">
+                  <h3 className="text-lg font-semibold text-green-400">
                     {t("wings.international.boundaries.canTitle")}
                   </h3>
                 </div>
@@ -362,7 +362,7 @@ export default function InternationalWingPage() {
                   {canDo.map((item, index) => (
                     <li key={index} className="flex items-start gap-3">
                       <CheckCircle2 className="w-4 h-4 mt-1 flex-shrink-0 text-green-500" />
-                      <span className="text-green-900/90 leading-relaxed">{item}</span>
+                      <span className="text-green-300/90 leading-relaxed">{item}</span>
                     </li>
                   ))}
                 </ul>
@@ -376,7 +376,7 @@ export default function InternationalWingPage() {
                   <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
                     <XCircle className="w-5 h-5 text-red-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-red-800">
+                  <h3 className="text-lg font-semibold text-red-400">
                     {t("wings.international.boundaries.cannotTitle")}
                   </h3>
                 </div>
@@ -384,7 +384,7 @@ export default function InternationalWingPage() {
                   {cannotDo.map((item, index) => (
                     <li key={index} className="flex items-start gap-3">
                       <XCircle className="w-4 h-4 mt-1 flex-shrink-0 text-red-500" />
-                      <span className="text-red-900/90 leading-relaxed">{item}</span>
+                      <span className="text-red-300/90 leading-relaxed">{item}</span>
                     </li>
                   ))}
                 </ul>
@@ -395,9 +395,9 @@ export default function InternationalWingPage() {
           {/* Disclaimer */}
           <RevealSection delay={200} className="max-w-3xl mx-auto mt-12">
             <div className="int-disclaimer flex items-start gap-4">
-              <Scale className="w-5 h-5 text-slate-500 flex-shrink-0 mt-0.5" />
+              <Scale className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm text-slate-600 leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   {t("wings.international.disclaimer")}
                 </p>
               </div>
@@ -426,9 +426,9 @@ export default function InternationalWingPage() {
           <RevealSection delay={100}>
             <div id="join-form" className="max-w-2xl mx-auto scroll-mt-28">
               <div className="int-form-card p-8 md:p-10">
-                <div className="flex items-center gap-3 mb-8 pb-6 border-b border-slate-100">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/10 to-slate-100 flex items-center justify-center">
-                    <Globe className="w-6 h-6 text-blue-600" />
+                <div className="flex items-center gap-3 mb-8 pb-6 border-b border-border">
+                  <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                    <Globe className="w-6 h-6 text-foreground" />
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-foreground">

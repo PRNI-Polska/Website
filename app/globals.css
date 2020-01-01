@@ -1,0 +1,331 @@
+/* file: app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * ============================================================================
+ * THEME TOKENS - Designer-Friendly CSS Variables
+ * ============================================================================
+ * 
+ * To customize the site's look and feel, modify these CSS variables.
+ * All colors use HSL format: "hue saturation lightness" (without commas)
+ * 
+ * Two themes are provided:
+ * 1. "classic" (default) - Traditional, trustworthy political aesthetic
+ * 2. "modern" - Bold, contemporary design
+ * 
+ * To switch themes, change the data-theme attribute on <html> in layout.tsx
+ * or set NEXT_PUBLIC_THEME environment variable.
+ * ============================================================================
+ */
+
+@layer base {
+  /* ========== CLASSIC THEME (Default) - PRNI Colors ========== */
+  :root,
+  [data-theme="classic"] {
+    /* === TYPOGRAPHY === */
+    --font-sans: "Crimson Pro", Georgia, serif;
+    --font-heading: "Playfair Display", Georgia, serif;
+    --font-mono: "JetBrains Mono", monospace;
+    
+    /* Font Sizes */
+    --text-display-xl: 4.5rem;
+    --text-display-lg: 3.5rem;
+    --text-display: 2.5rem;
+    --leading-display: 1.1;
+    
+    /* === COLORS === */
+    /* Primary - Deep Maroon/Crimson (from logo) */
+    --primary: 0 45% 35%;
+    --primary-foreground: 0 0% 98%;
+    
+    /* Secondary - Gold (from logo wreath) */
+    --secondary: 38 70% 50%;
+    --secondary-foreground: 0 0% 10%;
+    
+    /* Background & Foreground */
+    --background: 45 20% 97%;
+    --foreground: 220 30% 15%;
+    
+    /* Card */
+    --card: 0 0% 100%;
+    --card-foreground: 220 30% 15%;
+    
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 30% 15%;
+    
+    /* Muted */
+    --muted: 45 15% 92%;
+    --muted-foreground: 220 15% 45%;
+    
+    /* Accent */
+    --accent: 45 60% 90%;
+    --accent-foreground: 220 60% 20%;
+    
+    /* Destructive */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    
+    /* Success */
+    --success: 142 72% 29%;
+    --success-foreground: 0 0% 98%;
+    
+    /* Warning */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 10%;
+    
+    /* Border & Input */
+    --border: 45 20% 82%;
+    --input: 45 20% 82%;
+    --ring: 220 60% 25%;
+    
+    /* === SPACING === */
+    --section-spacing: 6rem;
+    --container-padding: 1.5rem;
+    
+    /* === BORDER RADIUS === */
+    --radius: 0.375rem;
+    
+    /* === SHADOWS === */
+    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-elevated: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-dropdown: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+
+  /* ========== MODERN THEME ========== */
+  [data-theme="modern"] {
+    /* === TYPOGRAPHY === */
+    --font-sans: "DM Sans", system-ui, sans-serif;
+    --font-heading: "Syne", "DM Sans", sans-serif;
+    --font-mono: "Fira Code", monospace;
+    
+    /* Font Sizes - Larger for modern feel */
+    --text-display-xl: 5rem;
+    --text-display-lg: 4rem;
+    --text-display: 3rem;
+    --leading-display: 1.05;
+    
+    /* === COLORS === */
+    /* Primary - Vibrant Emerald */
+    --primary: 160 84% 39%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Secondary - Electric Purple */
+    --secondary: 280 80% 55%;
+    --secondary-foreground: 0 0% 100%;
+    
+    /* Background & Foreground */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 10%;
+    
+    /* Card */
+    --card: 240 5% 98%;
+    --card-foreground: 240 10% 10%;
+    
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 10%;
+    
+    /* Muted */
+    --muted: 240 5% 93%;
+    --muted-foreground: 240 5% 45%;
+    
+    /* Accent */
+    --accent: 160 70% 92%;
+    --accent-foreground: 160 84% 25%;
+    
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    /* Success */
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    
+    /* Warning */
+    --warning: 43 96% 56%;
+    --warning-foreground: 0 0% 10%;
+    
+    /* Border & Input */
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 160 84% 39%;
+    
+    /* === SPACING === */
+    --section-spacing: 8rem;
+    --container-padding: 2rem;
+    
+    /* === BORDER RADIUS - More rounded for modern === */
+    --radius: 0.75rem;
+    
+    /* === SHADOWS - Softer for modern === */
+    --shadow-card: 0 2px 8px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+    --shadow-elevated: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+    --shadow-dropdown: 0 8px 16px -4px rgb(0 0 0 / 0.08), 0 4px 6px -2px rgb(0 0 0 / 0.04);
+  }
+
+  /* ========== DARK MODE (applies to both themes) ========== */
+  .dark,
+  [data-theme="classic"].dark,
+  [data-theme="modern"].dark {
+    --background: 240 10% 8%;
+    --foreground: 0 0% 95%;
+    
+    --card: 240 10% 12%;
+    --card-foreground: 0 0% 95%;
+    
+    --popover: 240 10% 12%;
+    --popover-foreground: 0 0% 95%;
+    
+    --muted: 240 6% 18%;
+    --muted-foreground: 240 5% 65%;
+    
+    --accent: 240 6% 20%;
+    --accent-foreground: 0 0% 95%;
+    
+    --border: 240 6% 22%;
+    --input: 240 6% 22%;
+  }
+}
+
+/* ============================================================================
+ * BASE STYLES
+ * ============================================================================ */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    @apply font-semibold tracking-tight;
+  }
+  
+  /* Focus styles for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+  
+  /* Skip link for accessibility */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md;
+  }
+}
+
+/* ============================================================================
+ * COMPONENT STYLES
+ * ============================================================================ */
+@layer components {
+  /* Container with theme-aware padding */
+  .container-custom {
+    @apply mx-auto w-full max-w-7xl;
+    padding-left: var(--container-padding);
+    padding-right: var(--container-padding);
+  }
+  
+  /* Section spacing */
+  .section-spacing {
+    padding-top: var(--section-spacing);
+    padding-bottom: var(--section-spacing);
+  }
+  
+  /* Prose styles for Markdown content */
+  .prose-custom {
+    @apply max-w-none text-foreground/90;
+  }
+  
+  .prose-custom h1,
+  .prose-custom h2,
+  .prose-custom h3,
+  .prose-custom h4,
+  .prose-custom h5,
+  .prose-custom h6 {
+    font-family: var(--font-heading);
+    @apply text-foreground font-semibold;
+  }
+  
+  .prose-custom a {
+    @apply text-primary no-underline hover:underline;
+  }
+  
+  .prose-custom strong {
+    @apply text-foreground font-semibold;
+  }
+  
+  .prose-custom code {
+    @apply text-primary bg-muted px-1.5 py-0.5 rounded text-sm;
+  }
+  
+  .prose-custom pre {
+    @apply bg-muted border border-border rounded-lg p-4 overflow-x-auto;
+  }
+  
+  .prose-custom blockquote {
+    @apply border-l-4 border-primary pl-4 italic text-muted-foreground;
+  }
+  
+  .prose-custom ul,
+  .prose-custom ol {
+    @apply text-foreground/90;
+  }
+  
+  /* Card hover effect */
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-elevated hover:-translate-y-0.5;
+  }
+  
+  /* Gradient text for hero sections */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+  }
+  
+  /* Hero pattern background */
+  .hero-pattern {
+    background-image: 
+      radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, hsl(var(--secondary) / 0.05) 0%, transparent 50%);
+  }
+}
+
+/* ============================================================================
+ * UTILITY CLASSES
+ * ============================================================================ */
+@layer utilities {
+  /* Smooth scrolling anchor offset for fixed header */
+  .scroll-mt-header {
+    scroll-margin-top: 5rem;
+  }
+  
+  /* Animation delays for staggered reveals */
+  .animation-delay-100 { animation-delay: 100ms; }
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-300 { animation-delay: 300ms; }
+  .animation-delay-400 { animation-delay: 400ms; }
+  .animation-delay-500 { animation-delay: 500ms; }
+  
+  /* Line clamp utilities */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}

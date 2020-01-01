@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Loader2, Send, Hash, MessageSquare } from "lucide-react";
+import { useMemberLang } from "@/lib/members/LangContext";
 
 interface Channel {
   id: string;
@@ -28,6 +29,7 @@ interface Message {
 }
 
 export default function ChannelsPage() {
+  const { t } = useMemberLang();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -214,9 +216,9 @@ export default function ChannelsPage() {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <MessageSquare className="h-10 w-10 text-[#333] mb-4" />
-        <p className="text-[#666] text-sm">No channels yet.</p>
+        <p className="text-[#666] text-sm">{t("channels.noChannels")}</p>
         <p className="text-[#444] text-xs mt-1">
-          An admin needs to create channels first.
+          {t("channels.noChannelsHint")}
         </p>
       </div>
     );
@@ -230,7 +232,7 @@ export default function ChannelsPage() {
       <div className={`${showChannelOnMobile ? "hidden sm:flex" : "flex"} sm:w-64 w-full shrink-0 border-r border-[#1a1a1a] bg-[#090909] flex-col h-full`}>
         <div className="px-4 h-12 flex items-center border-b border-[#1a1a1a] shrink-0">
           <h2 className="text-xs font-semibold text-[#888] uppercase tracking-wider">
-            Kanały
+            {t("channels.title")}
           </h2>
         </div>
         <div className="flex-1 overflow-y-auto py-1.5">
@@ -311,7 +313,7 @@ export default function ChannelsPage() {
                   {loadingOlder ? (
                     <Loader2 className="h-3 w-3 animate-spin inline mr-1" />
                   ) : null}
-                  Load older messages
+                  {t("channels.loadOlder")}
                 </button>
               </div>
             )}
@@ -319,9 +321,9 @@ export default function ChannelsPage() {
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <MessageSquare className="h-8 w-8 text-[#252525] mb-3" />
-                <p className="text-[#555] text-sm">No messages yet.</p>
+                <p className="text-[#555] text-sm">{t("channels.noMessages")}</p>
                 <p className="text-[#333] text-xs mt-1">
-                  Be the first to say something!
+                  {t("channels.firstMessage")}
                 </p>
               </div>
             )}
@@ -393,8 +395,8 @@ export default function ChannelsPage() {
                 onChange={(e) => setInput(e.target.value.slice(0, 2000))}
                 placeholder={
                   selectedChannel
-                    ? `Napisz w #${selectedChannel.name}`
-                    : "Napisz wiadomość..."
+                    ? `${t("channels.writeIn")} #${selectedChannel.name}`
+                    : t("channels.writeMessage")
                 }
                 onFocus={() => { setTimeout(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, 300); }}
                 className="flex-1 bg-transparent text-sm text-[#e8e8e8] placeholder-[#444] outline-none py-2"

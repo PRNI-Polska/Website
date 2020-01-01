@@ -4,9 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { useMemberLang } from "@/lib/members/LangContext";
 
 export default function MemberLoginPage() {
   const router = useRouter();
+  const { t } = useMemberLang();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -23,11 +25,11 @@ export default function MemberLoginPage() {
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
-      if (!res.ok) { setError(data.error || "Logowanie nie powiodło się"); return; }
+      if (!res.ok) { setError(data.error || t("login.error")); return; }
       router.push("/members");
       router.refresh();
     } catch {
-      setError("Wystąpił błąd. Spróbuj ponownie.");
+      setError(t("common.error"));
     } finally {
       setLoading(false);
     }
@@ -40,10 +42,10 @@ export default function MemberLoginPage() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="PRNI" className="w-20 h-20 mx-auto mb-5 opacity-90" />
           <h1 className="text-xl font-bold text-[#e8e8e8] tracking-wide font-[var(--font-heading)]">
-            Strefa Członkowska
+            {t("login.title")}
           </h1>
           <p className="text-[#555] text-xs mt-2 tracking-wider uppercase">
-            Polski Ruch Narodowo-Integralistyczny
+            {t("login.subtitle")}
           </p>
         </div>
 
@@ -55,7 +57,7 @@ export default function MemberLoginPage() {
           )}
 
           <div className="space-y-2">
-            <label htmlFor="email" className="text-xs font-medium text-[#888] block uppercase tracking-wider">Email</label>
+            <label htmlFor="email" className="text-xs font-medium text-[#888] block uppercase tracking-wider">{t("login.email")}</label>
             <input
               id="email"
               type="email"
@@ -69,7 +71,7 @@ export default function MemberLoginPage() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="password" className="text-xs font-medium text-[#888] block uppercase tracking-wider">Hasło</label>
+            <label htmlFor="password" className="text-xs font-medium text-[#888] block uppercase tracking-wider">{t("login.password")}</label>
             <input
               id="password"
               type="password"
@@ -88,14 +90,14 @@ export default function MemberLoginPage() {
             className="w-full bg-white text-black font-semibold text-sm rounded-xl px-4 py-3 hover:bg-white/90 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {loading ? "Logowanie..." : "Zaloguj się"}
+            {loading ? t("login.loading") : t("login.submit")}
           </button>
         </form>
 
         <p className="text-center text-[#444] text-xs mt-8">
-          Nie masz konta?{" "}
+          {t("login.noAccount")}{" "}
           <Link href="/members/register" className="text-[#888] hover:text-white transition">
-            Zarejestruj się z kodem zaproszenia
+            {t("login.register")}
           </Link>
         </p>
 

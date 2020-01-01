@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Loader2, FileText, Calendar, ChevronRight } from "lucide-react";
+import { useMemberLang } from "@/lib/members/LangContext";
 
 interface Post {
   id: string;
@@ -15,6 +16,7 @@ interface Post {
 }
 
 export default function MembersDashboard() {
+  const { t } = useMemberLang();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -77,14 +79,14 @@ export default function MembersDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Aktualności</h1>
-        <p className="text-[#888] text-sm mt-1">Blog, ogłoszenia i najnowsze informacje</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t("home.title")}</h1>
+        <p className="text-[#888] text-sm mt-1">{t("home.subtitle")}</p>
       </div>
 
       {posts.length === 0 && (
         <div className="text-center py-16 border border-[#1a1a1a] rounded-xl">
           <FileText className="h-8 w-8 text-[#444] mx-auto mb-3" />
-          <p className="text-[#666] text-sm">Brak postów.</p>
+          <p className="text-[#666] text-sm">{t("home.noPosts")}</p>
         </div>
       )}
 
@@ -101,9 +103,9 @@ export default function MembersDashboard() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2">
                   {post.type === "blog" ? (
-                    <span className="text-[10px] uppercase tracking-wider font-medium text-blue-400/70 bg-blue-400/10 px-2 py-0.5 rounded">Blog</span>
+                    <span className="text-[10px] uppercase tracking-wider font-medium text-blue-400/70 bg-blue-400/10 px-2 py-0.5 rounded">{t("home.blog")}</span>
                   ) : (
-                    <span className="text-[10px] uppercase tracking-wider font-medium text-amber-400/70 bg-amber-400/10 px-2 py-0.5 rounded">Ogłoszenie</span>
+                    <span className="text-[10px] uppercase tracking-wider font-medium text-amber-400/70 bg-amber-400/10 px-2 py-0.5 rounded">{t("home.announcement")}</span>
                   )}
                   <span className="text-[10px] uppercase tracking-wider text-[#555]">{post.category}</span>
                 </div>

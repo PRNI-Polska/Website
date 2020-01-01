@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { AnnouncementForm } from "@/components/admin/announcement-form";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 async function getAnnouncement(id: string) {
@@ -17,7 +17,8 @@ async function getAnnouncement(id: string) {
 }
 
 export default async function EditAnnouncementPage({ params }: PageProps) {
-  const announcement = await getAnnouncement(params.id);
+  const { id } = await params;
+  const announcement = await getAnnouncement(id);
 
   if (!announcement) {
     notFound();

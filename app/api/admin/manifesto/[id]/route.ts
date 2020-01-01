@@ -4,14 +4,15 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { updateManifestoSectionSchema } from "@/lib/validations";
 
-interface RouteParams {
-  params: { id: string };
-}
-
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     await requireAdmin();
-    const section = await prisma.manifestoSection.findUnique({ where: { id: params.id } });
+    const { id } = await params;
+
+    const section = await prisma.manifestoSection.findUnique({ where: { id } });
     if (!section) {
       return NextResponse.json({ error: "Section not found" }, { status: 404 });
     }
@@ -21,18 +22,22 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const user = await requireAdmin();
+    const { id } = await params;
     const body = await request.json();
 
-    const parsed = updateManifestoSectionSchema.safeParse({ ...body, id: params.id });
+    const parsed = updateManifestoSectionSchema.safeParse({ ...body, id });
     if (!parsed.success) {
       return NextResponse.json({ error: "Validation failed", details: parsed.error.flatten() }, { status: 400 });
     }
 
-    const { id, ...data } = parsed.data;
-    const existing = await prisma.manifestoSection.findUnique({ where: { id } });
+    const { id: parsedId, ...data } = parsed.data;
+    const existing = await prisma.manifestoSection.findUnique({ where: { id: parsedId } });
     if (!existing) {
       return NextResponse.json({ error: "Section not found" }, { status: 404 });
     }
@@ -45,7 +50,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     const section = await prisma.manifestoSection.update({
-      where: { id },
+      where: { id: parsedId },
       data: { ...data, parentId: data.parentId || null },
     });
 
@@ -65,23 +70,28 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const user = await requireAdmin();
-    const section = await prisma.manifestoSection.findUnique({ where: { id: params.id } });
+    const { id } = await params;
+
+    const section = await prisma.manifestoSection.findUnique({ where: { id } });
     if (!section) {
       return NextResponse.json({ error: "Section not found" }, { status: 404 });
     }
 
     // Delete children first
-    await prisma.manifestoSection.deleteMany({ where: { parentId: params.id } });
-    await prisma.manifestoSection.delete({ where: { id: params.id } });
+    await prisma.manifestoSection.deleteMany({ where: { parentId: id } });
+    await prisma.manifestoSection.delete({ where: { id } });
 
     await prisma.auditLog.create({
       data: {
         action: "DELETE",
         entityType: "ManifestoSection",
-        entityId: params.id,
+        entityId: id,
         userId: user.id,
         details: JSON.stringify({ title: section.title }),
       },

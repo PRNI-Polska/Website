@@ -28,11 +28,11 @@ const categoryLabels: Record<AnnouncementCategory, string> = {
 };
 
 interface PageProps {
-  searchParams: { 
+  searchParams: Promise<{ 
     page?: string; 
     category?: string;
     search?: string;
-  };
+  }>;
 }
 
 async function getAnnouncements(page: number, category?: string, search?: string) {
@@ -194,9 +194,10 @@ function Pagination({
 }
 
 export default async function AnnouncementsPage({ searchParams }: PageProps) {
-  const page = Math.max(1, parseInt(searchParams.page || "1", 10));
-  const category = searchParams.category;
-  const search = searchParams.search;
+  const resolvedSearchParams = await searchParams;
+  const page = Math.max(1, parseInt(resolvedSearchParams.page || "1", 10));
+  const category = resolvedSearchParams.category;
+  const search = resolvedSearchParams.search;
 
   const { announcements, total, totalPages, categories } = await getAnnouncements(
     page,

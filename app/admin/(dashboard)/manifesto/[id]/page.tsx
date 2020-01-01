@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ManifestoForm } from "@/components/admin/manifesto-form";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 async function getSection(id: string) {
@@ -23,9 +23,10 @@ async function getParentOptions(excludeId: string) {
 }
 
 export default async function EditManifestoPage({ params }: PageProps) {
+  const { id } = await params;
   const [section, parentOptions] = await Promise.all([
-    getSection(params.id),
-    getParentOptions(params.id),
+    getSection(id),
+    getParentOptions(id),
   ]);
 
   if (!section) notFound();

@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { Playfair_Display, Crimson_Pro, JetBrains_Mono, DM_Sans, Syne } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import AuthSessionProvider from "@/components/providers/session-provider";
 
 // Classic theme fonts
 const playfair = Playfair_Display({
@@ -112,9 +111,7 @@ export default function RootLayout({
         <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
-        <AuthSessionProvider>
-          {children}
-        </AuthSessionProvider>
+        {children}
         <Toaster />
       </body>
     </html>

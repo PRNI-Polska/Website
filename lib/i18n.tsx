@@ -121,13 +121,186 @@ export const translations: Translations = {
     pl: "Poznaj naszą wizję i politykę budowania silniejszej Polski." 
   },
   
-  // Wings
-  "wings.international.title": { en: "International Wing", pl: "Skrzydło Międzynarodowe", de: "Internationale Abteilung" },
-  "wings.international.tagline": { en: "Poland's voice abroad", pl: "Głos Polski za granicą", de: "Polens Stimme im Ausland" },
+  // Wings - General
+  "wings.back": { en: "Back to Wings", pl: "Powrót do Skrzydeł", de: "Zurück zu Flügeln" },
+  "wings.joinCta": { en: "Join International Wing", pl: "Dołącz do Skrzydła", de: "Beitreten" },
+  "wings.contactCta": { en: "Contact Us", pl: "Kontakt", de: "Kontakt" },
+  
+  // Wings - Main
   "wings.main.title": { en: "Main Wing", pl: "Skrzydło Główne", de: "Hauptabteilung" },
   "wings.main.tagline": { en: "The heart of the national movement", pl: "Serce ruchu narodowego", de: "Das Herz der nationalen Bewegung" },
+  
+  // Wings - Female
   "wings.female.title": { en: "Female Wing", pl: "Skrzydło Kobiece", de: "Frauenabteilung" },
   "wings.female.tagline": { en: "The strength of the nation in women's unity", pl: "Siła narodu w jedności kobiet", de: "Die Stärke der Nation in der Einheit der Frauen" },
+
+  // Wings - International
+  "wings.international.title": { en: "International Wing", pl: "Skrzydło Międzynarodowe", de: "Internationale Abteilung" },
+  "wings.international.tagline": { en: "Poland's voice abroad", pl: "Głos Polski za granicą", de: "Polens Stimme im Ausland" },
+  "wings.international.hero.subtitle": { 
+    en: "A non-membership platform for international supporters and affiliates of the Polish national-integralist vision.", 
+    pl: "Platforma współpracy dla międzynarodowych sympatyków i współpracowników polskiej wizji narodowo-integralistycznej.",
+    de: "Eine Kooperationsplattform für internationale Unterstützer und Mitarbeiter der polnischen national-integralistischen Vision."
+  },
+  
+  // International Wing - Purpose
+  "wings.international.purpose.title": { 
+    en: "Our Purpose", 
+    pl: "Nasz Cel", 
+    de: "Unser Zweck" 
+  },
+  "wings.international.purpose.text": { 
+    en: "The International Wing serves as a bridge between PRNI and supporters abroad who share our commitment to national sovereignty, traditional values, and the preservation of European identity. We provide a structured way for international affiliates to contribute to our cause through outreach, translation, and cultural exchange—without formal party membership.", 
+    pl: "Skrzydło Międzynarodowe stanowi pomost między PRNI a sympatykami za granicą, którzy podzielają nasze zaangażowanie w suwerenność narodową, tradycyjne wartości i zachowanie europejskiej tożsamości. Zapewniamy ustrukturyzowany sposób, w jaki międzynarodowi współpracownicy mogą wspierać naszą sprawę poprzez działania informacyjne, tłumaczenia i wymianę kulturową — bez formalnego członkostwa w partii.",
+    de: "Die Internationale Abteilung dient als Brücke zwischen PRNI und Unterstützern im Ausland, die unser Engagement für nationale Souveränität, traditionelle Werte und die Bewahrung der europäischen Identität teilen."
+  },
+  
+  // International Wing - Activities (Safe activities)
+  "wings.international.activities.title": { 
+    en: "What Affiliates Can Do", 
+    pl: "Co mogą robić współpracownicy", 
+    de: "Was Mitarbeiter tun können" 
+  },
+  "wings.international.activities.1": { 
+    en: "Translate materials and publications into your native language", 
+    pl: "Tłumaczyć materiały i publikacje na swój język ojczysty", 
+    de: "Materialien und Publikationen in Ihre Muttersprache übersetzen" 
+  },
+  "wings.international.activities.2": { 
+    en: "Share our message through social media and personal networks", 
+    pl: "Udostępniać nasze przesłanie w mediach społecznościowych i sieciach osobistych", 
+    de: "Unsere Botschaft über soziale Medien und persönliche Netzwerke teilen" 
+  },
+  "wings.international.activities.3": { 
+    en: "Participate in online discussions, webinars, and cultural events", 
+    pl: "Uczestniczyć w dyskusjach online, webinarach i wydarzeniach kulturalnych", 
+    de: "An Online-Diskussionen, Webinaren und kulturellen Veranstaltungen teilnehmen" 
+  },
+  "wings.international.activities.4": { 
+    en: "Connect like-minded individuals in your country with our movement", 
+    pl: "Łączyć osoby o podobnych poglądach w swoim kraju z naszym ruchem", 
+    de: "Gleichgesinnte in Ihrem Land mit unserer Bewegung verbinden" 
+  },
+  "wings.international.activities.5": { 
+    en: "Provide insights on international affairs and media coverage", 
+    pl: "Dostarczać informacje o sprawach międzynarodowych i relacjach medialnych", 
+    de: "Einblicke in internationale Angelegenheiten und Medienberichterstattung geben" 
+  },
+  
+  // International Wing - Boundaries
+  "wings.international.boundaries.title": { 
+    en: "Scope and Limitations", 
+    pl: "Zakres i ograniczenia", 
+    de: "Umfang und Grenzen" 
+  },
+  "wings.international.boundaries.canTitle": { 
+    en: "This program is:", 
+    pl: "Ten program to:", 
+    de: "Dieses Programm ist:" 
+  },
+  "wings.international.boundaries.cannotTitle": { 
+    en: "This program is not:", 
+    pl: "Ten program to nie:", 
+    de: "Dieses Programm ist nicht:" 
+  },
+  "wings.international.boundaries.can.1": { 
+    en: "A platform for ideological cooperation and cultural exchange", 
+    pl: "Platforma współpracy ideologicznej i wymiany kulturowej", 
+    de: "Eine Plattform für ideologische Zusammenarbeit und kulturellen Austausch" 
+  },
+  "wings.international.boundaries.can.2": { 
+    en: "An opportunity to support Polish national interests from abroad", 
+    pl: "Możliwość wspierania polskich interesów narodowych z zagranicy", 
+    de: "Eine Gelegenheit, polnische nationale Interessen aus dem Ausland zu unterstützen" 
+  },
+  "wings.international.boundaries.can.3": { 
+    en: "A network for sharing information and building international solidarity", 
+    pl: "Sieć wymiany informacji i budowania międzynarodowej solidarności", 
+    de: "Ein Netzwerk zum Informationsaustausch und Aufbau internationaler Solidarität" 
+  },
+  "wings.international.boundaries.can.4": { 
+    en: "Open to supporters regardless of citizenship or residence", 
+    pl: "Otwarte dla sympatyków niezależnie od obywatelstwa lub miejsca zamieszkania", 
+    de: "Offen für Unterstützer unabhängig von Staatsbürgerschaft oder Wohnsitz" 
+  },
+  "wings.international.boundaries.cannot.1": { 
+    en: "Formal membership in the Polish political party PRNI", 
+    pl: "Formalne członkostwo w polskiej partii politycznej PRNI", 
+    de: "Formelle Mitgliedschaft in der polnischen politischen Partei PRNI" 
+  },
+  "wings.international.boundaries.cannot.2": { 
+    en: "A path to voting rights or electoral participation in Poland", 
+    pl: "Droga do praw wyborczych lub udziału w wyborach w Polsce", 
+    de: "Ein Weg zu Wahlrechten oder Wahlbeteiligung in Polen" 
+  },
+  "wings.international.boundaries.cannot.3": { 
+    en: "Representation in internal party decision-making structures", 
+    pl: "Reprezentacja w wewnętrznych strukturach decyzyjnych partii", 
+    de: "Vertretung in internen Entscheidungsstrukturen der Partei" 
+  },
+  "wings.international.boundaries.cannot.4": { 
+    en: "A channel for financial contributions to Polish political campaigns", 
+    pl: "Kanał wpłat finansowych na polskie kampanie polityczne", 
+    de: "Ein Kanal für finanzielle Beiträge zu polnischen politischen Kampagnen" 
+  },
+  
+  // International Wing - Disclaimer
+  "wings.international.disclaimer": { 
+    en: "The International Wing does not constitute membership in the Polish political party PRNI. Participation is voluntary and does not confer any legal status, voting rights, or electoral privileges within the Polish political system.", 
+    pl: "Skrzydło Międzynarodowe nie stanowi członkostwa w polskiej partii politycznej PRNI. Uczestnictwo jest dobrowolne i nie nadaje żadnego statusu prawnego, praw wyborczych ani przywilejów wyborczych w polskim systemie politycznym.",
+    de: "Die Internationale Abteilung stellt keine Mitgliedschaft in der polnischen politischen Partei PRNI dar. Die Teilnahme ist freiwillig und verleiht keinen rechtlichen Status, kein Wahlrecht oder Wahlprivilegien im polnischen politischen System."
+  },
+  
+  // International Wing - Engage
+  "wings.international.engage.title": { 
+    en: "Get Involved", 
+    pl: "Zaangażuj się", 
+    de: "Machen Sie mit" 
+  },
+  "wings.international.engage.text": { 
+    en: "Ready to support the Polish national-integralist vision from abroad? Register as an International Affiliate to receive updates, access resources, and connect with our coordination team.", 
+    pl: "Gotowy, aby wspierać polską wizję narodowo-integralistyczną z zagranicy? Zarejestruj się jako Współpracownik Międzynarodowy, aby otrzymywać aktualizacje, uzyskać dostęp do zasobów i skontaktować się z naszym zespołem koordynacyjnym.",
+    de: "Bereit, die polnische national-integralistische Vision aus dem Ausland zu unterstützen? Registrieren Sie sich als Internationaler Mitarbeiter."
+  },
+  
+  // International Wing - Form
+  "wings.international.form.title": { 
+    en: "Register as International Affiliate", 
+    pl: "Zarejestruj się jako Współpracownik Międzynarodowy", 
+    de: "Als Internationaler Mitarbeiter registrieren" 
+  },
+  "wings.international.form.name": { en: "Full Name", pl: "Imię i nazwisko", de: "Vollständiger Name" },
+  "wings.international.form.email": { en: "Email Address", pl: "Adres e-mail", de: "E-Mail-Adresse" },
+  "wings.international.form.country": { en: "Country of Residence", pl: "Kraj zamieszkania", de: "Wohnsitzland" },
+  "wings.international.form.countryPlaceholder": { en: "Select your country", pl: "Wybierz swój kraj", de: "Wählen Sie Ihr Land" },
+  "wings.international.form.languages": { en: "Languages Spoken", pl: "Języki", de: "Gesprochene Sprachen" },
+  "wings.international.form.languagesPlaceholder": { en: "e.g., German, English, French", pl: "np. niemiecki, angielski, francuski", de: "z.B. Deutsch, Englisch, Französisch" },
+  "wings.international.form.interest": { en: "Area of Interest", pl: "Obszar zainteresowań", de: "Interessenbereich" },
+  "wings.international.form.interestPlaceholder": { en: "Select area", pl: "Wybierz obszar", de: "Bereich auswählen" },
+  "wings.international.form.interestTranslation": { en: "Translation & Localization", pl: "Tłumaczenia i lokalizacja", de: "Übersetzung & Lokalisierung" },
+  "wings.international.form.interestOutreach": { en: "Outreach & Social Media", pl: "Promocja i media społecznościowe", de: "Öffentlichkeitsarbeit & Social Media" },
+  "wings.international.form.interestEvents": { en: "Events & Coordination", pl: "Wydarzenia i koordynacja", de: "Veranstaltungen & Koordination" },
+  "wings.international.form.interestResearch": { en: "Research & Analysis", pl: "Badania i analizy", de: "Forschung & Analyse" },
+  "wings.international.form.interestOther": { en: "Other", pl: "Inne", de: "Sonstiges" },
+  "wings.international.form.message": { en: "Short Message (Optional)", pl: "Krótka wiadomość (opcjonalnie)", de: "Kurze Nachricht (optional)" },
+  "wings.international.form.messagePlaceholder": { en: "Tell us about yourself and how you'd like to contribute...", pl: "Opowiedz nam o sobie i jak chciałbyś się zaangażować...", de: "Erzählen Sie uns von sich und wie Sie beitragen möchten..." },
+  "wings.international.form.consent": { 
+    en: "I confirm that I have read and accept the principles of the movement and the privacy policy. I understand that this registration does not constitute party membership.", 
+    pl: "Potwierdzam, że zapoznałem się z zasadami ruchu i polityką prywatności oraz je akceptuję. Rozumiem, że ta rejestracja nie stanowi członkostwa w partii.",
+    de: "Ich bestätige, dass ich die Grundsätze der Bewegung und die Datenschutzrichtlinie gelesen und akzeptiert habe. Ich verstehe, dass diese Registrierung keine Parteimitgliedschaft darstellt."
+  },
+  "wings.international.form.submit": { en: "Submit Registration", pl: "Wyślij rejestrację", de: "Registrierung absenden" },
+  "wings.international.form.submitting": { en: "Submitting...", pl: "Wysyłanie...", de: "Wird gesendet..." },
+  "wings.international.form.success.title": { en: "Registration Received", pl: "Rejestracja otrzymana", de: "Registrierung erhalten" },
+  "wings.international.form.success.text": { 
+    en: "Thank you for your interest in the International Wing. Our coordination team will review your registration and contact you soon.", 
+    pl: "Dziękujemy za zainteresowanie Skrzydłem Międzynarodowym. Nasz zespół koordynacyjny przejrzy Twoją rejestrację i wkrótce się z Tobą skontaktuje.",
+    de: "Vielen Dank für Ihr Interesse an der Internationalen Abteilung. Unser Koordinationsteam wird Ihre Registrierung prüfen und sich bald bei Ihnen melden."
+  },
+  "wings.international.form.error": { en: "Something went wrong. Please try again.", pl: "Coś poszło nie tak. Spróbuj ponownie.", de: "Etwas ist schief gelaufen. Bitte versuchen Sie es erneut." },
+  "wings.international.form.required": { en: "This field is required", pl: "To pole jest wymagane", de: "Dieses Feld ist erforderlich" },
+  "wings.international.form.invalidEmail": { en: "Please enter a valid email address", pl: "Wprowadź prawidłowy adres e-mail", de: "Bitte geben Sie eine gültige E-Mail-Adresse ein" },
+  "wings.international.form.consentRequired": { en: "You must accept the terms to continue", pl: "Musisz zaakceptować warunki, aby kontynuować", de: "Sie müssen die Bedingungen akzeptieren, um fortzufahren" },
 
   // Announcements
   "announcements.title": { en: "Announcements", pl: "Komunikaty", de: "Mitteilungen" },

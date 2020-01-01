@@ -4,19 +4,43 @@ import { useEffect, useState, useCallback } from "react";
 import { Loader2, FileText, Calendar, ChevronRight, Eye } from "lucide-react";
 import { useMemberLang } from "@/lib/members/LangContext";
 
+const categoryLabels: Record<string, Record<string, string>> = {
+  OPINION: { pl: "Opinia", en: "Opinion", de: "Meinung" },
+  ANALYSIS: { pl: "Analiza", en: "Analysis", de: "Analyse" },
+  COMMENTARY: { pl: "Komentarz", en: "Commentary", de: "Kommentar" },
+  REPORT: { pl: "Raport", en: "Report", de: "Bericht" },
+  INTERVIEW: { pl: "Wywiad", en: "Interview", de: "Interview" },
+  OTHER: { pl: "Inne", en: "Other", de: "Sonstiges" },
+  NEWS: { pl: "Wiadomości", en: "News", de: "Nachrichten" },
+  PRESS_RELEASE: { pl: "Komunikat prasowy", en: "Press Release", de: "Pressemitteilung" },
+  POLICY: { pl: "Polityka", en: "Policy", de: "Politik" },
+  CAMPAIGN: { pl: "Kampania", en: "Campaign", de: "Kampagne" },
+  COMMUNITY: { pl: "Społeczność", en: "Community", de: "Gemeinschaft" },
+};
+
 interface Post {
   id: string;
   title: string;
+  titleEn: string | null;
+  titleDe: string | null;
   slug: string;
   excerpt: string;
+  excerptEn: string | null;
+  excerptDe: string | null;
   authorName?: string;
   category: string;
   publishedAt: string;
   type: "blog" | "announcement";
 }
 
+function localized(pl: string, en: string | null, de: string | null, lang: string): string {
+  if (lang === "en" && en) return en;
+  if (lang === "de" && de) return de;
+  return pl;
+}
+
 export default function MembersDashboard() {
-  const { t } = useMemberLang();
+  const { t, lang } = useMemberLang();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewCounts, setViewCounts] = useState<Record<string, number>>({});
@@ -52,25 +76,33 @@ export default function MembersDashboard() {
         const data = await res.json();
 
         const blogPosts: Post[] = (data.posts || [])
-          .map((p: Record<string, string>) => ({
-            id: p.id,
-            title: p.title,
-            slug: p.slug,
+          .map((p: Record<string, string | null>) => ({
+            id: p.id!,
+            title: p.title!,
+            titleEn: p.titleEn || null,
+            titleDe: p.titleDe || null,
+            slug: p.slug!,
             excerpt: p.excerpt || "",
-            authorName: p.authorName,
-            category: p.category,
-            publishedAt: p.publishedAt || p.createdAt,
+            excerptEn: p.excerptEn || null,
+            excerptDe: p.excerptDe || null,
+            authorName: p.authorName || undefined,
+            category: p.category!,
+            publishedAt: p.publishedAt || p.createdAt!,
             type: "blog" as const,
           }));
 
         const announcements: Post[] = (data.announcements || [])
-          .map((a: Record<string, string>) => ({
-            id: a.id,
-            title: a.title,
-            slug: a.slug,
+          .map((a: Record<string, string | null>) => ({
+            id: a.id!,
+            title: a.title!,
+            titleEn: a.titleEn || null,
+            titleDe: a.titleDe || null,
+            slug: a.slug!,
             excerpt: a.excerpt || "",
-            category: a.category,
-            publishedAt: a.publishedAt || a.createdAt,
+            excerptEn: a.excerptEn || null,
+            excerptDe: a.excerptDe || null,
+            category: a.category!,
+            publishedAt: a.publishedAt || a.createdAt!,
             type: "announcement" as const,
           }));
 
@@ -128,18 +160,18 @@ export default function MembersDashboard() {
                   ) : (
                     <span className="text-[10px] uppercase tracking-wider font-medium text-amber-400/70 bg-amber-400/10 px-2 py-0.5 rounded">{t("home.announcement")}</span>
                   )}
-                  <span className="text-[10px] uppercase tracking-wider text-[#555]">{post.category}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-[#555]">{categoryLabels[post.category]?.[lang] || post.category}</span>
                 </div>
                 <h3 className="font-semibold text-[#e8e8e8] text-base leading-tight group-hover:text-white transition">
-                  {post.title}
+                  {localized(post.title, post.titleEn, post.titleDe, lang)}
                 </h3>
                 {post.excerpt && (
-                  <p className="text-[#888] text-sm mt-1.5 line-clamp-2">{post.excerpt}</p>
+                  <p className="text-[#888] text-sm mt-1.5 line-clamp-2">{localized(post.excerpt, post.excerptEn, post.excerptDe, lang)}</p>
                 )}
                 <div className="flex items-center gap-3 mt-3 text-xs text-[#555]">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    {new Date(post.publishedAt).toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" })}
+                    {new Date(post.publishedAt).toLocaleDateString(lang === "de" ? "de-DE" : lang === "en" ? "en-US" : "pl-PL", { day: "numeric", month: "long", year: "numeric" })}
                   </span>
                   {post.authorName && <span>· {post.authorName}</span>}
                   {(viewCounts[post.id] || 0) > 0 && (

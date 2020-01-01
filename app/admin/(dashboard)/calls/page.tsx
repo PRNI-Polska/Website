@@ -7,9 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { createMeeting, type CreatedMeeting } from "@/lib/calls/api";
-
-const ADMIN_KEY = process.env.NEXT_PUBLIC_CALLS_ADMIN_KEY ?? "";
+import type { CreatedMeeting } from "@/lib/calls/api";
 
 const TRANSCRIPT_LANGS = [
   { value: "pl-PL", label: "Polski" },
@@ -28,9 +26,19 @@ export default function AdminCallsPage() {
 
   const handleSubmit = useCallback(async (e: FormEvent) => {
     e.preventDefault();
-    if (!ADMIN_KEY) return;
     setLoading(true); setError(null); setResult(null);
-    try { setResult(await createMeeting(ADMIN_KEY, title, duration)); }
+    try {
+      const res = await fetch("/api/admin/calls", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, durationMinutes: duration }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Failed (${res.status})`);
+      }
+      setResult(await res.json());
+    }
     catch (err) { setError(err instanceof Error ? err.message : "Error"); }
     finally { setLoading(false); }
   }, [title, duration]);
@@ -132,7 +140,7 @@ export default function AdminCallsPage() {
               </div>
               <Button
                 type="submit"
-                disabled={loading || !ADMIN_KEY}
+                disabled={loading}
                 className="w-full"
               >
                 {loading ? (
@@ -147,11 +155,6 @@ export default function AdminCallsPage() {
                   </>
                 )}
               </Button>
-              {!ADMIN_KEY && (
-                <p className="text-xs text-destructive text-center">
-                  NEXT_PUBLIC_CALLS_ADMIN_KEY not set. Add it in Vercel environment variables.
-                </p>
-              )}
             </form>
 
             {error && (

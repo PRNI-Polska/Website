@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
+import { createBlogPostSchema } from "@/lib/validations";
+import { validateCsrf, csrfErrorResponse } from "@/lib/csrf";
 
 export async function GET() {
   try {
@@ -28,24 +30,24 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAdmin();
+
+    if (!validateCsrf(request)) return csrfErrorResponse();
+
     const body = await request.json();
 
-    const {
-      title, slug, excerpt, content,
-      titleEn, titleDe, excerptEn, excerptDe, contentEn, contentDe,
-      authorName, authorRole, category, status, featuredImage,
-    } = body;
-
-    if (!title || !excerpt || !content || !authorName) {
+    const parsed = createBlogPostSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Missing required fields: title, excerpt, content, authorName" },
+        { error: "Invalid form data", details: parsed.error.flatten() },
         { status: 400 }
       );
     }
 
+    const data = parsed.data;
+
     const finalSlug =
-      slug ||
-      title
+      data.slug ||
+      data.title
         .toLowerCase()
         .replace(/\s+/g, "-")
         .replace(/[^a-z0-9-]/g, "");
@@ -60,25 +62,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const finalStatus = status || "DRAFT";
+    const finalStatus = data.status || "DRAFT";
 
     const post = await prisma.blogPost.create({
       data: {
-        title,
+        title: data.title,
         slug: finalSlug,
-        excerpt,
-        content,
-        titleEn: titleEn || null,
-        titleDe: titleDe || null,
-        excerptEn: excerptEn || null,
-        excerptDe: excerptDe || null,
-        contentEn: contentEn || null,
-        contentDe: contentDe || null,
-        authorName,
-        authorRole: authorRole || null,
-        category: category || "OPINION",
+        excerpt: data.excerpt,
+        content: data.content,
+        titleEn: data.titleEn || null,
+        titleDe: data.titleDe || null,
+        excerptEn: data.excerptEn || null,
+        excerptDe: data.excerptDe || null,
+        contentEn: data.contentEn || null,
+        contentDe: data.contentDe || null,
+        authorName: data.authorName,
+        authorRole: data.authorRole || null,
+        category: data.category || "OPINION",
         status: finalStatus,
-        featuredImage: featuredImage || null,
+        featuredImage: data.featuredImage || null,
         publishedAt: finalStatus === "PUBLISHED" ? new Date() : null,
       },
     });

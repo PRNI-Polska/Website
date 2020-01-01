@@ -5,8 +5,25 @@ const IV_LENGTH = 12;
 const TAG_LENGTH = 16;
 
 function getKey(): Buffer {
-  const secret = process.env.MEMBER_ENCRYPTION_KEY || process.env.NEXTAUTH_SECRET || "fallback-key-change-me";
-  return createHash("sha256").update(secret).digest();
+  const dedicatedKey = process.env.MEMBER_ENCRYPTION_KEY;
+  if (dedicatedKey) {
+    return createHash("sha256").update(dedicatedKey).digest();
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "MEMBER_ENCRYPTION_KEY must be set in production. " +
+      "Do not reuse NEXTAUTH_SECRET for message encryption."
+    );
+  }
+
+  const fallback = process.env.NEXTAUTH_SECRET;
+  if (!fallback) {
+    throw new Error(
+      "MEMBER_ENCRYPTION_KEY (or NEXTAUTH_SECRET for development) must be set."
+    );
+  }
+  return createHash("sha256").update(fallback).digest();
 }
 
 export function encrypt(plaintext: string): string {

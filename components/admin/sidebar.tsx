@@ -15,6 +15,7 @@ import {
   BarChart3,
   Mail,
   Shield,
+  ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +29,7 @@ const navigation = [
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Newsletter", href: "/admin/newsletter", icon: Mail },
   { name: "Members", href: "/admin/members", icon: Shield },
+  { name: "Security", href: "/admin/security", icon: ShieldAlert },
   { name: "Komunikator", href: "/admin/calls", icon: Phone },
 ];
 

@@ -28,11 +28,11 @@ export function Header() {
   const { t } = useI18n();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-neutral-800 bg-black/95 backdrop-blur-sm">
-      <nav className="container-custom flex h-20 items-center justify-between" aria-label="Main navigation">
+    <header className="sticky top-0 z-50 w-full border-b border-white/[0.06] bg-black/95 backdrop-blur-sm">
+      <nav className="container-custom flex h-16 items-center justify-between" aria-label="Main navigation">
         {/* Logo and Party Name */}
         <Link href="/" className="flex items-center gap-3">
-          <div className="relative h-14 w-14 flex-shrink-0">
+          <div className="relative h-10 w-10 flex-shrink-0">
             <Image
               src="/logo.png"
               alt="PRNI Logo"

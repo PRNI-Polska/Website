@@ -1,11 +1,12 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { validateCsrf, csrfErrorResponse } from "@/lib/csrf";
 
 const VALID_ROLES = ["ADMIN", "LEADERSHIP", "MAIN_WING", "INTERNATIONAL", "FEMALE_WING", "MEMBER"];
 
 export async function PATCH(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -13,6 +14,8 @@ export async function PATCH(
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  if (!validateCsrf(request)) return csrfErrorResponse();
 
   try {
     const { id } = await params;
@@ -60,13 +63,17 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAdmin();
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  if (!validateCsrf(request)) {
+    return csrfErrorResponse();
   }
 
   try {

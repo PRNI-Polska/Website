@@ -1,15 +1,16 @@
 import { SignJWT, jwtVerify } from "jose";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
 const SECRET = () => {
-  const secret = process.env.NEXTAUTH_SECRET;
-  if (!secret) throw new Error("NEXTAUTH_SECRET is not set");
+  const secret = process.env.MEMBER_JWT_SECRET || process.env.NEXTAUTH_SECRET;
+  if (!secret) throw new Error("MEMBER_JWT_SECRET (or NEXTAUTH_SECRET) is not set");
   return new TextEncoder().encode(secret);
 };
 
 const COOKIE_NAME = "member-session";
 const SESSION_DURATION = 2 * 60 * 60; // 2 hours in seconds
+const REFRESH_THRESHOLD = 30 * 60; // Refresh when less than 30 min remaining
 
 export async function createMemberSession(memberId: string): Promise<string> {
   return new SignJWT({ memberId })
@@ -21,11 +22,16 @@ export async function createMemberSession(memberId: string): Promise<string> {
 
 export async function verifyMemberSession(
   token: string
-): Promise<{ memberId: string } | null> {
+): Promise<{ memberId: string; shouldRefresh: boolean } | null> {
   try {
     const { payload } = await jwtVerify(token, SECRET());
     if (typeof payload.memberId !== "string") return null;
-    return { memberId: payload.memberId };
+
+    const exp = payload.exp ?? 0;
+    const now = Math.floor(Date.now() / 1000);
+    const shouldRefresh = (exp - now) < REFRESH_THRESHOLD;
+
+    return { memberId: payload.memberId, shouldRefresh };
   } catch {
     return null;
   }
@@ -43,7 +49,8 @@ export async function getMemberFromRequest(request: NextRequest) {
   });
 
   if (!member || !member.isActive) return null;
-  return member;
+
+  return { ...member, _shouldRefreshSession: session.shouldRefresh };
 }
 
 export async function requireMember(request: NextRequest) {
@@ -55,6 +62,17 @@ export async function requireMember(request: NextRequest) {
     });
   }
   return member;
+}
+
+export async function applySessionRefresh(
+  member: { id: string; _shouldRefreshSession?: boolean },
+  response: NextResponse
+): Promise<NextResponse> {
+  if (member._shouldRefreshSession) {
+    const newToken = await createMemberSession(member.id);
+    response.cookies.set(memberSessionCookieOptions(newToken));
+  }
+  return response;
 }
 
 export function memberSessionCookieOptions(token: string) {

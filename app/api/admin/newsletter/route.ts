@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
+import { validateCsrf, csrfErrorResponse } from "@/lib/csrf";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://prni.org.pl";
 
@@ -36,6 +37,10 @@ export async function POST(request: NextRequest) {
   try {
     await requireAdmin();
 
+    if (!validateCsrf(request)) {
+      return csrfErrorResponse();
+    }
+
     const body = await request.json();
     const { subject, content } = body;
 
@@ -45,6 +50,13 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const sanitizedContent = content
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
+      .replace(/on\w+\s*=\s*"[^"]*"/gi, "")
+      .replace(/on\w+\s*=\s*'[^']*'/gi, "")
+      .replace(/javascript:/gi, "");
 
     const subscribers = await prisma.subscriber.findMany({
       where: { confirmed: true },
@@ -59,8 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!process.env.RESEND_API_KEY) {
-      console.log("Newsletter send (no API key):", {
-        subject,
+      console.log("Newsletter send logged (no API key):", {
         recipientCount: subscribers.length,
       });
       return NextResponse.json({
@@ -79,7 +90,7 @@ export async function POST(request: NextRequest) {
     for (const subscriber of subscribers) {
       const unsubscribeUrl = `${BASE_URL}/api/newsletter/unsubscribe?token=${subscriber.unsubscribeToken}`;
 
-      const htmlWithFooter = `${content}
+      const htmlWithFooter = `${sanitizedContent}
 <hr style="margin: 32px 0; border: none; border-top: 1px solid #333;" />
 <p style="font-size: 12px; color: #888;">
   You received this email because you subscribed to the PRNI newsletter.<br />
@@ -95,13 +106,13 @@ export async function POST(request: NextRequest) {
         });
 
         if (error) {
-          console.error(`Failed to send to ${subscriber.email}:`, error);
+          console.error("Failed to send newsletter to subscriber:", error?.message || "Unknown error");
           failed++;
         } else {
           sent++;
         }
       } catch (err) {
-        console.error(`Error sending to ${subscriber.email}:`, err);
+        console.error("Error sending newsletter to subscriber:", err instanceof Error ? err.message : "Unknown error");
         failed++;
       }
     }

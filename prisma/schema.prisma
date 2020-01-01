@@ -378,3 +378,22 @@ model DirectMessage {
   @@index([receiverId, read])
   @@map("direct_messages")
 }
+
+// ============================================================================
+// SECURITY EVENT MODEL - Persistent security monitoring
+// ============================================================================
+model SecurityEvent {
+  id        String   @id @default(cuid())
+  type      String   // brute_force, ip_blocked, auth_failure, csrf_failure, rate_limit_exceeded, suspicious_request
+  severity  String   // low, medium, high, critical
+  ip        String
+  details   String
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  @@index([type])
+  @@index([severity])
+  @@index([createdAt])
+  @@index([resolved])
+  @@map("security_events")
+}

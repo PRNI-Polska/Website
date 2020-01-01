@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { checkRateLimit, getClientIP, rateLimitResponse } from "@/lib/rate-limit";
+import { getMemberFromRequest } from "@/lib/member-auth";
 
 interface TranscriptEntry {
   peerId: string;
@@ -8,9 +10,21 @@ interface TranscriptEntry {
 }
 
 const ADMIN_EMAIL = process.env.CONTACT_EMAIL || process.env.ADMIN_EMAIL || "";
+const TRANSCRIPT_RATE_LIMIT = { interval: 60 * 60 * 1000, maxRequests: 3 };
 
 export async function POST(request: NextRequest) {
   try {
+    const member = await getMemberFromRequest(request);
+    if (!member) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const ip = getClientIP(request);
+    const rateCheck = checkRateLimit(`transcript:${ip}`, TRANSCRIPT_RATE_LIMIT);
+    if (!rateCheck.allowed) {
+      return rateLimitResponse(rateCheck.resetIn);
+    }
+
     const body = await request.json();
     const { transcript } = body as { transcript: TranscriptEntry[] };
 

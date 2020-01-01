@@ -1,0 +1,8 @@
+# Security Policy for PRNI Website
+# https://securitytxt.org/
+
+Contact: mailto:security@prni.org.pl
+Preferred-Languages: en, pl
+Canonical: https://prni.org.pl/.well-known/security.txt
+Policy: https://prni.org.pl/security-policy
+Expires: 2027-03-12T00:00:00.000Z

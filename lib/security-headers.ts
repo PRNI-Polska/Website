@@ -1,59 +1,46 @@
-// file: lib/security-headers.ts
-// Security headers for all responses
-
-export const securityHeaders = {
-  // Prevent XSS attacks
-  "X-XSS-Protection": "1; mode=block",
-  
-  // Prevent MIME type sniffing
+export const securityHeaders: Record<string, string> = {
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
   "X-Content-Type-Options": "nosniff",
-  
-  // Prevent clickjacking
   "X-Frame-Options": "DENY",
-  
-  // Control referrer information
   "Referrer-Policy": "strict-origin-when-cross-origin",
-  
-  // Disable browser features we don't need
   "Permissions-Policy": "camera=(), microphone=(self), geolocation=(), interest-cohort=()",
-  
-  // Force HTTPS (enable in production)
-  // "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
 };
 
-// Content Security Policy
-// Adjust based on your needs (e.g., if you use external scripts/fonts)
-export const contentSecurityPolicy = `
-  default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval';
-  style-src 'self' 'unsafe-inline';
-  img-src 'self' data: https: blob:;
-  font-src 'self' data:;
-  connect-src 'self' https://vaultcall-server.onrender.com wss://vaultcall-server.onrender.com;
-  media-src 'self' blob:;
-  object-src 'none';
-  frame-src 'none';
-  frame-ancestors 'none';
-  form-action 'self';
-  base-uri 'self';
-  upgrade-insecure-requests;
-`.replace(/\s{2,}/g, " ").trim();
+export function buildContentSecurityPolicy(nonce?: string): string {
+  const scriptSrc = nonce
+    ? `'self' 'nonce-${nonce}' 'strict-dynamic'`
+    : "'self' 'unsafe-inline'";
 
-// Get all security headers including CSP
-export function getSecurityHeaders(): Record<string, string> {
+  return [
+    "default-src 'self'",
+    `script-src ${scriptSrc}`,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: https: blob:",
+    "font-src 'self' data:",
+    "connect-src 'self' https://vaultcall-server.onrender.com wss://vaultcall-server.onrender.com",
+    "media-src 'self' blob:",
+    "object-src 'none'",
+    "frame-src 'none'",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    "base-uri 'self'",
+    "upgrade-insecure-requests",
+  ].join("; ");
+}
+
+export const contentSecurityPolicy = buildContentSecurityPolicy();
+
+export function getSecurityHeaders(nonce?: string): Record<string, string> {
   return {
     ...securityHeaders,
-    "Content-Security-Policy": contentSecurityPolicy,
+    "Content-Security-Policy": buildContentSecurityPolicy(nonce),
   };
 }
 
-// Apply security headers to a response
-export function applySecurityHeaders(response: Response): Response {
-  const headers = getSecurityHeaders();
-  
+export function applySecurityHeaders(response: Response, nonce?: string): Response {
+  const headers = getSecurityHeaders(nonce);
   for (const [key, value] of Object.entries(headers)) {
     response.headers.set(key, value);
   }
-  
   return response;
 }

@@ -1,6 +1,7 @@
 // file: app/api/international-join/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { checkRateLimit } from "@/lib/utils";
+import { checkRateLimit, validateHoneypot } from "@/lib/utils";
+import { internationalJoinSchema } from "@/lib/validations";
 
 interface InternationalJoinData {
   name: string;
@@ -10,6 +11,15 @@ interface InternationalJoinData {
   interest: string;
   message?: string;
   consent: boolean;
+}
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 const INTEREST_LABELS: Record<string, string> = {
@@ -25,15 +35,9 @@ async function sendNotificationEmail(data: InternationalJoinData) {
   
   // If no API key configured, just log
   if (!process.env.RESEND_API_KEY) {
-    console.log("=== International Wing Registration (no email configured) ===");
-    console.log("Name:", data.name);
-    console.log("Email:", data.email);
-    console.log("Country:", data.country);
-    console.log("Languages:", data.languages || "Not specified");
-    console.log("Interest:", interestLabel);
-    console.log("Message:", data.message || "No message");
-    console.log("Timestamp:", new Date().toISOString());
-    console.log("==============================================================");
+    console.log("International wing registration received (no email configured)", {
+      timestamp: new Date().toISOString(),
+    });
     return { success: true, emailSent: false };
   }
 
@@ -65,29 +69,29 @@ Note: This person has acknowledged that participation does not constitute party 
         <table style="border-collapse: collapse; width: 100%; max-width: 600px;">
           <tr>
             <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold; width: 140px;">Name:</td>
-            <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.name}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(data.name)}</td>
           </tr>
           <tr>
             <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Email:</td>
-            <td style="padding: 8px; border-bottom: 1px solid #eee;"><a href="mailto:${data.email}">${data.email}</a></td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;"><a href="mailto:${escapeHtml(data.email)}">${escapeHtml(data.email)}</a></td>
           </tr>
           <tr>
             <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Country:</td>
-            <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.country}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(data.country)}</td>
           </tr>
           <tr>
             <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Languages:</td>
-            <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.languages || "<em>Not specified</em>"}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.languages ? escapeHtml(data.languages) : "<em>Not specified</em>"}</td>
           </tr>
           <tr>
             <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Interest Area:</td>
-            <td style="padding: 8px; border-bottom: 1px solid #eee;">${interestLabel}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(interestLabel)}</td>
           </tr>
         </table>
         
         ${data.message ? `
           <h3 style="margin-top: 20px;">Message:</h3>
-          <p style="background: #f5f5f5; padding: 15px; border-radius: 5px;">${data.message.replace(/\n/g, "<br>")}</p>
+          <p style="background: #f5f5f5; padding: 15px; border-radius: 5px;">${escapeHtml(data.message).replace(/\n/g, "<br>")}</p>
         ` : ""}
         
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
@@ -99,26 +103,13 @@ Note: This person has acknowledged that participation does not constitute party 
     });
 
     if (error) {
-      console.error("Resend email error:", error);
-      // Don't throw - still log the registration
-      console.log("=== International Wing Registration (email failed) ===");
-      console.log("Name:", data.name);
-      console.log("Email:", data.email);
-      console.log("Country:", data.country);
-      console.log("=======================================================");
+      console.error("International wing registration email failed");
       return { success: true, emailSent: false };
     }
 
     return { success: true, emailSent: true };
   } catch (emailError) {
-    console.error("Email sending failed:", emailError);
-    // Log registration even if email fails
-    console.log("=== International Wing Registration (email exception) ===");
-    console.log("Name:", data.name);
-    console.log("Email:", data.email);
-    console.log("Country:", data.country);
-    console.log("Interest:", interestLabel);
-    console.log("=========================================================");
+    console.error("International wing email sending failed:", emailError instanceof Error ? emailError.message : "Unknown error");
     return { success: true, emailSent: false };
   }
 }
@@ -145,62 +136,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const data: InternationalJoinData = await request.json();
+    const body = await request.json();
 
-    // Validate required fields
-    if (!data.name?.trim()) {
+    const parsed = internationalJoinSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Name is required" },
+        { error: "Invalid form data", details: parsed.error.flatten() },
         { status: 400 }
       );
     }
 
-    if (!data.email?.trim()) {
-      return NextResponse.json(
-        { error: "Email is required" },
-        { status: 400 }
-      );
+    const data = parsed.data as InternationalJoinData;
+
+    if (!validateHoneypot((body as Record<string, unknown>).website as string)) {
+      console.log("International join honeypot triggered, rejecting submission");
+      return NextResponse.json({ success: true });
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(data.email)) {
-      return NextResponse.json(
-        { error: "Invalid email format" },
-        { status: 400 }
-      );
-    }
-
-    if (!data.country?.trim()) {
-      return NextResponse.json(
-        { error: "Country is required" },
-        { status: 400 }
-      );
-    }
-
-    if (!data.interest?.trim()) {
-      return NextResponse.json(
-        { error: "Area of interest is required" },
-        { status: 400 }
-      );
-    }
-
-    // Validate consent
-    if (!data.consent) {
-      return NextResponse.json(
-        { error: "Consent is required" },
-        { status: 400 }
-      );
-    }
-
-    // Send notification email (won't fail even if email fails)
     const result = await sendNotificationEmail(data);
     
-    console.log("Registration processed:", {
-      name: data.name,
-      email: data.email,
-      country: data.country,
+    console.log("International wing registration processed:", {
       emailSent: result.emailSent,
+      timestamp: new Date().toISOString(),
     });
 
     return NextResponse.json({

@@ -1,48 +1,57 @@
-// file: middleware.ts
 import { withAuth } from "next-auth/middleware";
 import { NextResponse, NextRequest } from "next/server";
 import type { NextRequestWithAuth } from "next-auth/middleware";
 
 // ============================================
-// SECURITY HEADERS
+// CSP NONCE + SECURITY HEADERS
 // ============================================
-const securityHeaders = {
-  "X-XSS-Protection": "1; mode=block",
+function generateNonce(): string {
+  const array = new Uint8Array(16);
+  crypto.getRandomValues(array);
+  return btoa(String.fromCharCode(...array));
+}
+
+const staticSecurityHeaders: Record<string, string> = {
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "DENY",
   "Referrer-Policy": "strict-origin-when-cross-origin",
   "Permissions-Policy": "camera=(), microphone=(self), geolocation=(), interest-cohort=()",
+  "X-DNS-Prefetch-Control": "on",
 };
 
-const csp = `
-  default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval';
-  style-src 'self' 'unsafe-inline';
-  img-src 'self' data: https: blob:;
-  font-src 'self' data:;
-  connect-src 'self' https://vaultcall-server.onrender.com wss://vaultcall-server.onrender.com;
-  media-src 'self' blob:;
-  object-src 'none';
-  frame-src 'none';
-  frame-ancestors 'none';
-  form-action 'self';
-  base-uri 'self';
-`.replace(/\s{2,}/g, " ").trim();
+function buildCsp(nonce: string): string {
+  return [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: https: blob:",
+    "font-src 'self' data:",
+    "connect-src 'self' https://vaultcall-server.onrender.com wss://vaultcall-server.onrender.com",
+    "media-src 'self' blob:",
+    "object-src 'none'",
+    "frame-src 'none'",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    "base-uri 'self'",
+    "upgrade-insecure-requests",
+  ].join("; ");
+}
 
-function applySecurityHeaders(response: NextResponse): NextResponse {
-  for (const [key, value] of Object.entries(securityHeaders)) {
+function applySecurityHeaders(response: NextResponse, nonce: string): NextResponse {
+  for (const [key, value] of Object.entries(staticSecurityHeaders)) {
     response.headers.set(key, value);
   }
-  response.headers.set("Content-Security-Policy", csp);
+  response.headers.set("Content-Security-Policy", buildCsp(nonce));
+  response.headers.set("x-nonce", nonce);
   return response;
 }
 
 // ============================================
-// RATE LIMITING (In-Memory)
+// RATE LIMITING (In-Memory for middleware layer)
 // ============================================
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
-// Clean up expired entries every minute
 if (typeof setInterval !== "undefined") {
   setInterval(() => {
     const now = Date.now();
@@ -90,12 +99,12 @@ function checkRateLimit(
   return { allowed: true, remaining: maxRequests - existing.count, resetIn: existing.resetTime - now };
 }
 
-// Rate limit configurations
 const RATE_LIMITS = {
-  auth: { maxRequests: 5, interval: 60 * 1000 },        // 5 per minute
-  contact: { maxRequests: 5, interval: 60 * 60 * 1000 }, // 5 per hour
-  admin: { maxRequests: 100, interval: 60 * 1000 },     // 100 per minute
-  public: { maxRequests: 200, interval: 60 * 1000 },    // 200 per minute
+  auth: { maxRequests: 5, interval: 60 * 1000 },
+  contact: { maxRequests: 5, interval: 60 * 60 * 1000 },
+  admin: { maxRequests: 100, interval: 60 * 1000 },
+  members: { maxRequests: 120, interval: 60 * 1000 },
+  public: { maxRequests: 200, interval: 60 * 1000 },
 };
 
 // ============================================
@@ -103,8 +112,7 @@ const RATE_LIMITS = {
 // ============================================
 function isIPAllowed(ip: string): boolean {
   const allowedIPs = process.env.ALLOWED_ADMIN_IPS;
-  if (!allowedIPs) return true; // If not configured, allow all
-  
+  if (!allowedIPs) return true;
   const allowList = allowedIPs.split(",").map((i) => i.trim());
   return allowList.includes(ip) || allowList.includes("*");
 }
@@ -116,30 +124,33 @@ export default withAuth(
   function middleware(req: NextRequestWithAuth) {
     const { pathname } = req.nextUrl;
     const ip = getClientIP(req);
-    
-    // Determine route type
+    const nonce = generateNonce();
+
     const isAdminRoute = pathname.startsWith("/admin");
     const isAdminApiRoute = pathname.startsWith("/api/admin");
     const isLoginPage = pathname === "/admin/login";
     const isAuthApi = pathname.startsWith("/api/auth");
     const isContactApi = pathname === "/api/contact";
-    const isPublicApi = pathname.startsWith("/api/") && !isAdminApiRoute && !isAuthApi;
-    
+    const isMemberApi = pathname.startsWith("/api/members");
+    const isPublicApi = pathname.startsWith("/api/") && !isAdminApiRoute && !isAuthApi && !isMemberApi;
+
     // ============================================
     // RATE LIMITING
     // ============================================
     let rateLimit: RateLimitResult | null = null;
-    
+
     if (isAuthApi || isLoginPage) {
       rateLimit = checkRateLimit(`auth:${ip}`, RATE_LIMITS.auth.maxRequests, RATE_LIMITS.auth.interval);
     } else if (isContactApi) {
       rateLimit = checkRateLimit(`contact:${ip}`, RATE_LIMITS.contact.maxRequests, RATE_LIMITS.contact.interval);
     } else if (isAdminApiRoute) {
       rateLimit = checkRateLimit(`admin:${ip}`, RATE_LIMITS.admin.maxRequests, RATE_LIMITS.admin.interval);
+    } else if (isMemberApi) {
+      rateLimit = checkRateLimit(`members:${ip}`, RATE_LIMITS.members.maxRequests, RATE_LIMITS.members.interval);
     } else if (isPublicApi) {
       rateLimit = checkRateLimit(`public:${ip}`, RATE_LIMITS.public.maxRequests, RATE_LIMITS.public.interval);
     }
-    
+
     if (rateLimit && !rateLimit.allowed) {
       const response = NextResponse.json(
         {
@@ -150,60 +161,56 @@ export default withAuth(
         { status: 429 }
       );
       response.headers.set("Retry-After", Math.ceil(rateLimit.resetIn / 1000).toString());
-      return applySecurityHeaders(response);
+      return applySecurityHeaders(response, nonce);
     }
-    
+
     // ============================================
     // IP ALLOWLIST CHECK FOR ADMIN
     // ============================================
     if ((isAdminRoute || isAdminApiRoute) && !isLoginPage) {
       if (!isIPAllowed(ip)) {
-        console.warn(`[SECURITY] Blocked admin access from IP: ${ip}`);
+        console.warn(`[SECURITY] Blocked admin access from unauthorized IP`);
         const response = NextResponse.json(
           { error: "Access denied" },
           { status: 403 }
         );
-        return applySecurityHeaders(response);
+        return applySecurityHeaders(response, nonce);
       }
     }
-    
+
     // ============================================
     // AUTH CHECKS
     // ============================================
     const token = req.nextauth.token;
-    
-    // Allow access to login page
+
     if (isLoginPage) {
       if (token) {
         const response = NextResponse.redirect(new URL("/admin", req.url));
-        return applySecurityHeaders(response);
+        return applySecurityHeaders(response, nonce);
       }
       const response = NextResponse.next();
-      return applySecurityHeaders(response);
+      return applySecurityHeaders(response, nonce);
     }
 
-    // Protect admin routes and API routes
     if ((isAdminRoute || isAdminApiRoute) && !token) {
       const response = NextResponse.redirect(new URL("/admin/login", req.url));
-      return applySecurityHeaders(response);
+      return applySecurityHeaders(response, nonce);
     }
 
-    // Verify admin role
     if ((isAdminRoute || isAdminApiRoute) && token?.role !== "ADMIN") {
-      console.warn(`[SECURITY] Non-admin user attempted admin access: ${token?.email}`);
+      console.warn("[SECURITY] Non-admin user attempted admin access");
       const response = NextResponse.redirect(new URL("/admin/login", req.url));
-      return applySecurityHeaders(response);
+      return applySecurityHeaders(response, nonce);
     }
 
     const response = NextResponse.next();
-    
-    // Add rate limit headers if applicable
+
     if (rateLimit) {
       response.headers.set("X-RateLimit-Remaining", rateLimit.remaining.toString());
       response.headers.set("X-RateLimit-Reset", Math.ceil(rateLimit.resetIn / 1000).toString());
     }
-    
-    return applySecurityHeaders(response);
+
+    return applySecurityHeaders(response, nonce);
   },
   {
     callbacks: {
@@ -211,16 +218,13 @@ export default withAuth(
         const isLoginPage = req.nextUrl.pathname === "/admin/login";
         const isAdminRoute = req.nextUrl.pathname.startsWith("/admin");
         const isAdminApiRoute = req.nextUrl.pathname.startsWith("/api/admin");
-        
-        // Always allow login page
+
         if (isLoginPage) return true;
-        
-        // Require auth for admin routes
+
         if (isAdminRoute || isAdminApiRoute) {
           return !!token;
         }
-        
-        // Allow all other routes
+
         return true;
       },
     },
@@ -229,14 +233,16 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    // Admin routes
     "/admin/:path*",
     "/api/admin/:path*",
-    // Auth routes (for rate limiting)
     "/api/auth/:path*",
-    // Contact route (for rate limiting)
     "/api/contact",
-    // Public API routes (for rate limiting)
+    "/api/members/:path*",
     "/api/calendar/:path*",
+    "/api/newsletter/:path*",
+    "/api/recruitment",
+    "/api/international-join",
+    "/api/analytics/:path*",
+    "/api/calls/:path*",
   ],
 };

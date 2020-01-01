@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { prisma } from "./db";
 import { loginSchema } from "./validations";
+import { recordSecurityEvent } from "./security-monitor";
 
 // Extend the built-in session types
 declare module "next-auth" {
@@ -84,9 +85,14 @@ export const authOptions: NextAuthOptions = {
 
           const { email, password } = parsed.data;
 
-          // Check rate limiting
           const rateLimit = checkLoginRateLimit(email);
           if (!rateLimit.allowed) {
+            recordSecurityEvent({
+              type: "brute_force",
+              ip: "admin-login",
+              details: `Admin login rate limit exceeded for ${email}`,
+              severity: "high",
+            });
             throw new Error("Too many login attempts. Please try again later.");
           }
 
@@ -96,12 +102,23 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (!user) {
+            recordSecurityEvent({
+              type: "auth_failure",
+              ip: "admin-login",
+              details: "Admin login attempt with unknown email",
+              severity: "medium",
+            });
             throw new Error("Invalid email or password");
           }
 
-          // Verify password
           const isValidPassword = await compare(password, user.passwordHash);
           if (!isValidPassword) {
+            recordSecurityEvent({
+              type: "auth_failure",
+              ip: "admin-login",
+              details: "Admin login failed — wrong password",
+              severity: "high",
+            });
             throw new Error("Invalid email or password");
           }
 

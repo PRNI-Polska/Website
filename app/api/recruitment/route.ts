@@ -2,13 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { recruitmentFormSchema } from "@/lib/validations";
 import { checkRateLimit, validateHoneypot } from "@/lib/utils";
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 async function sendEmail(data: { name: string; email: string; location?: string; message: string }) {
-  // If no API key configured, just log
   if (!process.env.RESEND_API_KEY) {
-    console.log("Recruitment submission (no email configured):", {
-      from: `${data.name} <${data.email}>`,
-      location: data.location || "",
-      message: data.message,
+    console.log("Recruitment submission received (no email configured)", {
       timestamp: new Date().toISOString(),
     });
     return { success: true };
@@ -32,29 +37,23 @@ async function sendEmail(data: { name: string; email: string; location?: string;
       text: `New recruitment interest:\n\nName: ${data.name}\nEmail: ${data.email}\nLocation: ${data.location || "Not provided"}\n\nMessage:\n${data.message}\n\n---\nSubmitted: ${new Date().toISOString()}`,
       html: `
         <h2>New recruitment interest</h2>
-        <p><strong>Name:</strong> ${data.name}</p>
-        <p><strong>Email:</strong> <a href="mailto:${data.email}">${data.email}</a></p>
-        <p><strong>Location:</strong> ${data.location ? data.location : "<em>Not provided</em>"}</p>
+        <p><strong>Name:</strong> ${escapeHtml(data.name)}</p>
+        <p><strong>Email:</strong> <a href="mailto:${escapeHtml(data.email)}">${escapeHtml(data.email)}</a></p>
+        <p><strong>Location:</strong> ${data.location ? escapeHtml(data.location) : "<em>Not provided</em>"}</p>
         <hr>
         <p><strong>Message:</strong></p>
-        <p>${data.message.replace(/\n/g, "<br>")}</p>
+        <p>${escapeHtml(data.message).replace(/\n/g, "<br>")}</p>
         <hr>
         <p style="color:#666;font-size:12px;">Submitted: ${new Date().toISOString()}</p>
       `,
     });
 
     if (error) {
-      console.error("Failed to send recruitment email:", error);
+      console.error("Failed to send recruitment email");
       throw new Error("Failed to send email");
     }
   } catch (emailError) {
-    console.error("Recruitment email sending failed:", emailError);
-    // Don't throw: still allow the form to succeed
-    console.log("Recruitment submission (email exception):", {
-      from: `${data.name} <${data.email}>`,
-      location: data.location || "",
-      timestamp: new Date().toISOString(),
-    });
+    console.error("Recruitment email sending failed:", emailError instanceof Error ? emailError.message : "Unknown error");
     return { success: true };
   }
 
@@ -92,7 +91,7 @@ export async function POST(request: NextRequest) {
     const { name, email, location, message, website } = parsed.data;
 
     if (!validateHoneypot(website)) {
-      console.log("Recruitment honeypot triggered, rejecting submission from:", email);
+      console.log("Recruitment honeypot triggered, rejecting submission");
       return NextResponse.json({ success: true });
     }
 

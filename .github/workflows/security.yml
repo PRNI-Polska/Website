@@ -1,0 +1,126 @@
+name: Security & CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1' # Weekly on Monday at 06:00 UTC
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  lint-and-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci --ignore-scripts
+
+      - run: npx prisma generate
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: Next.js lint
+        run: npm run lint
+
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci --ignore-scripts
+
+      - name: npm audit (production)
+        run: npm audit --production --audit-level=high
+        continue-on-error: true
+
+      - name: npm audit (all)
+        run: npm audit --audit-level=critical
+
+  build-test:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck]
+    env:
+      DATABASE_URL: "file:./test.db"
+      NEXTAUTH_SECRET: "ci-test-secret-not-for-production-use-only"
+      NEXTAUTH_URL: "http://localhost:3000"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci --ignore-scripts
+
+      - run: npx prisma generate
+
+      - name: Build Next.js
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+  secret-scan:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for secrets in code
+        run: |
+          echo "Scanning for potential secrets..."
+          PATTERNS='(sk_live|pk_live|re_[a-zA-Z0-9]{20,}|AKIA[0-9A-Z]{16}|ghp_[a-zA-Z0-9]{36}|-----BEGIN (RSA |EC )?PRIVATE KEY-----)'
+          if grep -rPn "$PATTERNS" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.json" . 2>/dev/null | grep -v node_modules | grep -v '.next'; then
+            echo "::error::Potential secrets found in source code!"
+            exit 1
+          else
+            echo "No secrets detected."
+          fi
+
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [build-test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg NODE_ENV=production \
+            -t prni-website:${{ github.sha }} \
+            .
+
+      - name: Verify container runs
+        run: |
+          docker run -d --name test-container \
+            -e DATABASE_URL="file:./test.db" \
+            -e NEXTAUTH_SECRET="docker-test-secret" \
+            -e NEXTAUTH_URL="http://localhost:3000" \
+            -p 3000:3000 \
+            prni-website:${{ github.sha }}
+          sleep 5
+          docker logs test-container
+          docker stop test-container

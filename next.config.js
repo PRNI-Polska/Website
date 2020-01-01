@@ -1,7 +1,5 @@
-// file: next.config.js
 /** @type {import('next').NextConfig} */
 
-// Security headers configuration
 const securityHeaders = [
   {
     key: 'X-DNS-Prefetch-Control',
@@ -9,19 +7,15 @@ const securityHeaders = [
   },
   {
     key: 'Strict-Transport-Security',
-    value: 'max-age=31536000; includeSubDomains'
-  },
-  {
-    key: 'X-XSS-Protection',
-    value: '1; mode=block'
-  },
-  {
-    key: 'X-Frame-Options',
-    value: 'DENY'
+    value: 'max-age=31536000; includeSubDomains; preload'
   },
   {
     key: 'X-Content-Type-Options',
     value: 'nosniff'
+  },
+  {
+    key: 'X-Frame-Options',
+    value: 'DENY'
   },
   {
     key: 'Referrer-Policy',
@@ -31,59 +25,41 @@ const securityHeaders = [
     key: 'Permissions-Policy',
     value: 'camera=(), microphone=(self), geolocation=(), interest-cohort=()'
   },
-  {
-    key: 'Content-Security-Policy',
-    value: [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: https: blob:",
-      "font-src 'self' data:",
-      "connect-src 'self' https://vaultcall-server.onrender.com wss://vaultcall-server.onrender.com",
-      "media-src 'self' blob:",
-      "object-src 'none'",
-      "frame-src 'none'",
-      "frame-ancestors 'none'",
-      "form-action 'self'",
-      "base-uri 'self'",
-    ].join('; ')
-  },
 ];
 
 const nextConfig = {
-  // Disable x-powered-by header (don't reveal we're using Next.js)
   poweredByHeader: false,
-  
+  output: process.env.DOCKER_BUILD === '1' ? 'standalone' : undefined,
+
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '**',
+        hostname: 'prni.org.pl',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.prni.org.pl',
       },
     ],
   },
-  
-  // Enable experimental features for server actions
+
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
     },
   },
-  
-  // Apply security headers to all routes
+
   async headers() {
     return [
       {
-        // Apply to all routes
         source: '/:path*',
         headers: securityHeaders,
       },
     ];
   },
-  
-  // Redirect HTTP to HTTPS in production
+
   async redirects() {
-    // Only apply in production
     if (process.env.NODE_ENV !== 'production') {
       return [];
     }

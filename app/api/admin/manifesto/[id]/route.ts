@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { updateManifestoSectionSchema } from "@/lib/validations";
+import { validateCsrf, csrfErrorResponse } from "@/lib/csrf";
 
 export async function GET(
   request: NextRequest,
@@ -28,6 +29,9 @@ export async function PATCH(
 ) {
   try {
     const user = await requireAdmin();
+
+    if (!validateCsrf(request)) return csrfErrorResponse();
+
     const { id } = await params;
     const body = await request.json();
 
@@ -76,6 +80,9 @@ export async function DELETE(
 ) {
   try {
     const user = await requireAdmin();
+
+    if (!validateCsrf(request)) return csrfErrorResponse();
+
     const { id } = await params;
 
     const section = await prisma.manifestoSection.findUnique({ where: { id } });

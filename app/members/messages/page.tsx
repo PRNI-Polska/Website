@@ -56,6 +56,7 @@ export default function MessagesPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const shouldAutoScroll = useRef(true);
+  const prevMsgCount = useRef(0);
   const msgPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const convoPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -100,9 +101,10 @@ export default function MessagesPage() {
   }, [selectedMemberId, fetchMessages]);
 
   useEffect(() => {
-    if (shouldAutoScroll.current) {
+    if (messages.length > prevMsgCount.current && shouldAutoScroll.current) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
+    prevMsgCount.current = messages.length;
   }, [messages]);
 
   useEffect(() => {

@@ -41,6 +41,7 @@ export default function ChannelsPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const shouldAutoScroll = useRef(true);
+  const prevMsgCount = useRef(0);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const selectedChannel = channels.find((c) => c.id === selectedId);
@@ -99,11 +100,11 @@ export default function ChannelsPage() {
     fetchMessages(selectedId);
   }, [selectedId, fetchMessages]);
 
-  // Auto-scroll when messages change
   useEffect(() => {
-    if (shouldAutoScroll.current) {
+    if (messages.length > prevMsgCount.current && shouldAutoScroll.current) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
+    prevMsgCount.current = messages.length;
   }, [messages]);
 
   // Poll for new messages every 3 seconds

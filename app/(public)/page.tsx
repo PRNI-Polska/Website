@@ -3,212 +3,205 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useState, useCallback, useRef } from "react";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
 
-// Wing panel data - Main in center, International left, Female right
-const wings = [
+// Ideology sections data
+const ideologySections = [
   {
-    id: "international",
-    href: "/wings/international",
-    titleKey: "wings.international.title",
-    taglineKey: "wings.international.tagline",
-    disabled: false,
-    isMain: false,
+    id: "s1",
+    title: "§ 1. Naród jako najwyższa wartość polityczna",
+    text: "Uznajemy naród za najwyższą wartość polityczną. Naród pojmujemy jako byt historyczny i kulturowy, stojący ponad interesami jednostek oraz grup społecznych."
   },
   {
-    id: "main",
-    href: "/wings/main",
-    titleKey: "wings.main.title",
-    taglineKey: "wings.main.tagline",
-    disabled: false,
-    isMain: true,
+    id: "s2",
+    title: "§ 2. Jedność ideowa i kulturowa",
+    text: "Opowiadamy się za zachowaniem jedności ideowej i kulturowej wspólnoty narodowej. Uznajemy konieczność obrony jednej, polskiej tradycji narodowej jako fundamentu tożsamości i ciągłości narodu."
   },
   {
-    id: "female",
-    href: "/wings/female",
-    titleKey: "wings.female.title",
-    taglineKey: "wings.female.tagline",
-    disabled: false, // ENABLED
-    isMain: false,
+    id: "s3",
+    title: "§ 3. Antyliberalizm",
+    text: "Odrzucamy liberalizm polityczny, oparty na skrajnym pluralizmie i indywidualizmie, jak również liberalizm kulturowy, prowadzący do relatywizacji wartości i osłabienia więzi narodowych."
+  },
+  {
+    id: "s4",
+    title: "§ 4. Degeneracja moralna współczesnego społeczeństwa",
+    text: "Sprzeciwiamy się ogarniającym świat globalizmowi oraz międzynarodowym korporacjom wspierającym liberalne i progresywne inicjatywy mające na celu destabilizację i kontrolę narodów, w wyniku których współczesne społeczeństwa poddawane są procesowi głębokiej erozji moralnej i aksjologicznej — jeśli proces ten nie zostanie powstrzymany, doprowadzi on do destrukcji ładu społecznego i tożsamości narodowej."
+  },
+  {
+    id: "s5",
+    title: "§ 5. Gospodarka podporządkowana narodowi",
+    text: "Uznajemy, że gospodarka powinna służyć narodowi. Nie opowiadamy się ani za skrajnym wolnym rynkiem, ani za socjalizmem. Dopuszczamy interwencję państwa tam, gdzie wymaga tego interes narodowy lub stabilność społeczna."
+  },
+  {
+    id: "s6",
+    title: "§ 6. Zasady współpracy międzynarodowej",
+    text: "Opowiadamy się za współpracą międzynarodową opartą na poszanowaniu suwerenności, samostanowienia oraz pełnej niezależności politycznej i gospodarczej państw. Wszelkie formy integracji ponadnarodowej uznajemy za dopuszczalne wyłącznie wówczas, gdy nie naruszają one nadrzędności interesu narodowego, nie ograniczają kompetencji państwa w kluczowych obszarach oraz pozostają oparte na dobrowolności i równoprawności uczestników."
+  },
+  {
+    id: "s7",
+    title: "§ 7. Bezpieczeństwo i obronność państwa",
+    text: "Uznajemy, że bezpieczeństwo państwa powinno opierać się na zdolności do samodzielnej obrony oraz na współpracy międzynarodowej o wyłącznie obronnym charakterze. Sprzeciwiamy się polityce ekspansji militarnej, wykorzystywaniu sojuszy wojskowych jako narzędzi presji politycznej oraz działaniom prowadzącym do destabilizacji ładu międzynarodowego. Trwałe bezpieczeństwo może być budowane jedynie w oparciu o równowagę sił, odpowiedzialność państw oraz poszanowanie ich suwerenności."
+  },
+  {
+    id: "s8",
+    title: "§ 8. Państwo organiczne",
+    text: "Uznajemy państwo za organiczny wyraz woli narodu. Państwo nie jest neutralnym arbitrem pomiędzy konkurującymi interesami, lecz narzędziem realizacji interesu narodowego."
   },
 ];
 
 export default function HomePage() {
   const { t, locale } = useI18n();
-  const router = useRouter();
-  const [selectedPanel, setSelectedPanel] = useState<string | null>(null);
-  const [isNavigating, setIsNavigating] = useState(false);
-  const panelRefs = useRef<(HTMLButtonElement | null)[]>([]);
-
-  const handlePanelClick = useCallback((wing: typeof wings[0], index: number) => {
-    if (isNavigating || wing.disabled) return;
-    
-    setSelectedPanel(wing.id);
-    setIsNavigating(true);
-    
-    setTimeout(() => {
-      router.push(wing.href);
-    }, 700);
-  }, [router, isNavigating]);
-
-  const scrollToContent = () => {
-    document.getElementById("mission-section")?.scrollIntoView({ 
-      behavior: "smooth" 
-    });
-  };
-
-  const gatewayText = {
-    eyebrow: t("party.name.full"),
-    title: locale === "pl" ? "Skrzydła" : locale === "de" ? "Flügel" : "Wings",
-    subtitle: locale === "pl" 
-      ? "Trzy ramiona. Jeden ruch." 
-      : locale === "de" 
-      ? "Drei Arme. Eine Bewegung." 
-      : "Three branches. One movement.",
-    enter: locale === "pl" ? "Wejdź" : locale === "de" ? "Eintreten" : "Enter",
-  };
 
   return (
-    <div className="wings-gateway">
-      {/* Hero Gateway Section */}
-      <section className="wings-gateway-hero relative">
-        {/* STAGE: Anchoring surface */}
-        <div className="wings-stage">
-          {/* Hero Header */}
-          <header className="text-center mb-8">
+    <div className="flex flex-col">
+      {/* Hero Section with Polish Flag Background */}
+      <section className="relative py-20 md:py-32 overflow-hidden hero-flag-bg">
+        <div className="container-custom relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
             {/* Logo */}
-            <div className="hero-reveal hero-reveal-1 mb-4">
-              <div className="relative w-12 h-12 md:w-14 md:h-14 mx-auto">
-                <Image
-                  src="/logo.png"
-                  alt="PRNI"
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              </div>
+            <div className="relative w-32 h-32 md:w-40 md:h-40 mx-auto mb-8 animate-fade-in">
+              <Image
+                src="/logo.png"
+                alt="PRNI Logo"
+                fill
+                className="object-contain drop-shadow-lg"
+                priority
+              />
             </div>
             
-            {/* Eyebrow */}
-            <p className="hero-reveal hero-reveal-2 text-[10px] md:text-[11px] font-medium tracking-[0.25em] uppercase text-foreground/55 mb-2">
-              {gatewayText.eyebrow}
-            </p>
+            {/* Party Name */}
+            <div className="mb-6 animate-fade-in animation-delay-100">
+              <h2 className="text-lg md:text-xl text-primary font-semibold tracking-widest uppercase mb-2">
+                {locale === "pl" 
+                  ? "Polski Ruch Narodowo-Integralistyczny" 
+                  : locale === "de"
+                  ? "Polnische National-Integralistische Bewegung"
+                  : "Polish National-Integralist Movement"}
+              </h2>
+            </div>
             
-            {/* H1: Wings */}
-            <h1 className="hero-reveal hero-reveal-2 text-7xl md:text-8xl lg:text-[6.5rem] font-heading font-bold tracking-[0.025em] text-foreground mb-2">
-              {gatewayText.title}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight mb-6 animate-fade-in animation-delay-200">
+              {t("hero.title")}
             </h1>
-            
-            {/* Subtitle */}
-            <p className="hero-reveal hero-reveal-3 text-base md:text-lg text-foreground/68">
-              {gatewayText.subtitle}
+            <p className="text-xl md:text-2xl text-muted-foreground mb-8 animate-fade-in animation-delay-300">
+              {t("hero.subtitle")}
             </p>
-          </header>
-
-          {/* Wing Panels */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 items-stretch">
-            {wings.map((wing, index) => {
-              const isSelected = selectedPanel === wing.id;
-              const isFading = selectedPanel && selectedPanel !== wing.id;
-              const isMainPanel = wing.isMain;
-              
-              return (
-                <button
-                  key={wing.id}
-                  ref={(el) => { panelRefs.current[index] = el; }}
-                  onClick={() => handlePanelClick(wing, index)}
-                  disabled={isNavigating && !isSelected}
-                  className={cn(
-                    "wing-panel text-left flex flex-col",
-                    `panel-entrance panel-entrance-${index + 1}`,
-                    isMainPanel ? "md:col-span-6 wing-panel-main" : "md:col-span-3 wing-panel-side",
-                    // Wing-specific backgrounds
-                    wing.id === "international" && "wing-panel-international",
-                    wing.id === "main" && "wing-panel-poland",
-                    wing.id === "female" && "wing-panel-female",
-                    isSelected && "is-selected",
-                    isFading && (index === 0 ? "is-fading-left" : "is-fading-right")
-                  )}
-                  aria-label={t(wing.titleKey)}
-                >
-                  {/* Title */}
-                  <h2 className={cn(
-                    "wing-panel-title",
-                    isMainPanel ? "text-xl md:text-2xl" : "text-lg md:text-xl"
-                  )}>
-                    {t(wing.titleKey)}
-                  </h2>
-                  
-                  {/* Description */}
-                  <p className={cn(
-                    "wing-panel-desc",
-                    isMainPanel ? "text-sm md:text-base" : "text-[13px] md:text-sm"
-                  )}>
-                    {t(wing.taglineKey)}
-                  </p>
-                  
-                  {/* Spacer - pushes footer to bottom */}
-                  <div className="flex-grow" />
-                  
-                  {/* Divider */}
-                  <div className="wing-panel-divider" />
-                  
-                  {/* Footer with CTA */}
-                  <div className="wing-panel-footer">
-                    <span className={cn(
-                      "wing-panel-cta",
-                      isMainPanel && "text-[15px]"
-                    )}>
-                      {gatewayText.enter}
-                      <ArrowRight className="wing-panel-cta-arrow" />
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <button 
-          onClick={scrollToContent}
-          className="scroll-indicator"
-          aria-label={locale === "pl" ? "Przewiń w dół" : locale === "de" ? "Nach unten scrollen" : "Scroll down"}
-        >
-          <ChevronDown />
-        </button>
-      </section>
-
-      {/* Mission Section */}
-      <section id="mission-section" className="py-20 md:py-28">
-        <div className="container-custom">
-          <div className="max-w-2xl mx-auto text-center">
-            <h2 className="reveal-section reveal-delay-1 text-2xl md:text-3xl font-heading font-semibold mb-5 text-foreground">
-              {t("mission.title")}
-            </h2>
-            <p className="reveal-section reveal-delay-2 text-muted-foreground leading-relaxed mb-8">
-              {t("mission.summary")}
-            </p>
-            
-            <div className="reveal-section reveal-delay-3 flex flex-wrap justify-center gap-3">
-              <Button variant="outline" size="sm" asChild className="hover-lift">
-                <Link href="/manifesto">{t("nav.manifesto")}</Link>
-              </Button>
-              <Button variant="outline" size="sm" asChild className="hover-lift">
-                <Link href="/about">{t("nav.about")}</Link>
-              </Button>
-              <Button size="sm" asChild className="hover-lift">
-                <Link href="/contact">
-                  {t("nav.join")}
-                  <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
+            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in animation-delay-400">
+              <Button size="lg" asChild>
+                <Link href="/manifesto">
+                  {t("hero.cta.manifesto")}
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
+              <Button size="lg" variant="outline" asChild>
+                <Link href="/contact">{t("hero.cta.join")}</Link>
+              </Button>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mission Statement */}
+      <section className="py-16 bg-muted/30">
+        <div className="container-custom">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-6">
+              {t("mission.title")}
+            </h2>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              {t("mission.text")}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Ideology Declaration */}
+      <section className="section-spacing">
+        <div className="container-custom">
+          <div className="text-center mb-12">
+            <Badge variant="secondary" className="mb-4">
+              {locale === "pl" ? "Deklaracja Ideowa" : locale === "de" ? "Ideologische Erklärung" : "Declaration of Ideology"}
+            </Badge>
+            <h2 className="text-2xl md:text-3xl font-heading font-semibold">
+              {locale === "pl" ? "Deklaracja Ideowa Narodowego Integralizmu" : locale === "de" ? "Erklärung der nationalen Integralismus-Ideologie" : "Declaration of National Integralism Ideology"}
+            </h2>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            {ideologySections.map((section, index) => (
+              <Card 
+                key={section.id} 
+                className="card-hover animate-fade-in"
+                style={{ animationDelay: `${index * 80}ms` }}
+              >
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base md:text-lg leading-tight text-primary">
+                    {section.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {section.text}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Manifesto CTA */}
+      <section className="section-spacing bg-muted/30">
+        <div className="container-custom">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-4">
+              {t("section.manifesto")}
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              {t("section.manifesto.subtitle")}
+            </p>
+          </div>
+
+          <div className="text-center">
+            <Button size="lg" asChild>
+              <Link href="/manifesto">
+                {t("hero.cta.manifesto")}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Call to Action */}
+      <section className="py-20 bg-primary text-primary-foreground relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-1/2 translate-y-1/2" />
+        <div className="absolute top-0 left-0 right-0 h-1 bg-white/20" />
+        
+        <div className="container-custom text-center relative">
+          <Users className="mx-auto h-12 w-12 mb-6 opacity-80" />
+          <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-4">
+            {t("cta.title")}
+          </h2>
+          <p className="text-lg opacity-90 max-w-2xl mx-auto mb-8">
+            {t("cta.text")}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" variant="secondary" asChild>
+              <Link href="/contact">{t("cta.contact")}</Link>
+            </Button>
+            <Button 
+              size="lg" 
+              className="border-2 border-white text-white bg-transparent hover:bg-white/20"
+              asChild
+            >
+              <Link href="/about">{t("cta.learn")}</Link>
+            </Button>
           </div>
         </div>
       </section>

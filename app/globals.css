@@ -204,6 +204,32 @@
 
 /*
  * ============================================================================
+ * HERO WITH POLISH FLAG BACKGROUND
+ * ============================================================================
+ */
+.hero-flag-bg {
+  position: relative;
+  background: linear-gradient(180deg, 
+    #ffffff 0%, 
+    #ffffff 48%, 
+    #fef2f2 50%,
+    #fee2e2 55%,
+    #fecaca 65%,
+    #fca5a5 80%,
+    #f87171 100%
+  );
+}
+
+.hero-flag-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(255,255,255,0.9), transparent);
+  pointer-events: none;
+}
+
+/*
+ * ============================================================================
  * KEYFRAMES
  * ============================================================================
  */
@@ -265,8 +291,32 @@
  * ============================================================================
  */
 @layer utilities {
+  /* Card hover effect */
+  .card-hover {
+    @apply transition-all;
+    transition-duration: var(--dur-2);
+    transition-timing-function: var(--ease-out);
+  }
+  
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevated);
+  }
+
   .wings-gateway {
     @apply min-h-screen flex flex-col;
+  }
+  
+  /* Wings page layout */
+  .wings-page {
+    @apply min-h-screen flex flex-col;
+  }
+  
+  .wings-page-hero {
+    @apply flex-1 flex items-center justify-center;
+    min-height: calc(100vh - 80px);
+    padding: 3rem 1rem;
+    background: #f6f5f2;
   }
   
   .wings-gateway-hero {
@@ -396,19 +446,43 @@
     background: linear-gradient(180deg, #ffffff 0%, #ffffff 40%, #fef2f2 50%, #fecaca 70%, #fca5a5 100%);
   }
   
-  /* Female Wing - roses background with light pink overlay */
+  /* Female Wing - roses background with dark overlay for text visibility */
   .wing-panel-female {
     background: 
-      linear-gradient(145deg, rgba(253, 242, 248, 0.4) 0%, rgba(252, 231, 243, 0.35) 50%, rgba(251, 207, 232, 0.3) 100%),
+      linear-gradient(145deg, rgba(136, 19, 55, 0.45) 0%, rgba(159, 18, 57, 0.4) 50%, rgba(190, 18, 60, 0.35) 100%),
       url('/women_wing.jpg') center/cover no-repeat;
-    border-color: rgba(219, 39, 119, 0.12);
+    border-color: rgba(219, 39, 119, 0.2);
   }
   
   .wing-panel-female:hover {
-    border-color: rgba(219, 39, 119, 0.2);
+    border-color: rgba(219, 39, 119, 0.35);
     background: 
-      linear-gradient(145deg, rgba(253, 242, 248, 0.3) 0%, rgba(252, 231, 243, 0.25) 50%, rgba(251, 207, 232, 0.2) 100%),
+      linear-gradient(145deg, rgba(136, 19, 55, 0.35) 0%, rgba(159, 18, 57, 0.3) 50%, rgba(190, 18, 60, 0.25) 100%),
       url('/women_wing.jpg') center/cover no-repeat;
+  }
+  
+  /* Text styling for female wing */
+  .wing-panel-female .wing-panel-title,
+  .wing-panel-female .wing-panel-cta {
+    color: white;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+  
+  .wing-panel-female .wing-panel-desc {
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  
+  .wing-panel-female .wing-panel-divider {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  .wing-panel-female .wing-panel-cta-arrow {
+    color: white;
+  }
+  
+  .wing-panel-female:hover .wing-panel-cta {
+    border-bottom-color: rgba(255, 255, 255, 0.5);
   }
   
   /* Panel title */

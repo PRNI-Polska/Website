@@ -1,9 +1,9 @@
 // file: app/api/contact/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { contactFormSchema } from "@/lib/validations";
-import { checkRateLimit, validateHoneypot } from "@/lib/utils";
-import { escapeHtml } from "@/lib/security-alerts";
-import { trackHoneypotTrigger } from "@/lib/security-alerts";
+import { validateHoneypot } from "@/lib/utils";
+import { escapeHtml, trackHoneypotTrigger } from "@/lib/security-alerts";
+import { rateLimit, getClientIP, validateOrigin, RATE_LIMITS } from "@/lib/rate-limit";
 
 async function sendEmail(data: {
   name: string;
@@ -69,21 +69,24 @@ async function sendEmail(data: {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get client IP for rate limiting
-    const ip = request.headers.get("x-forwarded-for") || 
-                request.headers.get("x-real-ip") || 
-                "unknown";
+    // Origin validation (CSRF protection)
+    if (!validateOrigin(request)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
-    // Rate limiting: 2 requests per hour per IP
-    const rateLimit = checkRateLimit(`contact:${ip}`, 2, 60 * 60 * 1000);
+    // Get client IP for rate limiting
+    const ip = getClientIP(request);
+
+    // Rate limiting: 2 requests per hour per IP (Redis-backed)
+    const rl = await rateLimit(ip, "contact", RATE_LIMITS.contact.maxRequests, RATE_LIMITS.contact.windowMs, RATE_LIMITS.contact.blockDuration);
     
-    if (!rateLimit.allowed) {
+    if (!rl.allowed) {
       return NextResponse.json(
         { error: "Too many requests. Please try again later." },
         { 
           status: 429,
           headers: {
-            "Retry-After": Math.ceil(rateLimit.resetIn / 1000).toString(),
+            "Retry-After": Math.ceil(rl.resetIn / 1000).toString(),
           },
         }
       );

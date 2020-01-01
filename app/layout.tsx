@@ -164,6 +164,43 @@ export default function RootLayout({
                   publisher: { "@id": "https://www.prni.org.pl/#organization" },
                   inLanguage: ["pl", "en", "de"],
                 },
+                {
+                  "@type": "FAQPage",
+                  mainEntity: [
+                    {
+                      "@type": "Question",
+                      name: "What is PRNI?",
+                      acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "PRNI stands for Polski Ruch Narodowo-Integralistyczny (Polish National-Integralist Movement). It is a Polish political movement founded in 2024, dedicated to national sovereignty, tradition, and the integral unity of the Polish nation. Its motto is 'Naród Ponad Wszystkim' (Nation Above All).",
+                      },
+                    },
+                    {
+                      "@type": "Question",
+                      name: "Co to jest PRNI?",
+                      acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "PRNI to skrót od Polski Ruch Narodowo-Integralistyczny — ruch polityczny założony w 2024 roku, działający na rzecz suwerenności, tradycji i integralności narodowej Polski. Hasło PRNI to 'Naród Ponad Wszystkim'.",
+                      },
+                    },
+                    {
+                      "@type": "Question",
+                      name: "Was ist PRNI?",
+                      acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "PRNI steht für Polski Ruch Narodowo-Integralistyczny (Polnische National-Integralistische Bewegung). Es ist eine polnische politische Bewegung, die 2024 gegründet wurde und sich für nationale Souveränität, Tradition und die integrale Einheit der polnischen Nation einsetzt.",
+                      },
+                    },
+                    {
+                      "@type": "Question",
+                      name: "What does PRNI stand for?",
+                      acceptedAnswer: {
+                        "@type": "Answer",
+                        text: "PRNI stands for Polski Ruch Narodowo-Integralistyczny, which translates to the Polish National-Integralist Movement. The official website is www.prni.org.pl.",
+                      },
+                    },
+                  ],
+                },
               ],
             }),
           }}

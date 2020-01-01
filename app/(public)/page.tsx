@@ -24,8 +24,37 @@ export default function HomePage() {
     { id: "s8", title: t("ideology.s8.title"), text: t("ideology.s8.text") },
   ];
 
+  const siteNavJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SiteNavigationElement",
+    name: [
+      "PRNI — Strona Główna",
+      "O PRNI",
+      "Manifest PRNI",
+      "Komunikaty PRNI",
+      "Wydarzenia PRNI",
+      "Rekrutacja PRNI",
+      "Merch PRNI",
+      "Kontakt PRNI",
+    ],
+    url: [
+      "https://www.prni.org.pl",
+      "https://www.prni.org.pl/about",
+      "https://www.prni.org.pl/manifesto",
+      "https://www.prni.org.pl/announcements",
+      "https://www.prni.org.pl/events",
+      "https://www.prni.org.pl/recruitment",
+      "https://www.prni.org.pl/merch",
+      "https://www.prni.org.pl/contact",
+    ],
+  };
+
   return (
     <div className="flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(siteNavJsonLd) }}
+      />
       {/* Hero Section with Polish Flag Background */}
       <section className="relative py-28 md:py-40 overflow-hidden hero-flag-bg">
         <div className="container-custom relative z-10">

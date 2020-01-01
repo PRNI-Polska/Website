@@ -5,14 +5,16 @@ import { cn } from "@/lib/utils";
 
 interface GlobalBackdropProps {
   className?: string;
-  variant?: "hero" | "section";
+  variant?: "hero" | "section" | "full";
   showGrid?: boolean;
   showDots?: boolean;
+  showNoise?: boolean;
+  showFloatingDots?: boolean;
 }
 
 /**
  * GlobalBackdrop - A subtle decorative background for the International Wing page.
- * Features latitude/longitude-style grid lines and dot patterns.
+ * Features latitude/longitude-style grid lines, dot patterns, noise texture, and floating elements.
  * Uses CSS-only approach for performance.
  */
 export function GlobalBackdrop({
@@ -20,6 +22,8 @@ export function GlobalBackdrop({
   variant = "hero",
   showGrid = true,
   showDots = true,
+  showNoise = true,
+  showFloatingDots = false,
 }: GlobalBackdropProps) {
   return (
     <div
@@ -34,105 +38,129 @@ export function GlobalBackdrop({
         className={cn(
           "absolute inset-0",
           variant === "hero"
-            ? "bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-100/50"
+            ? "bg-gradient-to-br from-slate-50 via-blue-50/40 to-slate-100/60"
+            : variant === "full"
+            ? "bg-gradient-to-b from-slate-50/50 via-blue-50/20 to-slate-50/50"
             : "bg-gradient-to-b from-transparent via-blue-50/20 to-transparent"
         )}
       />
 
-      {/* Radial highlight */}
+      {/* Radial highlight - gives depth */}
       <div
         className="absolute inset-0"
         style={{
           background:
             variant === "hero"
-              ? "radial-gradient(ellipse 80% 50% at 50% 30%, rgba(147, 197, 253, 0.15), transparent 70%)"
-              : "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(147, 197, 253, 0.08), transparent 60%)",
+              ? "radial-gradient(ellipse 90% 60% at 50% 20%, rgba(147, 197, 253, 0.18), transparent 70%)"
+              : "radial-gradient(ellipse 70% 50% at 50% 50%, rgba(147, 197, 253, 0.1), transparent 60%)",
         }}
       />
 
       {/* SVG Grid - Latitude/Longitude lines */}
       {showGrid && (
         <svg
-          className="absolute inset-0 w-full h-full opacity-[0.04]"
+          className="absolute inset-0 w-full h-full opacity-[0.035]"
           xmlns="http://www.w3.org/2000/svg"
           preserveAspectRatio="none"
         >
           <defs>
             {/* Horizontal lines pattern (latitudes) */}
             <pattern
-              id="lat-lines"
+              id="int-lat-lines"
               patternUnits="userSpaceOnUse"
               width="100"
-              height="60"
+              height="50"
             >
               <line
                 x1="0"
-                y1="30"
+                y1="25"
                 x2="100"
-                y2="30"
+                y2="25"
                 stroke="currentColor"
                 strokeWidth="0.5"
-                className="text-slate-600"
+                className="text-slate-500"
               />
             </pattern>
 
-            {/* Vertical curved lines pattern (longitudes) - simplified as straight for performance */}
+            {/* Vertical lines pattern (longitudes) */}
             <pattern
-              id="long-lines"
+              id="int-long-lines"
               patternUnits="userSpaceOnUse"
-              width="80"
+              width="60"
               height="100"
             >
               <line
-                x1="40"
+                x1="30"
                 y1="0"
-                x2="40"
+                x2="30"
                 y2="100"
                 stroke="currentColor"
                 strokeWidth="0.5"
-                className="text-slate-600"
+                className="text-slate-500"
               />
             </pattern>
           </defs>
 
           {/* Apply patterns */}
-          <rect width="100%" height="100%" fill="url(#lat-lines)" />
-          <rect width="100%" height="100%" fill="url(#long-lines)" />
+          <rect width="100%" height="100%" fill="url(#int-lat-lines)" />
+          <rect width="100%" height="100%" fill="url(#int-long-lines)" />
         </svg>
       )}
 
       {/* Dots pattern - world map abstraction */}
       {showDots && (
         <svg
-          className="absolute inset-0 w-full h-full opacity-[0.025]"
+          className="absolute inset-0 w-full h-full opacity-[0.02]"
           xmlns="http://www.w3.org/2000/svg"
         >
           <defs>
             <pattern
-              id="dots-pattern"
+              id="int-dots-pattern"
               patternUnits="userSpaceOnUse"
-              width="24"
-              height="24"
+              width="20"
+              height="20"
             >
               <circle
                 cx="2"
                 cy="2"
-                r="1"
+                r="0.8"
                 fill="currentColor"
-                className="text-slate-700"
+                className="text-slate-600"
               />
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill="url(#dots-pattern)" />
+          <rect width="100%" height="100%" fill="url(#int-dots-pattern)" />
         </svg>
       )}
 
-      {/* Subtle vignette */}
+      {/* Noise texture overlay for tactile feel */}
+      {showNoise && (
+        <div
+          className="absolute inset-0 opacity-[0.015] mix-blend-overlay"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          }}
+        />
+      )}
+
+      {/* Floating decorative dots - positioned absolutely */}
+      {showFloatingDots && (
+        <>
+          <div className="absolute top-[15%] left-[10%] w-2 h-2 rounded-full bg-blue-400/20" />
+          <div className="absolute top-[25%] right-[15%] w-3 h-3 rounded-full bg-slate-400/15" />
+          <div className="absolute top-[45%] left-[5%] w-1.5 h-1.5 rounded-full bg-blue-300/25" />
+          <div className="absolute bottom-[30%] right-[8%] w-2.5 h-2.5 rounded-full bg-slate-400/20" />
+          <div className="absolute bottom-[20%] left-[20%] w-2 h-2 rounded-full bg-blue-400/15" />
+          <div className="absolute top-[60%] right-[25%] w-1.5 h-1.5 rounded-full bg-slate-300/20" />
+        </>
+      )}
+
+      {/* Subtle vignette - frames the content */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at center, transparent 40%, rgba(241, 245, 249, 0.5) 100%)",
+            "radial-gradient(ellipse at center, transparent 50%, rgba(241, 245, 249, 0.4) 100%)",
         }}
       />
     </div>
@@ -140,38 +168,45 @@ export function GlobalBackdrop({
 }
 
 /**
- * GlobeIcon - A subtle decorative globe element
+ * SectionDivider - A subtle gradient line to separate sections
  */
-export function GlobeDecoration({ className }: { className?: string }) {
+export function SectionDivider({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn("relative h-px w-full max-w-5xl mx-auto", className)}
+      aria-hidden="true"
+    >
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent 0%, rgba(148, 163, 184, 0.3) 20%, rgba(148, 163, 184, 0.3) 80%, transparent 100%)",
+        }}
+      />
+    </div>
+  );
+}
+
+/**
+ * FloatingAccent - Small decorative floating shape
+ */
+export function FloatingAccent({
+  className,
+  variant = "circle",
+}: {
+  className?: string;
+  variant?: "circle" | "ring";
+}) {
   return (
     <div
       className={cn(
-        "relative w-16 h-16 md:w-20 md:h-20 opacity-60",
+        "absolute pointer-events-none",
+        variant === "circle"
+          ? "w-32 h-32 rounded-full bg-gradient-to-br from-blue-200/10 to-transparent"
+          : "w-40 h-40 rounded-full border border-slate-300/10",
         className
       )}
       aria-hidden="true"
-    >
-      <svg
-        viewBox="0 0 100 100"
-        className="w-full h-full text-blue-600/20"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="0.75"
-      >
-        {/* Outer circle */}
-        <circle cx="50" cy="50" r="45" />
-        
-        {/* Equator */}
-        <ellipse cx="50" cy="50" rx="45" ry="18" />
-        
-        {/* Longitude lines */}
-        <ellipse cx="50" cy="50" rx="18" ry="45" />
-        <ellipse cx="50" cy="50" rx="35" ry="45" />
-        
-        {/* Latitude lines */}
-        <ellipse cx="50" cy="30" rx="38" ry="12" />
-        <ellipse cx="50" cy="70" rx="38" ry="12" />
-      </svg>
-    </div>
+    />
   );
 }

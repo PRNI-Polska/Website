@@ -312,6 +312,44 @@ export const translations: Translations = {
     de: "Den Umfang der Teilnahme verstehen" 
   },
 
+  // International Wing - How It Works
+  "wings.international.howItWorks.title": { 
+    en: "How International Cooperation Works", 
+    pl: "Jak działa współpraca międzynarodowa", 
+    de: "Wie internationale Zusammenarbeit funktioniert" 
+  },
+  "wings.international.howItWorks.step1.title": { en: "Connect", pl: "Połącz się", de: "Verbinden" },
+  "wings.international.howItWorks.step1.desc": { 
+    en: "Register as an affiliate and introduce yourself to our coordination team", 
+    pl: "Zarejestruj się jako współpracownik i przedstaw się naszemu zespołowi koordynacyjnemu", 
+    de: "Registrieren Sie sich als Mitarbeiter und stellen Sie sich unserem Koordinationsteam vor" 
+  },
+  "wings.international.howItWorks.step2.title": { en: "Contribute", pl: "Wspieraj", de: "Beitragen" },
+  "wings.international.howItWorks.step2.desc": { 
+    en: "Support through translations, research, outreach, or event coordination", 
+    pl: "Wspieraj poprzez tłumaczenia, badania, promocję lub koordynację wydarzeń", 
+    de: "Unterstützen Sie durch Übersetzungen, Forschung, Öffentlichkeitsarbeit oder Veranstaltungskoordination" 
+  },
+  "wings.international.howItWorks.step3.title": { en: "Collaborate", pl: "Współpracuj", de: "Zusammenarbeiten" },
+  "wings.international.howItWorks.step3.desc": { 
+    en: "Work with international affiliates to amplify our ideas across borders", 
+    pl: "Współpracuj z międzynarodowymi współpracownikami, aby rozpowszechniać nasze idee ponad granicami", 
+    de: "Arbeiten Sie mit internationalen Mitarbeitern zusammen, um unsere Ideen über Grenzen hinweg zu verbreiten" 
+  },
+
+  // International Wing - Cooperation Areas
+  "wings.international.areas.title": { 
+    en: "Areas of Cooperation", 
+    pl: "Obszary współpracy", 
+    de: "Kooperationsbereiche" 
+  },
+  "wings.international.areas.languages": { en: "Multilingual Support", pl: "Wsparcie wielojęzyczne", de: "Mehrsprachige Unterstützung" },
+  "wings.international.areas.research": { en: "Academic Research", pl: "Badania naukowe", de: "Akademische Forschung" },
+  "wings.international.areas.media": { en: "Media & Communications", pl: "Media i komunikacja", de: "Medien & Kommunikation" },
+  "wings.international.areas.events": { en: "International Events", pl: "Wydarzenie międzynarodowe", de: "Internationale Veranstaltungen" },
+  "wings.international.areas.dialogue": { en: "Cross-border Dialogue", pl: "Dialog transgraniczny", de: "Grenzüberschreitender Dialog" },
+  "wings.international.areas.culture": { en: "Cultural Exchange", pl: "Wymiana kulturowa", de: "Kulturaustausch" },
+
   // Announcements
   "announcements.title": { en: "Announcements", pl: "Komunikaty", de: "Mitteilungen" },
   "announcements.subtitle": { en: "Official communications from our movement", pl: "Oficjalne komunikaty naszego ruchu", de: "Offizielle Mitteilungen unserer Bewegung" },

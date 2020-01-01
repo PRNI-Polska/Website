@@ -584,18 +584,41 @@ export const translations: Translations = {
   "common.loading": { en: "Loading...", pl: "Ładowanie..." },
   
   // Contact form
-  "contact.title": { en: "Contact Us", pl: "Kontakt" },
+  "contact.title": { en: "Contact", pl: "Kontakt", de: "Kontakt" },
   "contact.subtitle": { 
     en: "Have a question or want to get involved? We'd love to hear from you.", 
-    pl: "Masz pytanie lub chcesz się zaangażować? Chętnie Cię wysłuchamy." 
+    pl: "Masz pytanie lub chcesz się zaangażować? Chętnie Cię wysłuchamy.",
+    de: "Haben Sie eine Frage oder möchten Sie sich engagieren? Wir freuen uns auf Ihre Nachricht.",
   },
-  "contact.form.name": { en: "Name", pl: "Imię i nazwisko" },
-  "contact.form.email": { en: "Email", pl: "E-mail" },
-  "contact.form.subject": { en: "Subject", pl: "Temat" },
-  "contact.form.message": { en: "Message", pl: "Wiadomość" },
-  "contact.form.send": { en: "Send Message", pl: "Wyślij Wiadomość" },
-  "contact.form.sending": { en: "Sending...", pl: "Wysyłanie..." },
-  "contact.form.success": { en: "Message Sent!", pl: "Wiadomość Wysłana!" },
+  "contact.email.title": { en: "Email", pl: "E-mail", de: "E-Mail" },
+  "contact.form.title": { en: "Send a message", pl: "Wyślij wiadomość", de: "Nachricht senden" },
+  "contact.form.desc": { 
+    en: "Fill out the form below and we'll get back to you as soon as possible.", 
+    pl: "Wypełnij formularz poniżej, a my skontaktujemy się z Tobą najszybciej jak to możliwe.",
+    de: "Füllen Sie das Formular aus und wir melden uns so schnell wie möglich bei Ihnen.",
+  },
+  "contact.form.name": { en: "Name", pl: "Imię i nazwisko", de: "Name" },
+  "contact.form.namePlaceholder": { en: "Your name", pl: "Twoje imię i nazwisko", de: "Ihr Name" },
+  "contact.form.email": { en: "Email", pl: "E-mail", de: "E-Mail" },
+  "contact.form.emailPlaceholder": { en: "your@email.com", pl: "twoj@email.com", de: "ihre@email.de" },
+  "contact.form.subject": { en: "Subject", pl: "Temat", de: "Betreff" },
+  "contact.form.subjectPlaceholder": { en: "What is this about?", pl: "Czego dotyczy wiadomość?", de: "Worum geht es?" },
+  "contact.form.message": { en: "Message", pl: "Wiadomość", de: "Nachricht" },
+  "contact.form.messagePlaceholder": { en: "Your message...", pl: "Twoja wiadomość...", de: "Ihre Nachricht..." },
+  "contact.form.send": { en: "Send Message", pl: "Wyślij Wiadomość", de: "Nachricht senden" },
+  "contact.form.sending": { en: "Sending...", pl: "Wysyłanie...", de: "Wird gesendet..." },
+  "contact.form.success": { en: "Message Sent!", pl: "Wiadomość Wysłana!", de: "Nachricht gesendet!" },
+  "contact.form.success.text": { 
+    en: "Thank you for reaching out. We'll get back to you soon.", 
+    pl: "Dziękujemy za kontakt. Odezwiemy się najszybciej jak to możliwe.",
+    de: "Vielen Dank für Ihre Nachricht. Wir melden uns bald bei Ihnen.",
+  },
+  "contact.form.sendAnother": { en: "Send Another Message", pl: "Wyślij kolejną wiadomość", de: "Weitere Nachricht senden" },
+  "contact.form.required": { 
+    en: "* Required fields. Your information will be kept confidential.", 
+    pl: "* Pola wymagane. Twoje informacje pozostaną poufne.",
+    de: "* Pflichtfelder. Ihre Daten bleiben vertraulich.",
+  },
   
   // About
   "about.title": { 

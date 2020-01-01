@@ -216,22 +216,32 @@
  */
 .hero-flag-bg {
   position: relative;
-  background: linear-gradient(180deg, 
-    hsl(var(--background)) 0%, 
-    hsl(var(--background)) 48%,
-    /* subtle national accent on dark */
-    hsl(0 0% 5%) 50%,
-    hsl(0 0% 6%) 62%,
-    hsl(0 10% 8%) 75%,
-    hsl(0 15% 12%) 100%
-  );
+  background: hsl(var(--background));
 }
 
 .hero-flag-bg::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(0,0,0,0.5), transparent);
+  background-image: url('/hero-flag.png');
+  background-size: cover;
+  background-position: center 30%;
+  background-repeat: no-repeat;
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.hero-flag-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    hsl(var(--background)) 0%,
+    transparent 30%,
+    transparent 70%,
+    hsl(var(--background)) 100%
+  );
   pointer-events: none;
 }
 

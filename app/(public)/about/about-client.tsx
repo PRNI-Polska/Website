@@ -1,6 +1,7 @@
 // file: app/(public)/about/about-client.tsx
 "use client";
 
+import Image from "next/image";
 import { Mail, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -53,6 +54,18 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
           <p className="text-xl text-muted-foreground">
             {t("about.subtitle")}
           </p>
+        </div>
+
+        {/* Photo banner */}
+        <div className="max-w-4xl mx-auto mb-16 relative rounded-lg overflow-hidden aspect-[21/9]">
+          <Image
+            src="/members-flag.png"
+            alt="PRNI members"
+            fill
+            className="object-cover object-center"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/40" />
         </div>
 
         {/* Mission & Vision */}

@@ -639,8 +639,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Improve Typography (Size & Contrast) - DESKTOP */
 p, li, .text-muted-foreground {
-  font-size: 17px !important;      /* Good size for desktop */
-  line-height: 1.75 !important;    /* More breathing room between lines */
+  font-size: 16px !important;      /* Normal size for desktop */
+  line-height: 1.65 !important;    /* Good line spacing */
   color: #0d0d0d !important;       /* High contrast (almost black) text */
 }
 
@@ -665,10 +665,10 @@ p, li, .text-muted-foreground {
     line-height: 1.15 !important;
   }
   
-  /* Larger body text on mobile - easier to read on small screens */
+  /* 23px body text on mobile - perfect for phones */
   p, li, .text-muted-foreground {
-    font-size: 19px !important;
-    line-height: 1.8 !important;
+    font-size: 23px !important;
+    line-height: 1.75 !important;
   }
   
   /* More breathing room for headings on mobile */

@@ -96,13 +96,29 @@ export default function MembersLayout({
   );
 }
 
+function isIOSSafari(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+
+function isStandalone(): boolean {
+  if (typeof window === "undefined") return false;
+  return (
+    ("standalone" in window.navigator && (window.navigator as unknown as { standalone: boolean }).standalone === true) ||
+    window.matchMedia("(display-mode: standalone)").matches
+  );
+}
+
 function MembersLayoutInner({ member, loggingOut, handleLogout, pathname, children }: { member: MemberInfo | null; loggingOut: boolean; handleLogout: () => void; pathname: string; children: React.ReactNode }) {
   const { t, lang, setLang } = useMemberLang();
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushLoading, setPushLoading] = useState(false);
+  const [showIOSPrompt, setShowIOSPrompt] = useState(false);
 
   useEffect(() => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+
     navigator.serviceWorker.register("/sw.js").catch(() => {});
     navigator.serviceWorker.ready.then(async (reg) => {
       const sub = await reg.pushManager.getSubscription();
@@ -111,6 +127,11 @@ function MembersLayoutInner({ member, loggingOut, handleLogout, pathname, childr
   }, []);
 
   async function togglePush() {
+    if (isIOSSafari() && !isStandalone()) {
+      setShowIOSPrompt(true);
+      return;
+    }
+
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
       alert("Push notifications are not supported in this browser.");
       return;
@@ -211,6 +232,25 @@ function MembersLayoutInner({ member, loggingOut, handleLogout, pathname, childr
           )}
         </div>
       </header>
+
+      {showIOSPrompt && (
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-4" onClick={() => setShowIOSPrompt(false)}>
+          <div className="bg-[#111] border border-[#222] rounded-2xl p-6 max-w-sm w-full space-y-4 text-center" onClick={(e) => e.stopPropagation()}>
+            <div className="text-3xl">📲</div>
+            <h3 className="text-lg font-semibold text-white">Install PRNI to enable notifications</h3>
+            <p className="text-sm text-[#888] leading-relaxed">
+              On iPhone/iPad, push notifications require the app to be installed.
+              Tap the <span className="inline-block text-white">Share</span> button
+              {" "}in Safari, then select <span className="text-white">&quot;Add to Home Screen&quot;</span>.
+              After that, open PRNI from your home screen and enable notifications.
+            </p>
+            <button onClick={() => setShowIOSPrompt(false)} className="w-full py-2.5 bg-white text-black rounded-lg text-sm font-semibold hover:bg-[#ddd] transition">
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
+
       <main className={`flex-1 overflow-hidden ${pathname.startsWith("/members/channels") || pathname.startsWith("/members/messages") ? "" : "overflow-y-auto"}`}>
         <div className={pathname.startsWith("/members/channels") || pathname.startsWith("/members/messages") ? "h-full" : "max-w-4xl mx-auto px-6 py-8"}>
           {children}

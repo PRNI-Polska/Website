@@ -167,3 +167,26 @@ model SiteSettings {
   
   @@map("site_settings")
 }
+
+// ============================================================================
+// PAGE VIEW MODEL - Analytics tracking
+// ============================================================================
+model PageView {
+  id        String    @id @default(cuid())
+  path      String
+  sessionId String?
+  country   String?
+  city      String?
+  region    String?
+  device    String?
+  browser   String?
+  os        String?
+  referrer  String?
+  createdAt DateTime  @default(now())
+  
+  @@index([path])
+  @@index([country])
+  @@index([createdAt])
+  @@index([sessionId])
+  @@map("page_views")
+}

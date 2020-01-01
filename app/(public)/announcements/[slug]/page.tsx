@@ -40,7 +40,7 @@ async function getAnnouncement(slug: string) {
   return announcement;
 }
 
-async function getRelatedAnnouncements(category: AnnouncementCategory, excludeId: string) {
+async function getRelatedAnnouncements(category: string, excludeId: string) {
   return prisma.announcement.findMany({
     where: {
       status: "PUBLISHED",
@@ -106,7 +106,7 @@ export default async function AnnouncementPage({ params }: PageProps) {
       {/* Header */}
       <header className="max-w-3xl mb-8">
         <Badge variant="secondary" className="mb-4">
-          {categoryLabels[announcement.category]}
+          {categoryLabels[announcement.category as AnnouncementCategory]}
         </Badge>
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold mb-4">
           {announcement.title}
@@ -131,7 +131,7 @@ export default async function AnnouncementPage({ params }: PageProps) {
           )}
           <div className="flex items-center gap-1">
             <Tag className="h-4 w-4" />
-            <span>{categoryLabels[announcement.category]}</span>
+            <span>{categoryLabels[announcement.category as AnnouncementCategory]}</span>
           </div>
         </div>
       </header>

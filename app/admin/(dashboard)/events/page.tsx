@@ -107,7 +107,7 @@ export default async function AdminEventsPage() {
                       <td className="py-3 px-4">
                         <span
                           className={`text-xs px-2 py-1 rounded ${
-                            statusColors[event.status]
+                            statusColors[event.status as ContentStatus]
                           }`}
                         >
                           {event.status.toLowerCase()}

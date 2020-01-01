@@ -250,7 +250,7 @@ export default async function AnnouncementsPage({ searchParams }: PageProps) {
               <CardHeader>
                 <div className="flex items-center gap-2 mb-2">
                   <Badge variant="secondary">
-                    {categoryLabels[announcement.category]}
+                    {categoryLabels[announcement.category as AnnouncementCategory]}
                   </Badge>
                 </div>
                 <CardTitle className="line-clamp-2">

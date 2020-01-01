@@ -7,6 +7,17 @@ import { LogOut, Loader2, Hash, MessageCircle, FileText, Newspaper, Bell, BellOf
 import { MemberLangProvider, useMemberLang } from "@/lib/members/LangContext";
 import type { MemberLang } from "@/lib/members/i18n";
 
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 interface MemberInfo {
   id: string;
   displayName: string;
@@ -100,7 +111,10 @@ function MembersLayoutInner({ member, loggingOut, handleLogout, pathname, childr
   }, []);
 
   async function togglePush() {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+      alert("Push notifications are not supported in this browser.");
+      return;
+    }
     setPushLoading(true);
     try {
       const reg = await navigator.serviceWorker.ready;
@@ -109,9 +123,16 @@ function MembersLayoutInner({ member, loggingOut, handleLogout, pathname, childr
         if (sub) { await sub.unsubscribe(); await fetch("/api/members/push/subscribe", { method: "DELETE" }); }
         setPushEnabled(false);
       } else {
+        const vapidKey = process.env.NEXT_PUBLIC_VAPID_KEY;
+        if (!vapidKey) {
+          console.error("NEXT_PUBLIC_VAPID_KEY is not set");
+          alert("Push notifications are not configured yet.");
+          return;
+        }
+        const key = urlBase64ToUint8Array(vapidKey);
         const sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: process.env.NEXT_PUBLIC_VAPID_KEY,
+          applicationServerKey: key,
         });
         await fetch("/api/members/push/subscribe", {
           method: "POST",
@@ -120,8 +141,10 @@ function MembersLayoutInner({ member, loggingOut, handleLogout, pathname, childr
         });
         setPushEnabled(true);
       }
-    } catch { /* ignore */ }
-    finally { setPushLoading(false); }
+    } catch (err) {
+      console.error("Push toggle error:", err);
+      alert("Failed to toggle notifications. Check browser permissions.");
+    } finally { setPushLoading(false); }
   }
 
   return (

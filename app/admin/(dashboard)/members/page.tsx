@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { adminFetch } from "@/lib/admin-fetch";
 import {
   Card,
   CardContent,
@@ -131,9 +132,8 @@ export default function AdminMembersPage() {
     if (!newChannelName.trim()) return;
     setCreatingChannel(true);
     try {
-      const res = await fetch("/api/admin/members/channels", {
+      const res = await adminFetch("/api/admin/members/channels", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newChannelName.trim(), description: newChannelDesc.trim() || null, allowedRoles: newChannelRoles || null }),
       });
       if (!res.ok) throw new Error("Failed");
@@ -147,7 +147,7 @@ export default function AdminMembersPage() {
     if (!confirm("Delete this channel and all its messages?")) return;
     setActionLoading(id);
     try {
-      await fetch(`/api/admin/members/channels?id=${id}`, { method: "DELETE" });
+      await adminFetch(`/api/admin/members/channels?id=${id}`, { method: "DELETE" });
       fetchChannels();
     } catch { /* ignore */ }
     finally { setActionLoading(null); }
@@ -158,9 +158,8 @@ export default function AdminMembersPage() {
     setGeneratedCode(null);
     setGeneratedExpiry(null);
     try {
-      const res = await fetch("/api/admin/members", {
+      const res = await adminFetch("/api/admin/members", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: inviteEmail.trim() || undefined,
           code: customCode.trim() || undefined,
@@ -195,9 +194,8 @@ export default function AdminMembersPage() {
   async function changeMemberRole(id: string, role: string) {
     setActionLoading(id);
     try {
-      const res = await fetch(`/api/admin/members/${id}`, {
+      const res = await adminFetch(`/api/admin/members/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role }),
       });
       if (res.ok) {
@@ -213,9 +211,8 @@ export default function AdminMembersPage() {
   async function toggleMember(id: string) {
     setActionLoading(id);
     try {
-      const res = await fetch(`/api/admin/members/${id}`, {
+      const res = await adminFetch(`/api/admin/members/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: !members.find((m) => m.id === id)?.isActive }),
       });
       if (res.ok) {
@@ -237,7 +234,7 @@ export default function AdminMembersPage() {
     if (!confirm("Are you sure you want to delete this member?")) return;
     setActionLoading(id);
     try {
-      const res = await fetch(`/api/admin/members/${id}`, {
+      const res = await adminFetch(`/api/admin/members/${id}`, {
         method: "DELETE",
       });
       if (res.ok) {
@@ -400,9 +397,8 @@ export default function AdminMembersPage() {
                               onBlur={async (e) => {
                                 const newName = e.target.value.trim();
                                 if (newName && newName !== member.displayName && newName.length >= 2) {
-                                  const res = await fetch(`/api/admin/members/${member.id}`, {
+                                  const res = await adminFetch(`/api/admin/members/${member.id}`, {
                                     method: "PATCH",
-                                    headers: { "Content-Type": "application/json" },
                                     body: JSON.stringify({ displayName: newName }),
                                   });
                                   if (res.ok) {
@@ -423,9 +419,8 @@ export default function AdminMembersPage() {
                               onBlur={async (e) => {
                                 const val = e.target.value.trim();
                                 if (val !== (member.fullName || "")) {
-                                  const res = await fetch(`/api/admin/members/${member.id}`, {
+                                  const res = await adminFetch(`/api/admin/members/${member.id}`, {
                                     method: "PATCH",
-                                    headers: { "Content-Type": "application/json" },
                                     body: JSON.stringify({ fullName: val }),
                                   });
                                   if (res.ok) setMembers((prev) => prev.map((m) => m.id === member.id ? { ...m, fullName: val || null } : m));
@@ -442,9 +437,8 @@ export default function AdminMembersPage() {
                               onBlur={async (e) => {
                                 const val = e.target.value.trim();
                                 if (val !== (member.location || "")) {
-                                  const res = await fetch(`/api/admin/members/${member.id}`, {
+                                  const res = await adminFetch(`/api/admin/members/${member.id}`, {
                                     method: "PATCH",
-                                    headers: { "Content-Type": "application/json" },
                                     body: JSON.stringify({ location: val }),
                                   });
                                   if (res.ok) setMembers((prev) => prev.map((m) => m.id === member.id ? { ...m, location: val || null } : m));
@@ -824,7 +818,7 @@ export default function AdminMembersPage() {
                   <p className="text-muted-foreground mb-4">No channels yet.</p>
                   <Button variant="outline" onClick={async () => {
                     setCreatingChannel(true);
-                    try { await fetch("/api/admin/members/channels/setup", { method: "POST" }); fetchChannels(); }
+                    try { await adminFetch("/api/admin/members/channels/setup", { method: "POST" }); fetchChannels(); }
                     catch {} finally { setCreatingChannel(false); }
                   }} disabled={creatingChannel}>
                     {creatingChannel ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}

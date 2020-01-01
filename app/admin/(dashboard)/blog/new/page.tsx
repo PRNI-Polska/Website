@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,9 +70,8 @@ export default function NewBlogPostPage() {
     setError("");
 
     try {
-      const res = await fetch("/api/admin/blog", {
+      const res = await adminFetch("/api/admin/blog", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
 

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Eye, Save } from "lucide-react";
+import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -71,9 +72,8 @@ export function ManifestoForm({ section, parentOptions = [] }: ManifestoFormProp
       const url = section ? `/api/admin/manifesto/${section.id}` : "/api/admin/manifesto";
       const method = section ? "PATCH" : "POST";
 
-      const response = await fetch(url, {
+      const response = await adminFetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 

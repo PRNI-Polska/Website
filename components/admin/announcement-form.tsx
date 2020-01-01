@@ -23,6 +23,7 @@ import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { toast } from "@/components/ui/use-toast";
 import { createAnnouncementSchema, type CreateAnnouncementInput } from "@/lib/validations";
 import { slugify, cn } from "@/lib/utils";
+import { adminFetch } from "@/lib/admin-fetch";
 import type { Announcement } from "@prisma/client";
 
 // Type-safe category values
@@ -110,9 +111,8 @@ export function AnnouncementForm({ announcement }: AnnouncementFormProps) {
         : "/api/admin/announcements";
       const method = announcement ? "PATCH" : "POST";
 
-      const response = await fetch(url, {
+      const response = await adminFetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 

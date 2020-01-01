@@ -275,7 +275,7 @@ export type RecruitmentFormInput = z.infer<typeof recruitmentFormSchema>;
 // BLOG POST SCHEMAS
 // ============================================================================
 export const blogCategoryEnum = z.enum([
-  "OPINION", "ANALYSIS", "INTERVIEW", "REPORT", "OTHER",
+  "OPINION", "ANALYSIS", "COMMENTARY", "INTERVIEW", "REPORT", "OTHER",
 ]);
 
 export const createBlogPostSchema = z.object({

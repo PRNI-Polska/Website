@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { adminFetch } from "@/lib/admin-fetch";
 import { Badge } from "@/components/ui/badge";
 import type { CreatedMeeting } from "@/lib/calls/api";
 
@@ -28,9 +29,8 @@ export default function AdminCallsPage() {
     e.preventDefault();
     setLoading(true); setError(null); setResult(null);
     try {
-      const res = await fetch("/api/admin/calls", {
+      const res = await adminFetch("/api/admin/calls", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, durationMinutes: duration }),
       });
       if (!res.ok) {

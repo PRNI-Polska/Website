@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { Loader2, Eye, Save } from "lucide-react";
+import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -94,9 +95,8 @@ export function EventForm({ event }: EventFormProps) {
         : "/api/admin/events";
       const method = event ? "PATCH" : "POST";
 
-      const response = await fetch(url, {
+      const response = await adminFetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
           startDateTime: new Date(data.startDateTime).toISOString(),

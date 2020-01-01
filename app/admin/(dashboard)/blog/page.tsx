@@ -146,7 +146,7 @@ export default function AdminBlogPage() {
                             {post.status === "PUBLISHED" && (
                               <DropdownMenuItem asChild>
                                 <Link
-                                  href={`/blog/${post.slug}`}
+                                  href={`/members/blog/${post.slug}`}
                                   target="_blank"
                                 >
                                   <Eye className="mr-2 h-4 w-4" />

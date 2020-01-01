@@ -116,9 +116,7 @@ export default function MembersDashboard() {
         {posts.map((post) => (
           <a
             key={`${post.type}-${post.id}`}
-            href={post.type === "blog" ? `/blog/${post.slug}` : `/announcements/${post.slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={post.type === "blog" ? `/members/blog/${post.slug}` : `/announcements/${post.slug}`}
             onClick={() => trackView(post.id)}
             className="block border border-[#1a1a1a] rounded-xl p-5 hover:border-[#333] transition bg-[#0d0d0d] group"
           >

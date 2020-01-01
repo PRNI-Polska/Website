@@ -504,7 +504,7 @@
     opacity: 0.035;
     pointer-events: none;
     animation: grain 8s steps(10) infinite;
-    z-index: 1;
+    z-index: -1;
   }
   
   /* Button hover glow */

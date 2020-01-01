@@ -71,12 +71,12 @@ export default function HomePage() {
             {/* Logo with parallax and glow */}
             <div 
               ref={parallaxRef}
-              className="relative w-32 h-32 md:w-40 md:h-40 mx-auto mb-8"
+              className="relative w-32 h-32 md:w-40 md:h-40 mx-auto mb-8 z-10"
             >
               {/* Radial pulse behind logo */}
               <div className="radial-pulse" />
               
-              <div className="animate-scale-in">
+              <div className="animate-scale-in relative z-10">
                 <Image
                   src="/logo.png"
                   alt="PRNI Logo"

@@ -730,7 +730,17 @@ export default function AdminMembersPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-center py-8 text-muted-foreground">No channels yet. Create one above.</p>
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground mb-4">No channels yet.</p>
+                  <Button variant="outline" onClick={async () => {
+                    setCreatingChannel(true);
+                    try { await fetch("/api/admin/members/channels/setup", { method: "POST" }); fetchChannels(); }
+                    catch {} finally { setCreatingChannel(false); }
+                  }} disabled={creatingChannel}>
+                    {creatingChannel ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Create default channels (Ogólne, Zarząd, Międzynarodowe, etc.)
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>

@@ -1,38 +1,69 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Pin, FileText } from "lucide-react";
+import { Loader2, FileText, Calendar, ChevronRight } from "lucide-react";
 
-interface MemberDocument {
+interface Post {
   id: string;
   title: string;
-  content: string;
+  slug: string;
+  excerpt: string;
+  authorName?: string;
   category: string;
-  pinned: boolean;
-  createdAt: string;
-  updatedAt: string;
+  publishedAt: string;
+  type: "blog" | "announcement";
 }
 
 export default function MembersDashboard() {
-  const [documents, setDocuments] = useState<MemberDocument[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
   useEffect(() => {
-    async function fetchDocuments() {
+    async function fetchContent() {
       try {
-        const res = await fetch("/api/members/documents");
-        if (!res.ok) throw new Error("Failed to fetch");
-        const data = await res.json();
-        setDocuments(data.documents);
+        const [blogRes, announcementsRes] = await Promise.all([
+          fetch("/api/admin/blog").then((r) => r.ok ? r.json() : { posts: [] }).catch(() => ({ posts: [] })),
+          fetch("/api/admin/announcements").then((r) => r.ok ? r.json() : { announcements: [] }).catch(() => ({ announcements: [] })),
+        ]);
+
+        const blogPosts: Post[] = (blogRes.posts || [])
+          .filter((p: Record<string, unknown>) => p.status === "PUBLISHED")
+          .map((p: Record<string, string>) => ({
+            id: p.id,
+            title: p.title,
+            slug: p.slug,
+            excerpt: p.excerpt || "",
+            authorName: p.authorName,
+            category: p.category,
+            publishedAt: p.publishedAt || p.createdAt,
+            type: "blog" as const,
+          }));
+
+        const announcements: Post[] = (announcementsRes.announcements || [])
+          .filter((a: Record<string, unknown>) => a.status === "PUBLISHED")
+          .map((a: Record<string, string>) => ({
+            id: a.id,
+            title: a.title,
+            slug: a.slug,
+            excerpt: a.excerpt || "",
+            category: a.category,
+            publishedAt: a.publishedAt || a.createdAt,
+            type: "announcement" as const,
+          }));
+
+        const all = [...blogPosts, ...announcements].sort(
+          (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+        );
+
+        setPosts(all);
       } catch {
-        setError("Failed to load documents");
+        /* ignore */
       } finally {
         setLoading(false);
       }
     }
 
-    fetchDocuments();
+    fetchContent();
   }, []);
 
   if (loading) {
@@ -43,118 +74,57 @@ export default function MembersDashboard() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="text-center py-20">
-        <p className="text-red-400 text-sm">{error}</p>
-      </div>
-    );
-  }
-
-  const pinnedDocs = documents.filter((d) => d.pinned);
-  const unpinnedDocs = documents.filter((d) => !d.pinned);
-
-  const categories = Array.from(
-    new Set(unpinnedDocs.map((d) => d.category))
-  ).sort();
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-[#888] text-sm mt-1">
-          Private documents and resources
-        </p>
+        <h1 className="text-2xl font-bold tracking-tight">Aktualności</h1>
+        <p className="text-[#888] text-sm mt-1">Blog, ogłoszenia i najnowsze informacje</p>
       </div>
 
-      {documents.length === 0 && (
+      {posts.length === 0 && (
         <div className="text-center py-16 border border-[#1a1a1a] rounded-xl">
           <FileText className="h-8 w-8 text-[#444] mx-auto mb-3" />
-          <p className="text-[#666] text-sm">No documents available yet.</p>
+          <p className="text-[#666] text-sm">Brak postów.</p>
         </div>
       )}
 
-      {pinnedDocs.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-sm font-medium text-[#888] uppercase tracking-wider flex items-center gap-2">
-            <Pin className="h-3.5 w-3.5" />
-            Pinned
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {pinnedDocs.map((doc) => (
-              <DocumentCard key={doc.id} document={doc} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {categories.map((category) => {
-        const categoryDocs = unpinnedDocs.filter(
-          (d) => d.category === category
-        );
-        if (categoryDocs.length === 0) return null;
-
-        return (
-          <div key={category} className="space-y-4">
-            <h2 className="text-sm font-medium text-[#888] uppercase tracking-wider">
-              {category}
-            </h2>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {categoryDocs.map((doc) => (
-                <DocumentCard key={doc.id} document={doc} />
-              ))}
+      <div className="space-y-3">
+        {posts.map((post) => (
+          <a
+            key={`${post.type}-${post.id}`}
+            href={post.type === "blog" ? `/blog/${post.slug}` : `/announcements/${post.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block border border-[#1a1a1a] rounded-xl p-5 hover:border-[#333] transition bg-[#0d0d0d] group"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-2">
+                  {post.type === "blog" ? (
+                    <span className="text-[10px] uppercase tracking-wider font-medium text-blue-400/70 bg-blue-400/10 px-2 py-0.5 rounded">Blog</span>
+                  ) : (
+                    <span className="text-[10px] uppercase tracking-wider font-medium text-amber-400/70 bg-amber-400/10 px-2 py-0.5 rounded">Ogłoszenie</span>
+                  )}
+                  <span className="text-[10px] uppercase tracking-wider text-[#555]">{post.category}</span>
+                </div>
+                <h3 className="font-semibold text-[#e8e8e8] text-base leading-tight group-hover:text-white transition">
+                  {post.title}
+                </h3>
+                {post.excerpt && (
+                  <p className="text-[#888] text-sm mt-1.5 line-clamp-2">{post.excerpt}</p>
+                )}
+                <div className="flex items-center gap-3 mt-3 text-xs text-[#555]">
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {new Date(post.publishedAt).toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" })}
+                  </span>
+                  {post.authorName && <span>· {post.authorName}</span>}
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-[#333] group-hover:text-[#888] transition shrink-0 mt-1" />
             </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function DocumentCard({ document }: { document: MemberDocument }) {
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <div className="border border-[#1a1a1a] rounded-xl p-5 hover:border-[#333] transition bg-[#0d0d0d]">
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <h3 className="font-semibold text-[#e8e8e8] text-sm leading-tight">
-          {document.title}
-        </h3>
-        {document.pinned && (
-          <Pin className="h-3.5 w-3.5 text-[#666] shrink-0 mt-0.5" />
-        )}
-      </div>
-
-      <div
-        className={`text-[#999] text-sm leading-relaxed whitespace-pre-wrap ${
-          !expanded && document.content.length > 300
-            ? "line-clamp-4"
-            : ""
-        }`}
-      >
-        {document.content}
-      </div>
-
-      {document.content.length > 300 && (
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="text-xs text-[#666] hover:text-[#aaa] mt-2 transition"
-        >
-          {expanded ? "Show less" : "Read more"}
-        </button>
-      )}
-
-      <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#1a1a1a]">
-        <span className="text-xs text-[#555] font-medium uppercase tracking-wider">
-          {document.category}
-        </span>
-        <span className="text-xs text-[#555]">
-          {new Date(document.updatedAt).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })}
-        </span>
+          </a>
+        ))}
       </div>
     </div>
   );

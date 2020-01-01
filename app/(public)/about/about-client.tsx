@@ -13,10 +13,22 @@ interface TeamMember {
   name: string;
   role: string;
   bio: string;
+  quote?: string | null;
   photoUrl: string | null;
   email: string | null;
   isLeadership: boolean;
 }
+
+const FOUNDING_LEADER: TeamMember = {
+  id: "_founding_leader",
+  name: "Karol Małszycki",
+  role: "Prezes Naczelny Ruchu",
+  bio: "",
+  quote: "„Tolerancja jest cechą ludzi bez przekonań" ~ G.K. Chesterton",
+  photoUrl: "/team/karol.png",
+  email: null,
+  isLeadership: true,
+};
 
 interface AboutPageClientProps {
   teamMembers: TeamMember[];
@@ -24,9 +36,16 @@ interface AboutPageClientProps {
 
 export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
   const { t } = useI18n();
-  
-  const leadership = teamMembers.filter((m) => m.isLeadership);
-  const team = teamMembers.filter((m) => !m.isLeadership);
+
+  const hasFounder = teamMembers.some(
+    (m) => m.name === FOUNDING_LEADER.name
+  );
+  const allMembers = hasFounder
+    ? teamMembers
+    : [FOUNDING_LEADER, ...teamMembers];
+
+  const leadership = allMembers.filter((m) => m.isLeadership);
+  const team = allMembers.filter((m) => !m.isLeadership);
 
   const values = ["nationalism", "integralism", "sovereignty", "order"];
 
@@ -214,6 +233,7 @@ interface TeamMemberCardProps {
     name: string;
     role: string;
     bio: string;
+    quote?: string | null;
     photoUrl: string | null;
     email: string | null;
   };
@@ -233,7 +253,11 @@ function TeamMemberCard({ member, featured }: TeamMemberCardProps) {
       <CardHeader className={featured ? "items-center" : ""}>
         <Avatar className={featured ? "h-24 w-24 mb-4" : "h-16 w-16"}>
           {member.photoUrl && (
-            <AvatarImage src={member.photoUrl} alt={member.name} />
+            <AvatarImage
+              src={member.photoUrl}
+              alt={member.name}
+              className="object-cover object-top"
+            />
           )}
           <AvatarFallback className={featured ? "text-2xl" : "text-lg"}>
             {initials}
@@ -247,9 +271,16 @@ function TeamMemberCard({ member, featured }: TeamMemberCardProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <p className={`text-muted-foreground ${featured ? "" : "text-sm"} line-clamp-3`}>
-          {member.bio}
-        </p>
+        {member.bio && (
+          <p className={`text-muted-foreground ${featured ? "" : "text-sm"} line-clamp-3`}>
+            {member.bio}
+          </p>
+        )}
+        {member.quote && (
+          <p className={`italic text-muted-foreground/80 ${featured ? "text-sm" : "text-xs"} ${member.bio ? "mt-3" : ""}`}>
+            {member.quote}
+          </p>
+        )}
         {member.email && (
           <a
             href={`mailto:${member.email}`}

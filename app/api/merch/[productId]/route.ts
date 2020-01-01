@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStoreProduct } from "@/lib/gelato";
+import { getStoreProduct, extractAllProductImages } from "@/lib/gelato";
 import { getVariantRetailPrices } from "@/lib/gelato-prices";
 
 export async function GET(
@@ -30,12 +30,17 @@ export async function GET(
       };
     });
 
+    const allImages = extractAllProductImages(product);
+    const mainImage = product.previewUrl || product.externalPreviewUrl || product.externalThumbnailUrl;
+
     return NextResponse.json({
       product: {
         id: product.id,
         name: product.title,
         description: product.description,
-        preview_image: product.previewUrl || product.externalPreviewUrl || product.externalThumbnailUrl,
+        preview_image: mainImage,
+        images: allImages.length > 0 ? allImages : (mainImage ? [mainImage] : []),
+        variantOptions: product.productVariantOptions,
         variants,
       },
     });

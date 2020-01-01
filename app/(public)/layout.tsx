@@ -4,6 +4,7 @@
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { CookieConsent } from "@/components/cookie-consent";
+import { AnalyticsTracker } from "@/components/analytics-tracker";
 import { I18nProvider } from "@/lib/i18n";
 
 export default function PublicLayout({
@@ -20,6 +21,7 @@ export default function PublicLayout({
         </main>
         <Footer />
         <CookieConsent />
+        <AnalyticsTracker />
       </div>
     </I18nProvider>
   );

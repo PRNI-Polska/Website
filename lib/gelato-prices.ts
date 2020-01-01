@@ -1,15 +1,7 @@
 import { getCatalogPricesBatch } from "./gelato";
 
-// Small fixed margin on top of Gelato's production cost to cover
-// payment processing fees (Stripe ~3%) and rounding.
-const FIXED_MARGIN_EUR = 1.5;
-
-function roundUp50(n: number): number {
-  return Math.ceil(n * 2) / 2; // round up to nearest €0.50
-}
-
 export function applyMarkup(costEur: number): number {
-  return roundUp50(costEur + FIXED_MARGIN_EUR);
+  return Math.round(costEur * 100) / 100;
 }
 
 /**

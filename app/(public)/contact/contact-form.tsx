@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { contactFormSchema, type ContactFormInput } from "@/lib/validations";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
+import { Turnstile } from "@/components/turnstile";
 
 type FormState = "idle" | "loading" | "success" | "error";
 
@@ -19,6 +20,8 @@ export function ContactForm() {
   const { t } = useI18n();
   const [formState, setFormState] = useState<FormState>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 
   const {
     register,
@@ -37,7 +40,7 @@ export function ContactForm() {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, turnstileToken }),
       });
 
       const result = await response.json();
@@ -48,11 +51,14 @@ export function ContactForm() {
 
       setFormState("success");
       reset();
+      setTurnstileToken("");
+      setTurnstileResetKey((k) => k + 1);
     } catch (error) {
       setFormState("error");
       setErrorMessage(
         error instanceof Error ? error.message : "An unexpected error occurred"
       );
+      setTurnstileResetKey((k) => k + 1);
     }
   };
 
@@ -159,6 +165,13 @@ export function ContactForm() {
           {...register("website")}
         />
       </div>
+
+      {/* CAPTCHA */}
+      <Turnstile
+        onVerify={setTurnstileToken}
+        onExpire={() => setTurnstileToken("")}
+        resetKey={turnstileResetKey}
+      />
 
       {/* Submit */}
       <Button

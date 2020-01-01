@@ -3,6 +3,7 @@ import { recruitmentFormSchema } from "@/lib/validations";
 import { validateHoneypot } from "@/lib/utils";
 import { escapeHtml, trackHoneypotTrigger } from "@/lib/security-alerts";
 import { rateLimit, getClientIP, validateOrigin, RATE_LIMITS } from "@/lib/rate-limit";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 async function sendEmail(data: { name: string; email: string; location?: string; message: string }) {
   // If no API key configured, log minimally
@@ -101,6 +102,16 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+
+    // Verify CAPTCHA token
+    const isCaptchaValid = await verifyTurnstileToken(body.turnstileToken, ip);
+    if (!isCaptchaValid) {
+      return NextResponse.json(
+        { error: "CAPTCHA verification failed. Please try again." },
+        { status: 403 }
+      );
+    }
+
     const parsed = recruitmentFormSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(

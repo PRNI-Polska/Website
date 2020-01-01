@@ -40,6 +40,7 @@ export default function ChannelsPage() {
   const [hasOlder, setHasOlder] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const shouldAutoScroll = useRef(true);
   const prevMsgCount = useRef(0);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -174,6 +175,7 @@ export default function ChannelsPage() {
       /* ignore */
     } finally {
       setSending(false);
+      requestAnimationFrame(() => inputRef.current?.focus());
     }
   }
 
@@ -385,6 +387,7 @@ export default function ChannelsPage() {
           >
             <div className="flex items-center gap-2 bg-[#111] border border-[#1a1a1a] rounded-xl px-3 py-1 focus-within:border-[#333] transition-colors">
               <input
+                ref={inputRef}
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value.slice(0, 2000))}
@@ -397,6 +400,7 @@ export default function ChannelsPage() {
                 className="flex-1 bg-transparent text-sm text-[#e8e8e8] placeholder-[#444] outline-none py-2"
                 maxLength={2000}
                 disabled={sending}
+                autoFocus
                 autoComplete="off"
               />
               <button

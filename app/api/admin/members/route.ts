@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Code already exists" }, { status: 409 });
     }
 
-    const VALID_ROLES = ["ADMIN", "LEADERSHIP", "MAIN_WING", "INTERNATIONAL", "FEMALE_WING", "MEMBER"];
+    const VALID_ROLES = ["ADMIN", "LEADERSHIP", "MAIN_WING", "INTERNATIONAL", "MEMBER"];
     const role = typeof body.role === "string" && VALID_ROLES.includes(body.role) ? body.role : "MEMBER";
 
     const invite = await prisma.memberInvite.create({

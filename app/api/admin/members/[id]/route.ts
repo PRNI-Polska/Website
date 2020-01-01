@@ -3,7 +3,7 @@ import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { validateCsrf, csrfErrorResponse } from "@/lib/csrf";
 
-const VALID_ROLES = ["ADMIN", "LEADERSHIP", "MAIN_WING", "INTERNATIONAL", "FEMALE_WING", "MEMBER"];
+const VALID_ROLES = ["ADMIN", "LEADERSHIP", "MAIN_WING", "INTERNATIONAL", "MEMBER"];
 
 export async function PATCH(
   request: NextRequest,

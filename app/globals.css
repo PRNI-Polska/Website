@@ -225,10 +225,17 @@
   inset: 0;
   background-image: url('/hero-flag.png');
   background-size: cover;
-  background-position: center 30%;
+  background-position: 40% 30%;
   background-repeat: no-repeat;
   opacity: 0.18;
   pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .hero-flag-bg::before {
+    background-position: 35% 30%;
+    opacity: 0.12;
+  }
 }
 
 .hero-flag-bg::after {
@@ -461,45 +468,6 @@
   .wing-panel-poland:hover {
     border-color: rgba(185, 28, 28, 0.3);
     background: linear-gradient(180deg, hsl(0 0% 8%) 0%, hsl(0 0% 8%) 40%, hsl(0 5% 10%) 50%, hsl(0 20% 14%) 70%, hsl(0 30% 18%) 100%);
-  }
-  
-  /* Female Wing - roses background with dark overlay for text visibility */
-  .wing-panel-female {
-    background: 
-      linear-gradient(145deg, rgba(136, 19, 55, 0.45) 0%, rgba(159, 18, 57, 0.4) 50%, rgba(190, 18, 60, 0.35) 100%),
-      url('/women_wing.jpg') center/cover no-repeat;
-    border-color: rgba(219, 39, 119, 0.2);
-  }
-  
-  .wing-panel-female:hover {
-    border-color: rgba(219, 39, 119, 0.35);
-    background: 
-      linear-gradient(145deg, rgba(136, 19, 55, 0.35) 0%, rgba(159, 18, 57, 0.3) 50%, rgba(190, 18, 60, 0.25) 100%),
-      url('/women_wing.jpg') center/cover no-repeat;
-  }
-  
-  /* Text styling for female wing */
-  .wing-panel-female .wing-panel-title,
-  .wing-panel-female .wing-panel-cta {
-    color: white;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
-  }
-  
-  .wing-panel-female .wing-panel-desc {
-    color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-  }
-  
-  .wing-panel-female .wing-panel-divider {
-    background: rgba(255, 255, 255, 0.3);
-  }
-  
-  .wing-panel-female .wing-panel-cta-arrow {
-    color: white;
-  }
-  
-  .wing-panel-female:hover .wing-panel-cta {
-    border-bottom-color: rgba(255, 255, 255, 0.5);
   }
   
   /* Panel title */

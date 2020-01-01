@@ -78,7 +78,7 @@ export default function AdminMembersPage() {
     { value: "LEADERSHIP", label: "Kadra" },
     { value: "MAIN_WING", label: "Skrzydło Główne" },
     { value: "INTERNATIONAL", label: "Skrzydło Międzynarodowe" },
-    { value: "FEMALE_WING", label: "Skrzydło Kobiece" },
+
     { value: "MEMBER", label: "Członek" },
   ];
 

@@ -100,7 +100,7 @@ export const memberTranslations = {
   "role.LEADERSHIP": { pl: "Kadra", en: "Leadership", de: "Leitung" },
   "role.MAIN_WING": { pl: "Główne", en: "Main", de: "Haupt" },
   "role.INTERNATIONAL": { pl: "INT", en: "INT", de: "INT" },
-  "role.FEMALE_WING": { pl: "Kobiece", en: "Female", de: "Frauen" },
+
   "role.MEMBER": { pl: "Członek", en: "Member", de: "Mitglied" },
 
   // Messages - read receipts

@@ -22,7 +22,7 @@ const navigationKeys = [
 ];
 
 const INSTAGRAM_URL = "https://www.instagram.com/prni_official/";
-const TELEGRAM_URL = "https://t.me/prni_official";
+const TELEGRAM_URL = "https://t.me/PRNIpolska";
 
 function SocialIcons({
   size = "md",

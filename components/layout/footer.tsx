@@ -75,7 +75,7 @@ export function Footer() {
                 <Instagram className="h-5 w-5" />
               </a>
               <a
-                href="https://t.me/prni_official"
+                href="https://t.me/PRNIpolska"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="PRNI on Telegram"

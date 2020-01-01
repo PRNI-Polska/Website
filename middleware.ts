@@ -261,40 +261,50 @@ function logSecurityEvent(type: string, details: Record<string, unknown>): void 
 }
 
 // ============================================
-// REWRITE TO SECURITY LOG (persists alert to DB and returns 403)
-// Instead of returning 403 directly from Edge (which can't write to DB),
-// we rewrite the request to a Node.js API route that logs + blocks.
+// PERSIST ALERT TO DB (awaited fetch to internal API)
 // ============================================
-function blockAndLog(
-  req: NextRequest,
+async function saveAlert(
   alertType: string,
   severity: string,
   ip: string,
+  path: string,
+  userAgent: string,
   details: string,
   patternType?: string,
-): NextResponse {
-  const url = req.nextUrl.clone();
-  url.pathname = "/api/internal/security-log";
-  
-  // Pass alert data as URL params (headers can get stripped in rewrites)
-  url.searchParams.set("t", alertType);
-  url.searchParams.set("s", severity);
-  url.searchParams.set("ip", ip);
-  url.searchParams.set("p", req.nextUrl.pathname);
-  url.searchParams.set("ua", (req.headers.get("user-agent") || "unknown").slice(0, 200));
-  url.searchParams.set("d", details.slice(0, 500));
-  if (patternType) {
-    url.searchParams.set("pt", patternType);
-  }
+): Promise<void> {
+  // Use VERCEL_URL (direct deployment URL, no 308 redirects)
+  const base = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : process.env.NEXTAUTH_URL || "http://localhost:3000";
 
-  return NextResponse.rewrite(url);
+  try {
+    const res = await fetch(`${base}/api/internal/security-log`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Internal-Secret": process.env.NEXTAUTH_SECRET || "internal",
+      },
+      body: JSON.stringify({
+        type: alertType,
+        severity,
+        ipAddress: ip,
+        path,
+        userAgent: userAgent.slice(0, 200),
+        details: details.slice(0, 500),
+        metadata: patternType ? JSON.stringify({ patternType }) : null,
+      }),
+    });
+    console.log(`[SECURITY] Alert saved: ${alertType} (${res.status})`);
+  } catch (err) {
+    console.error(`[SECURITY] Failed to save alert:`, err);
+  }
 }
 
 // ============================================
-// MAIN MIDDLEWARE
+// MAIN MIDDLEWARE (async so we can await alert persistence)
 // ============================================
 export default withAuth(
-  function middleware(req: NextRequestWithAuth) {
+  async function middleware(req: NextRequestWithAuth) {
     const { pathname } = req.nextUrl;
     const ip = getClientIP(req);
     const userAgent = req.headers.get("user-agent") || "unknown";
@@ -314,14 +324,16 @@ export default withAuth(
       const ipBlockStatus = isIPBlocked(ip);
       if (ipBlockStatus.blocked) {
         logSecurityEvent("THREAT_BLOCKED", { ip, pathname, reason: ipBlockStatus.reason });
-        return blockAndLog(req, "RATE_LIMIT_ABUSE", "high", ip, `Blocked IP attempted access: ${pathname}`);
+        await saveAlert("RATE_LIMIT_ABUSE", "high", ip, pathname, userAgent, `Blocked IP attempted access: ${pathname}`);
+        return new NextResponse(null, { status: 403 });
       }
 
       // Track this request in the alert system
       const requestTracking = trackRequest(ip, pathname);
       if (requestTracking.blocked) {
         logSecurityEvent("FLOOD_BLOCKED", { ip, pathname, reason: requestTracking.reason });
-        return blockAndLog(req, "BOT_FLOOD", "critical", ip, `Bot flood blocked: ${requestTracking.reason}`);
+        await saveAlert("BOT_FLOOD", "critical", ip, pathname, userAgent, `Bot flood blocked: ${requestTracking.reason}`);
+        return new NextResponse(null, { status: 403 });
       }
     }
 
@@ -346,14 +358,8 @@ export default withAuth(
       };
       const alertType = threatTypeMap[suspiciousCheck.patternType] || "SCANNER_DETECTED";
       
-      return blockAndLog(
-        req,
-        alertType,
-        "medium",
-        ip,
-        `Suspicious pattern detected: ${suspiciousCheck.patternType} on ${pathname}`,
-        suspiciousCheck.patternType,
-      );
+      await saveAlert(alertType, "medium", ip, pathname, userAgent, `Suspicious pattern detected: ${suspiciousCheck.patternType} on ${pathname}`, suspiciousCheck.patternType);
+      return new NextResponse(null, { status: 403 });
     }
     
     // Determine route type
@@ -434,15 +440,10 @@ export default withAuth(
       // Track rate limit hit in alert system
       trackRateLimitHit(ip, pathname, rateLimitType);
 
-      // Log to DB via rewrite for repeated abusers
+      // Log to DB for repeated abusers
       if (rateLimit.blocked) {
-        return blockAndLog(
-          req,
-          "RATE_LIMIT_ABUSE",
-          "high",
-          ip,
-          `Rate limit exceeded and IP blocked (type: ${rateLimitType}) on ${pathname}`,
-        );
+        await saveAlert("RATE_LIMIT_ABUSE", "high", ip, pathname, userAgent, `Rate limit exceeded and IP blocked (type: ${rateLimitType}) on ${pathname}`);
+        return new NextResponse(null, { status: 403 });
       }
 
       // Normal rate limit (not blocked yet) - return 429 directly

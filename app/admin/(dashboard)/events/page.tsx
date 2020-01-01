@@ -30,6 +30,7 @@ const statusColors: Record<ContentStatus, string> = {
 async function getEvents() {
   return prisma.event.findMany({
     orderBy: { startDateTime: "desc" },
+    take: 100,
     include: {
       createdBy: {
         select: { name: true },

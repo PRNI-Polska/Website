@@ -24,6 +24,7 @@ export async function GET() {
         createdAt: true,
       },
       orderBy: { createdAt: "desc" },
+      take: 200,
     });
 
     return NextResponse.json({ members });

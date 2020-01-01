@@ -11,6 +11,7 @@ import {
   Trash2,
   Ban,
   CheckCircle,
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -229,11 +230,16 @@ export default function AdminMembersPage() {
             Manage members and invite codes
           </p>
         </div>
-        <Button
+        <div className="flex items-center gap-2">
+          <a href="/admin/members/oversight" className="text-xs text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded hover:bg-muted">
+            <Eye className="h-4 w-4 inline mr-1" />Oversight
+          </a>
+          <Button
           variant="outline"
           onClick={() => {
             fetchMembers();
             fetchInvites();
+            fetchChannels();
           }}
           disabled={loadingMembers || loadingInvites}
         >
@@ -244,6 +250,7 @@ export default function AdminMembersPage() {
           />
           Refresh
         </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="members">

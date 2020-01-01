@@ -41,6 +41,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: '*.prni.org.pl',
       },
+      {
+        protocol: 'https',
+        hostname: 'files.cdn.printful.com',
+      },
     ],
   },
 

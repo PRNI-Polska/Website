@@ -47,13 +47,11 @@ export default function MembersDashboard() {
   useEffect(() => {
     async function fetchContent() {
       try {
-        const [blogRes, announcementsRes] = await Promise.all([
-          fetch("/api/admin/blog").then((r) => r.ok ? r.json() : { posts: [] }).catch(() => ({ posts: [] })),
-          fetch("/api/admin/announcements").then((r) => r.ok ? r.json() : { announcements: [] }).catch(() => ({ announcements: [] })),
-        ]);
+        const res = await fetch("/api/members/news");
+        if (!res.ok) throw new Error("Failed to fetch news");
+        const data = await res.json();
 
-        const blogPosts: Post[] = (blogRes.posts || [])
-          .filter((p: Record<string, unknown>) => p.status === "PUBLISHED")
+        const blogPosts: Post[] = (data.posts || [])
           .map((p: Record<string, string>) => ({
             id: p.id,
             title: p.title,
@@ -65,8 +63,7 @@ export default function MembersDashboard() {
             type: "blog" as const,
           }));
 
-        const announcements: Post[] = (announcementsRes.announcements || [])
-          .filter((a: Record<string, unknown>) => a.status === "PUBLISHED")
+        const announcements: Post[] = (data.announcements || [])
           .map((a: Record<string, string>) => ({
             id: a.id,
             title: a.title,

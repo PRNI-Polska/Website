@@ -2,50 +2,11 @@
 "use client";
 
 import Image from "next/image";
-import { Mail, Users } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useI18n } from "@/lib/i18n";
 
-interface TeamMember {
-  id: string;
-  name: string;
-  role: string;
-  bio: string;
-  quote?: string | null;
-  photoUrl: string | null;
-  email: string | null;
-  isLeadership: boolean;
-}
-
-const FOUNDING_LEADER: TeamMember = {
-  id: "_founding_leader",
-  name: "Karol Małszycki",
-  role: "Prezes Naczelny Ruchu",
-  bio: "",
-  quote: `\u201ETolerancja jest cech\u0105 ludzi bez przekona\u0144\u201D \u2013 G.K. Chesterton`,
-  photoUrl: "/team/karol.png",
-  email: null,
-  isLeadership: true,
-};
-
-interface AboutPageClientProps {
-  teamMembers: TeamMember[];
-}
-
-export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
+export default function AboutPageClient() {
   const { t } = useI18n();
-
-  const hasFounder = teamMembers.some(
-    (m) => m.name === FOUNDING_LEADER.name
-  );
-  const allMembers = hasFounder
-    ? teamMembers
-    : [FOUNDING_LEADER, ...teamMembers];
-
-  const leadership = allMembers.filter((m) => m.isLeadership);
-  const team = allMembers.filter((m) => !m.isLeadership);
 
   const values = ["nationalism", "integralism", "sovereignty", "order"];
 
@@ -153,117 +114,7 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
           </div>
         </section>
 
-        <Separator className="my-16" />
-
-        {/* Leadership Team */}
-        {leadership.length > 0 && (
-          <section className="mb-16">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-2">
-                {t("about.leadership")}
-              </h2>
-              <p className="text-muted-foreground">
-                {t("about.leadership.subtitle")}
-              </p>
-            </div>
-
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {leadership.map((member) => (
-                <TeamMemberCard key={member.id} member={member} featured />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Team Members */}
-        {team.length > 0 && (
-          <section>
-            <div className="text-center mb-8">
-              <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-2">
-                {t("about.team")}
-              </h2>
-              <p className="text-muted-foreground">
-                {t("about.team.subtitle")}
-              </p>
-            </div>
-
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-              {team.map((member) => (
-                <TeamMemberCard key={member.id} member={member} />
-              ))}
-            </div>
-          </section>
-        )}
-
       </div>
     </div>
-  );
-}
-
-interface TeamMemberCardProps {
-  member: {
-    id: string;
-    name: string;
-    role: string;
-    bio: string;
-    quote?: string | null;
-    photoUrl: string | null;
-    email: string | null;
-  };
-  featured?: boolean;
-}
-
-function TeamMemberCard({ member, featured }: TeamMemberCardProps) {
-  const initials = member.name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-
-  return (
-    <Card className={featured ? "text-center" : ""}>
-      <CardHeader className={featured ? "items-center" : ""}>
-        <Avatar className={featured ? "h-24 w-24 mb-4" : "h-16 w-16"}>
-          {member.photoUrl && (
-            <AvatarImage
-              src={member.photoUrl}
-              alt={member.name}
-              className="object-cover object-top"
-            />
-          )}
-          <AvatarFallback className={featured ? "text-2xl" : "text-lg"}>
-            {initials}
-          </AvatarFallback>
-        </Avatar>
-        <CardTitle className={featured ? "text-xl" : "text-lg"}>
-          {member.name}
-        </CardTitle>
-        <CardDescription className="font-medium">
-          {member.role}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {member.bio && (
-          <p className={`text-muted-foreground ${featured ? "" : "text-sm"} line-clamp-3`}>
-            {member.bio}
-          </p>
-        )}
-        {member.quote && (
-          <p className={`italic text-muted-foreground/80 ${featured ? "text-sm" : "text-xs"} ${member.bio ? "mt-3" : ""}`}>
-            {member.quote}
-          </p>
-        )}
-        {member.email && (
-          <a
-            href={`mailto:${member.email}`}
-            className="inline-flex items-center gap-1 mt-3 text-sm text-foreground hover:underline"
-          >
-            <Mail className="h-4 w-4" />
-            Contact
-          </a>
-        )}
-      </CardContent>
-    </Card>
   );
 }

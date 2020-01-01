@@ -585,13 +585,8 @@ export const translations: Translations = {
   "announcements.of": { en: "of", pl: "z", de: "von" },
   "announcements.none": { en: "No announcements found", pl: "Brak komunikatów", de: "Keine Mitteilungen gefunden" },
 
-  // Events  
-  "events.title": { en: "Events", pl: "Wydarzenia", de: "Veranstaltungen" },
-  "events.subtitle": { en: "Upcoming gatherings and activities", pl: "Nadchodzące spotkania i działania", de: "Kommende Treffen und Aktivitäten" },
   "events.search": { en: "Search events...", pl: "Szukaj wydarzeń...", de: "Veranstaltungen suchen..." },
   "events.all": { en: "All", pl: "Wszystkie", de: "Alle" },
-  "events.upcoming": { en: "Upcoming", pl: "Nadchodzące", de: "Bevorstehend" },
-  "events.past": { en: "Past", pl: "Minione", de: "Vergangen" },
   "events.showing": { en: "Showing", pl: "Wyświetlanie", de: "Anzeigen" },
   "events.of": { en: "of", pl: "z", de: "von" },
   "events.none": { en: "No events found", pl: "Brak wydarzeń", de: "Keine Veranstaltungen gefunden" },

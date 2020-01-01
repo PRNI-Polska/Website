@@ -847,3 +847,55 @@
     font-size: 16px;
   }
 }
+
+/*
+ * ============================================================================
+ * CALLS / KOMUNIKATOR
+ * ============================================================================
+ */
+@keyframes calls-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.calls-animate-fade-up { animation: calls-fade-up 0.5s ease-out forwards; }
+
+@keyframes calls-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.calls-animate-fade-in { animation: calls-fade-in 0.3s ease-out forwards; }
+
+@keyframes calls-speaking-pulse {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(2); opacity: 0; }
+}
+.calls-speaking-ring { animation: calls-speaking-pulse 1.4s ease-out infinite; }
+
+@keyframes calls-audio-bar {
+  0%, 100% { height: 3px; }
+  50% { height: var(--bar-h, 16px); }
+}
+.calls-audio-bar {
+  animation: calls-audio-bar var(--bar-s, 0.5s) ease-in-out infinite;
+  animation-delay: var(--bar-d, 0s);
+}
+
+.calls-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.calls-divider::before, .calls-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #1e1e1e;
+}
+.calls-divider-dot::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  background: #333;
+  transform: rotate(45deg);
+}

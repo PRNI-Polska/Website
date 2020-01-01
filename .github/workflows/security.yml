@@ -31,7 +31,7 @@ jobs:
       - name: TypeScript type check
         run: npx tsc --noEmit
 
-      - name: Next.js lint
+      - name: ESLint
         run: npm run lint
 
   dependency-audit:

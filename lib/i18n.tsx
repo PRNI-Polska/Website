@@ -277,6 +277,8 @@ export const translations: Translations = {
   "recruitment.form.namePlaceholder": { en: "Your name", pl: "Twoje imię i nazwisko", de: "Dein Name" },
   "recruitment.form.email": { en: "Email", pl: "E-mail", de: "E-Mail" },
   "recruitment.form.emailPlaceholder": { en: "your@email.com", pl: "twoj@email.com", de: "deine@email.de" },
+  "recruitment.form.phone": { en: "Phone number", pl: "Numer telefonu", de: "Telefonnummer" },
+  "recruitment.form.phonePlaceholder": { en: "+48 600 000 000", pl: "+48 600 000 000", de: "+49 151 0000000" },
   "recruitment.form.location": { en: "City / Country (optional)", pl: "Miasto / Kraj (opcjonalnie)", de: "Stadt / Land (optional)" },
   "recruitment.form.locationPlaceholder": { en: "e.g., Warsaw, PL", pl: "np. Warszawa, PL", de: "z.B. Warschau, PL" },
   "recruitment.form.message": { en: "Message", pl: "Wiadomość", de: "Nachricht" },

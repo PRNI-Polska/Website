@@ -248,6 +248,15 @@ export const recruitmentFormSchema = z.object({
       },
       { message: "Please use a valid email address" }
     ),
+  phone: z
+    .string()
+    .min(1, "Phone number is required")
+    .max(30, "Phone number is too long")
+    .transform((val) => val.trim())
+    .refine(
+      (val) => /^[+0-9][0-9\s().-]{5,}$/.test(val),
+      "Please enter a valid phone number (digits, spaces, +, -, (), . allowed)"
+    ),
   location: z
     .string()
     .max(120, "Location must be less than 120 characters")

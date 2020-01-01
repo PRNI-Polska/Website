@@ -107,6 +107,22 @@ export function RecruitmentForm() {
         </div>
       </div>
 
+      {/* Phone */}
+      <div className="space-y-2">
+        <Label htmlFor="phone">{t("recruitment.form.phone")} *</Label>
+        <Input
+          id="phone"
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+          placeholder={t("recruitment.form.phonePlaceholder")}
+          {...register("phone")}
+          aria-invalid={errors.phone ? "true" : "false"}
+          className={cn(errors.phone && "border-destructive")}
+        />
+        {errors.phone && <p className="text-sm text-destructive">{errors.phone.message}</p>}
+      </div>
+
       {/* Location */}
       <div className="space-y-2">
         <Label htmlFor="location">{t("recruitment.form.location")}</Label>

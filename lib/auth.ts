@@ -1,4 +1,5 @@
 // file: lib/auth.ts
+// SECURITY-HARDENED AUTH FOR POLITICAL WEBSITE
 import { NextAuthOptions, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
@@ -32,29 +33,72 @@ declare module "next-auth/jwt" {
   }
 }
 
-// Rate limiting for login attempts
-const loginAttempts = new Map<string, { count: number; lastAttempt: number }>();
-const MAX_LOGIN_ATTEMPTS = 5;
-const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
+// ============================================
+// STRICT RATE LIMITING FOR LOGIN ATTEMPTS
+// ============================================
+interface LoginAttempt {
+  count: number;
+  lastAttempt: number;
+  blocked: boolean;
+  blockExpiry: number;
+}
 
-function checkLoginRateLimit(email: string): { allowed: boolean; remainingAttempts: number } {
+const loginAttempts = new Map<string, LoginAttempt>();
+const MAX_LOGIN_ATTEMPTS = 3; // Reduced from 5 for political site
+const LOCKOUT_DURATION = 30 * 60 * 1000; // 30 minutes lockout
+const PROGRESSIVE_LOCKOUT = true; // Each lockout doubles
+
+function checkLoginRateLimit(email: string): { allowed: boolean; remainingAttempts: number; lockoutRemaining?: number } {
   const now = Date.now();
-  const record = loginAttempts.get(email);
+  const normalizedEmail = email.toLowerCase();
+  const record = loginAttempts.get(normalizedEmail);
 
   if (!record) {
-    loginAttempts.set(email, { count: 1, lastAttempt: now });
+    loginAttempts.set(normalizedEmail, { 
+      count: 1, 
+      lastAttempt: now, 
+      blocked: false, 
+      blockExpiry: 0 
+    });
     return { allowed: true, remainingAttempts: MAX_LOGIN_ATTEMPTS - 1 };
   }
 
-  // Reset if lockout duration has passed
-  if (now - record.lastAttempt > LOCKOUT_DURATION) {
-    loginAttempts.set(email, { count: 1, lastAttempt: now });
+  // Check if currently blocked
+  if (record.blocked && now < record.blockExpiry) {
+    const lockoutRemaining = Math.ceil((record.blockExpiry - now) / 1000 / 60);
+    return { allowed: false, remainingAttempts: 0, lockoutRemaining };
+  }
+
+  // Reset if block has expired
+  if (record.blocked && now >= record.blockExpiry) {
+    record.blocked = false;
+    record.count = 1;
+    record.lastAttempt = now;
     return { allowed: true, remainingAttempts: MAX_LOGIN_ATTEMPTS - 1 };
   }
 
-  // Check if locked out
+  // Reset if enough time has passed (1 hour)
+  if (now - record.lastAttempt > 60 * 60 * 1000) {
+    record.count = 1;
+    record.lastAttempt = now;
+    return { allowed: true, remainingAttempts: MAX_LOGIN_ATTEMPTS - 1 };
+  }
+
+  // Check if exceeded attempts
   if (record.count >= MAX_LOGIN_ATTEMPTS) {
-    return { allowed: false, remainingAttempts: 0 };
+    // Apply progressive lockout
+    const lockoutMultiplier = PROGRESSIVE_LOCKOUT ? Math.min(record.count - MAX_LOGIN_ATTEMPTS + 1, 4) : 1;
+    record.blocked = true;
+    record.blockExpiry = now + (LOCKOUT_DURATION * lockoutMultiplier);
+    const lockoutRemaining = Math.ceil((record.blockExpiry - now) / 1000 / 60);
+    
+    logSecurityEvent("LOGIN_LOCKOUT", { 
+      email: normalizedEmail, 
+      attempts: record.count,
+      lockoutMinutes: lockoutRemaining 
+    });
+    
+    return { allowed: false, remainingAttempts: 0, lockoutRemaining };
   }
 
   record.count++;
@@ -63,9 +107,71 @@ function checkLoginRateLimit(email: string): { allowed: boolean; remainingAttemp
 }
 
 function resetLoginAttempts(email: string): void {
-  loginAttempts.delete(email);
+  loginAttempts.delete(email.toLowerCase());
 }
 
+function recordFailedLogin(email: string): void {
+  const normalizedEmail = email.toLowerCase();
+  const record = loginAttempts.get(normalizedEmail);
+  if (record) {
+    record.count++;
+    record.lastAttempt = Date.now();
+  }
+}
+
+// ============================================
+// SECURITY LOGGING
+// ============================================
+function logSecurityEvent(type: string, details: Record<string, unknown>): void {
+  const timestamp = new Date().toISOString();
+  console.log(JSON.stringify({
+    type: `AUTH:${type}`,
+    timestamp,
+    ...details,
+  }));
+}
+
+// ============================================
+// AUDIT LOGGING TO DATABASE
+// ============================================
+async function logAuthAudit(
+  action: string,
+  email: string,
+  success: boolean,
+  details?: string
+): Promise<void> {
+  try {
+    // Find user to get ID (might not exist for failed logins)
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
+      select: { id: true },
+    });
+
+    if (user) {
+      await prisma.auditLog.create({
+        data: {
+          action: `AUTH_${action}`,
+          entityType: "User",
+          entityId: user.id,
+          userId: user.id,
+          details: JSON.stringify({
+            success,
+            email,
+            details,
+            timestamp: new Date().toISOString(),
+          }),
+        },
+      });
+    }
+  } catch (error) {
+    // Don't fail auth if audit logging fails
+    console.error("Failed to log auth audit:", error);
+  }
+}
+
+// ============================================
+// AUTH OPTIONS
+// ============================================
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -79,34 +185,61 @@ export const authOptions: NextAuthOptions = {
           // Validate input
           const parsed = loginSchema.safeParse(credentials);
           if (!parsed.success) {
+            logSecurityEvent("INVALID_CREDENTIALS_FORMAT", { 
+              errors: parsed.error.flatten() 
+            });
             throw new Error("Invalid credentials format");
           }
 
           const { email, password } = parsed.data;
+          const normalizedEmail = email.toLowerCase();
 
           // Check rate limiting
-          const rateLimit = checkLoginRateLimit(email);
+          const rateLimit = checkLoginRateLimit(normalizedEmail);
           if (!rateLimit.allowed) {
-            throw new Error("Too many login attempts. Please try again later.");
+            logSecurityEvent("LOGIN_RATE_LIMITED", { 
+              email: normalizedEmail,
+              lockoutRemaining: rateLimit.lockoutRemaining 
+            });
+            throw new Error(`Account temporarily locked. Try again in ${rateLimit.lockoutRemaining} minutes.`);
           }
 
           // Find user
           const user = await prisma.user.findUnique({
-            where: { email: email.toLowerCase() },
+            where: { email: normalizedEmail },
           });
 
           if (!user) {
+            logSecurityEvent("LOGIN_USER_NOT_FOUND", { email: normalizedEmail });
+            recordFailedLogin(normalizedEmail);
+            // Use generic message to prevent user enumeration
             throw new Error("Invalid email or password");
           }
 
-          // Verify password
+          // Verify password with timing-safe comparison
           const isValidPassword = await compare(password, user.passwordHash);
           if (!isValidPassword) {
+            logSecurityEvent("LOGIN_INVALID_PASSWORD", { 
+              email: normalizedEmail,
+              remainingAttempts: rateLimit.remainingAttempts - 1 
+            });
+            recordFailedLogin(normalizedEmail);
+            await logAuthAudit("LOGIN_FAILED", normalizedEmail, false, "Invalid password");
             throw new Error("Invalid email or password");
           }
 
-          // Reset rate limit on successful login
-          resetLoginAttempts(email);
+          // Verify user has admin role
+          if (user.role !== "ADMIN") {
+            logSecurityEvent("LOGIN_NON_ADMIN", { email: normalizedEmail, role: user.role });
+            await logAuthAudit("LOGIN_DENIED", normalizedEmail, false, "Non-admin user");
+            throw new Error("Access denied");
+          }
+
+          // Success - reset rate limit
+          resetLoginAttempts(normalizedEmail);
+          
+          logSecurityEvent("LOGIN_SUCCESS", { email: normalizedEmail, userId: user.id });
+          await logAuthAudit("LOGIN_SUCCESS", normalizedEmail, true);
 
           return {
             id: user.id,
@@ -147,12 +280,24 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
-    maxAge: 60 * 60, // 1 hour (security hardening)
+    maxAge: 30 * 60, // 30 minutes (stricter for political site)
   },
   jwt: {
-    maxAge: 60 * 60, // 1 hour
+    maxAge: 30 * 60, // 30 minutes
   },
   secret: process.env.NEXTAUTH_SECRET,
+  // Additional security options
+  cookies: {
+    sessionToken: {
+      name: `__Secure-next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: true,
+      },
+    },
+  },
 };
 
 /**

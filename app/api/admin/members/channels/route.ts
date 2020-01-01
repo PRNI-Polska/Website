@@ -17,7 +17,16 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ channels });
+    const result = channels.map((ch) => ({
+      id: ch.id,
+      name: ch.name,
+      description: ch.description,
+      allowedRoles: ch.allowedRoles,
+      isDefault: ch.isDefault,
+      messageCount: ch._count.messages,
+      createdAt: ch.createdAt,
+    }));
+    return NextResponse.json({ channels: result });
   } catch {
     return NextResponse.json(
       { error: "Failed to fetch channels" },
@@ -57,8 +66,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const allowedRoles = typeof body.allowedRoles === "string" && body.allowedRoles.trim()
+      ? body.allowedRoles.trim()
+      : null;
+
     const channel = await prisma.memberChannel.create({
-      data: { name, description },
+      data: { name, description, allowedRoles },
     });
 
     return NextResponse.json({ channel }, { status: 201 });

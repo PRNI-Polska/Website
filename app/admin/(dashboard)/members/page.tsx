@@ -64,7 +64,17 @@ export default function AdminMembersPage() {
   const [loadingChannels, setLoadingChannels] = useState(true);
   const [newChannelName, setNewChannelName] = useState("");
   const [newChannelDesc, setNewChannelDesc] = useState("");
+  const [newChannelRoles, setNewChannelRoles] = useState("");
   const [creatingChannel, setCreatingChannel] = useState(false);
+
+  const MEMBER_ROLES = [
+    { value: "ADMIN", label: "Admin (Zarząd)" },
+    { value: "LEADERSHIP", label: "Kadra" },
+    { value: "MAIN_WING", label: "Skrzydło Główne" },
+    { value: "INTERNATIONAL", label: "Skrzydło Międzynarodowe" },
+    { value: "FEMALE_WING", label: "Skrzydło Kobiece" },
+    { value: "MEMBER", label: "Członek" },
+  ];
 
   const fetchMembers = useCallback(async () => {
     setLoadingMembers(true);
@@ -118,10 +128,10 @@ export default function AdminMembersPage() {
       const res = await fetch("/api/admin/members/channels", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newChannelName.trim(), description: newChannelDesc.trim() || null }),
+        body: JSON.stringify({ name: newChannelName.trim(), description: newChannelDesc.trim() || null, allowedRoles: newChannelRoles || null }),
       });
       if (!res.ok) throw new Error("Failed");
-      setNewChannelName(""); setNewChannelDesc("");
+      setNewChannelName(""); setNewChannelDesc(""); setNewChannelRoles("");
       fetchChannels();
     } catch { /* ignore */ }
     finally { setCreatingChannel(false); }
@@ -175,11 +185,31 @@ export default function AdminMembersPage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  async function changeMemberRole(id: string, role: string) {
+    setActionLoading(id);
+    try {
+      const res = await fetch(`/api/admin/members/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMembers((prev) =>
+          prev.map((m) => m.id === id ? { ...m, role: data.member.role } : m)
+        );
+      }
+    } catch { /* ignore */ }
+    finally { setActionLoading(null); }
+  }
+
   async function toggleMember(id: string) {
     setActionLoading(id);
     try {
       const res = await fetch(`/api/admin/members/${id}`, {
         method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: !members.find((m) => m.id === id)?.isActive }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -331,6 +361,18 @@ export default function AdminMembersPage() {
                           </td>
                           <td className="py-3 px-4 text-sm text-muted-foreground">
                             {member.email}
+                          </td>
+                          <td className="py-3 px-4">
+                            <select
+                              value={member.role}
+                              onChange={(e) => changeMemberRole(member.id, e.target.value)}
+                              disabled={actionLoading === member.id}
+                              className="text-xs bg-background border border-border rounded px-2 py-1"
+                            >
+                              {MEMBER_ROLES.map((r) => (
+                                <option key={r.value} value={r.value}>{r.label}</option>
+                              ))}
+                            </select>
                           </td>
                           <td className="py-3 px-4 text-sm">
                             {member.isActive ? (
@@ -612,13 +654,32 @@ export default function AdminMembersPage() {
               <CardTitle>Create Channel</CardTitle>
               <CardDescription>Add a new group chat channel for members.</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-3">
               <div className="flex gap-3">
                 <Input placeholder="Channel name" value={newChannelName} onChange={(e) => setNewChannelName(e.target.value)} className="max-w-[200px]" />
                 <Input placeholder="Description (optional)" value={newChannelDesc} onChange={(e) => setNewChannelDesc(e.target.value)} className="flex-1" />
                 <Button onClick={createChannel} disabled={creatingChannel || !newChannelName.trim()}>
                   {creatingChannel ? <Loader2 className="h-4 w-4 animate-spin" /> : "Create"}
                 </Button>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-2">Access (leave empty = everyone):</p>
+                <div className="flex flex-wrap gap-2">
+                  {MEMBER_ROLES.map((r) => {
+                    const selected = newChannelRoles.split(",").filter(Boolean).includes(r.value);
+                    return (
+                      <button key={r.value} type="button" onClick={() => {
+                        const current = newChannelRoles.split(",").filter(Boolean);
+                        const updated = selected ? current.filter((x) => x !== r.value) : [...current, r.value];
+                        setNewChannelRoles(updated.join(","));
+                      }}
+                        className={`text-xs px-2.5 py-1.5 rounded border transition-colors ${selected ? "bg-primary text-primary-foreground border-primary" : "border-border text-muted-foreground hover:border-foreground"}`}
+                      >
+                        {r.label}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -631,12 +692,21 @@ export default function AdminMembersPage() {
                 <div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
               ) : channels.length > 0 ? (
                 <div className="space-y-3">
-                  {channels.map((ch) => (
+                  {channels.map((ch: {id:string;name:string;description:string|null;allowedRoles?:string|null;messageCount:number;createdAt:string}) => (
                     <div key={ch.id} className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
                       <div>
                         <p className="font-medium">#{ch.name}</p>
                         {ch.description && <p className="text-sm text-muted-foreground">{ch.description}</p>}
-                        <p className="text-xs text-muted-foreground mt-1">{ch.messageCount} messages</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-muted-foreground">{ch.messageCount} messages</span>
+                          {ch.allowedRoles ? (
+                            <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                              {ch.allowedRoles.split(",").map((r: string) => MEMBER_ROLES.find((mr) => mr.value === r.trim())?.label || r.trim()).join(", ")}
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">Everyone</span>
+                          )}
+                        </div>
                       </div>
                       <Button variant="ghost" size="sm" onClick={() => deleteChannel(ch.id)} disabled={actionLoading === ch.id}>
                         {actionLoading === ch.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4 text-destructive" />}

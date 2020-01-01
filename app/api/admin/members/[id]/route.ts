@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
+const VALID_ROLES = ["ADMIN", "LEADERSHIP", "MAIN_WING", "INTERNATIONAL", "FEMALE_WING", "MEMBER"];
+
 export async function PATCH(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -14,32 +16,34 @@ export async function PATCH(
 
   try {
     const { id } = await params;
+    const body = await request.json().catch(() => ({}));
 
     const member = await prisma.member.findUnique({ where: { id } });
     if (!member) {
-      return NextResponse.json(
-        { error: "Member not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Member not found" }, { status: 404 });
+    }
+
+    const data: Record<string, unknown> = {};
+
+    if (typeof body.isActive === "boolean") {
+      data.isActive = body.isActive;
+    } else if (!body.role) {
+      data.isActive = !member.isActive;
+    }
+
+    if (typeof body.role === "string" && VALID_ROLES.includes(body.role)) {
+      data.role = body.role;
     }
 
     const updated = await prisma.member.update({
       where: { id },
-      data: { isActive: !member.isActive },
-      select: {
-        id: true,
-        email: true,
-        displayName: true,
-        isActive: true,
-      },
+      data,
+      select: { id: true, email: true, displayName: true, role: true, isActive: true },
     });
 
     return NextResponse.json({ member: updated });
   } catch {
-    return NextResponse.json(
-      { error: "Failed to update member" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update member" }, { status: 500 });
   }
 }
 

@@ -58,7 +58,7 @@
     
     /* Muted */
     --muted: 45 15% 92%;
-    --muted-foreground: 220 15% 45%;
+    --muted-foreground: 220 20% 25%;
     
     /* Accent */
     --accent: 45 60% 90%;
@@ -285,7 +285,7 @@
   
   /* Prose styles for Markdown content */
   .prose-custom {
-    @apply max-w-none text-foreground/90;
+    @apply max-w-none text-foreground;
   }
   
   .prose-custom h1,
@@ -320,7 +320,7 @@
   
   .prose-custom ul,
   .prose-custom ol {
-    @apply text-foreground/90;
+    @apply text-foreground;
   }
   
   /* Card hover effect */
@@ -612,7 +612,18 @@
 /* ============================================================================
  * RESPONSIVE TYPOGRAPHY
  * ============================================================================ */
+
+/* Desktop base font size */
+html {
+  font-size: 16px;
+}
+
+/* Larger base font on mobile for better readability */
 @media (max-width: 768px) {
+  html {
+    font-size: 17px;
+  }
+  
   /* Larger hero text on mobile for impact */
   .text-display-lg {
     font-size: 2.5rem !important;
@@ -626,10 +637,11 @@
   
   /* Better text sizing on mobile */
   body {
-    font-size: 1rem;
+    font-size: 1.0625rem;
   }
   
   p {
+    font-size: 1.0625rem;
     line-height: 1.85;
   }
   

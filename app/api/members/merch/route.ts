@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMemberFromRequest } from "@/lib/member-auth";
-import { getStoreProducts } from "@/lib/gelato";
+import { getStoreProducts, type GelatoStore } from "@/lib/gelato";
 import { getLowestRetailPrice } from "@/lib/gelato-prices";
 
 export async function GET(request: NextRequest) {
@@ -10,7 +10,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const products = await getStoreProducts();
+    const storeParam = request.nextUrl.searchParams.get("store") as GelatoStore | null;
+    const store: GelatoStore = storeParam === "int" ? "int" : "pl";
+    const products = await getStoreProducts(store);
 
     const enriched = await Promise.all(
       products.map(async (p) => {

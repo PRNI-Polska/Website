@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMemberFromRequest } from "@/lib/member-auth";
-import { getStoreProduct } from "@/lib/gelato";
+import { getStoreProduct, type GelatoStore } from "@/lib/gelato";
 import { getVariantRetailPrices } from "@/lib/gelato-prices";
 
 export async function GET(
@@ -14,7 +14,9 @@ export async function GET(
 
   try {
     const { productId } = await params;
-    const product = await getStoreProduct(productId);
+    const storeParam = request.nextUrl.searchParams.get("store") as GelatoStore | null;
+    const store: GelatoStore = storeParam === "int" ? "int" : "pl";
+    const product = await getStoreProduct(productId, store);
 
     const productUids = product.variants.map((v) => v.productUid);
     const retailPrices = await getVariantRetailPrices(productUids);

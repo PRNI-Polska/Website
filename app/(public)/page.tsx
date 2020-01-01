@@ -118,11 +118,11 @@ export default function HomePage() {
       {/* Hero Gateway Section */}
       <section className="wings-gateway-hero relative">
         <div className="w-full max-w-5xl mx-auto">
-          {/* Hero Header */}
-          <header className="text-center mb-16">
+          {/* Hero Header - tighter spacing */}
+          <header className="text-center mb-10">
             {/* Logo */}
-            <div className="hero-reveal hero-reveal-1 mb-8">
-              <div className="relative w-16 h-16 md:w-20 md:h-20 mx-auto">
+            <div className="hero-reveal hero-reveal-1 mb-5">
+              <div className="relative w-14 h-14 md:w-16 md:h-16 mx-auto">
                 <Image
                   src="/logo.png"
                   alt="PRNI"
@@ -134,23 +134,23 @@ export default function HomePage() {
             </div>
             
             {/* Eyebrow */}
-            <p className="hero-reveal hero-reveal-2 text-[10px] md:text-xs font-medium tracking-[0.25em] uppercase text-muted-foreground mb-4">
+            <p className="hero-reveal hero-reveal-2 text-[10px] md:text-[11px] font-medium tracking-[0.2em] uppercase text-foreground/50 mb-3">
               {gatewayText.eyebrow}
             </p>
             
-            {/* H1: Wings */}
-            <h1 className="hero-reveal hero-reveal-2 text-5xl md:text-6xl lg:text-7xl font-heading font-bold tracking-tight text-foreground mb-4">
+            {/* H1: Wings - larger with tracking */}
+            <h1 className="hero-reveal hero-reveal-2 text-6xl md:text-7xl lg:text-8xl font-heading font-bold tracking-[0.02em] text-foreground mb-3">
               {gatewayText.title}
             </h1>
             
-            {/* Subtitle */}
-            <p className="hero-reveal hero-reveal-3 text-base md:text-lg text-muted-foreground">
+            {/* Subtitle - better contrast */}
+            <p className="hero-reveal hero-reveal-3 text-base md:text-lg text-foreground/60">
               {gatewayText.subtitle}
             </p>
           </header>
 
           {/* Wing Panels - Main in center (larger) */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5 items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 items-stretch">
             {wings.map((wing, index) => {
               const isSelected = selectedPanel === wing.id;
               const isFading = selectedPanel && selectedPanel !== wing.id;
@@ -187,7 +187,7 @@ export default function HomePage() {
                   {/* Icon */}
                   <wing.Icon className={cn(
                     "wing-panel-icon",
-                    isMainPanel && "w-12 h-12 mb-8"
+                    isMainPanel && "w-14 h-14 mb-7"
                   )} />
                   
                   {/* Title */}

@@ -22,37 +22,9 @@ async function main() {
   console.log("🌱 Starting database seed...\n");
 
   // 1. Create Admin User
-  const adminEmail = process.env.ADMIN_EMAIL;
-  const adminPassword = process.env.ADMIN_PASSWORD;
-
-  if (!adminEmail || !adminPassword) {
-    console.error("\n❌ ADMIN_EMAIL and ADMIN_PASSWORD environment variables are REQUIRED.");
-    console.error("   Set them in your .env.local file before running the seed script.");
-    console.error("   Example:");
-    console.error('     ADMIN_EMAIL="admin@prni.org"');
-    console.error('     ADMIN_PASSWORD="Xk9#mP2$vL7@nQ4!wR8&jF5*"');
-    process.exit(1);
-  }
-
-  // Enforce VERY strong password requirements
-  const passwordErrors: string[] = [];
-  if (adminPassword.length < 20) passwordErrors.push("Must be at least 20 characters");
-  if (!/[A-Z].*[A-Z]/.test(adminPassword)) passwordErrors.push("Must contain at least 2 uppercase letters");
-  if (!/[a-z].*[a-z]/.test(adminPassword)) passwordErrors.push("Must contain at least 2 lowercase letters");
-  if (!/[0-9].*[0-9]/.test(adminPassword)) passwordErrors.push("Must contain at least 2 numbers");
-  if (!/[^A-Za-z0-9].*[^A-Za-z0-9]/.test(adminPassword)) passwordErrors.push("Must contain at least 2 special characters");
-  if (/(.)\1{2,}/.test(adminPassword)) passwordErrors.push("Must not contain 3 or more repeating characters");
-  const commonPatterns = ["qwerty", "asdfgh", "zxcvbn", "123456", "abcdef", "password", "admin"];
-  if (commonPatterns.some((p) => adminPassword.toLowerCase().includes(p))) {
-    passwordErrors.push("Must not contain common keyboard patterns or words");
-  }
-
-  if (passwordErrors.length > 0) {
-    console.error("\n❌ ADMIN_PASSWORD does not meet security requirements:");
-    passwordErrors.forEach((e) => console.error(`   - ${e}`));
-    process.exit(1);
-  }
-
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@prni.org";
+  const adminPassword = process.env.ADMIN_PASSWORD || "admin123!";
+  
   console.log("Creating admin user...");
   const passwordHash = await hash(adminPassword, 12);
   
@@ -382,7 +354,7 @@ We believe in:
   console.log("\n🎉 Database seeding completed successfully!");
   console.log(`\n📋 Admin Login Credentials:`);
   console.log(`   Email: ${adminEmail}`);
-  console.log(`   Password: ${"*".repeat(adminPassword.length)} (hidden for security)`);
+  console.log(`   Password: ${adminPassword}`);
   console.log(`\n⚠️  Remember to change the admin password in production!`);
 }
 

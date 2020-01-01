@@ -1,8 +1,6 @@
 // file: app/api/international-join/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { escapeHtml } from "@/lib/security-alerts";
-import { rateLimit, getClientIP, validateOrigin, RATE_LIMITS } from "@/lib/rate-limit";
-import { verifyTurnstileToken } from "@/lib/turnstile";
+import { checkRateLimit } from "@/lib/utils";
 
 interface InternationalJoinData {
   name: string;
@@ -25,19 +23,17 @@ const INTEREST_LABELS: Record<string, string> = {
 async function sendNotificationEmail(data: InternationalJoinData) {
   const interestLabel = INTEREST_LABELS[data.interest] || data.interest;
   
-  // If no API key configured, log minimally
+  // If no API key configured, just log
   if (!process.env.RESEND_API_KEY) {
-    if (process.env.NODE_ENV === "production") {
-      console.log("International Wing registration received (no email service configured)");
-    } else {
-      console.log("=== International Wing Registration (no email configured) ===");
-      console.log("Name:", data.name);
-      console.log("Email:", data.email);
-      console.log("Country:", data.country);
-      console.log("Interest:", interestLabel);
-      console.log("Timestamp:", new Date().toISOString());
-      console.log("==============================================================");
-    }
+    console.log("=== International Wing Registration (no email configured) ===");
+    console.log("Name:", data.name);
+    console.log("Email:", data.email);
+    console.log("Country:", data.country);
+    console.log("Languages:", data.languages || "Not specified");
+    console.log("Interest:", interestLabel);
+    console.log("Message:", data.message || "No message");
+    console.log("Timestamp:", new Date().toISOString());
+    console.log("==============================================================");
     return { success: true, emailSent: false };
   }
 
@@ -49,7 +45,7 @@ async function sendNotificationEmail(data: InternationalJoinData) {
     const { error } = await resend.emails.send({
       from: "PRNI Website <noreply@prni.org.pl>",
       to: process.env.CONTACT_EMAIL || "prni.official@gmail.com",
-      subject: `[PRNI International Wing] New Registration: ${data.name.replace(/[\r\n]/g, "").slice(0, 50)}`,
+      subject: `[PRNI International Wing] New Registration: ${data.name} (${data.email})`,
       text: `New International Wing Registration
 
 Name: ${data.name}
@@ -69,29 +65,29 @@ Note: This person has acknowledged that participation does not constitute party 
         <table style="border-collapse: collapse; width: 100%; max-width: 600px;">
           <tr>
             <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold; width: 140px;">Name:</td>
-            <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(data.name)}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.name}</td>
           </tr>
           <tr>
             <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Email:</td>
-            <td style="padding: 8px; border-bottom: 1px solid #eee;"><a href="mailto:${escapeHtml(data.email)}">${escapeHtml(data.email)}</a></td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;"><a href="mailto:${data.email}">${data.email}</a></td>
           </tr>
           <tr>
             <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Country:</td>
-            <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(data.country)}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.country}</td>
           </tr>
           <tr>
             <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Languages:</td>
-            <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.languages ? escapeHtml(data.languages) : "<em>Not specified</em>"}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.languages || "<em>Not specified</em>"}</td>
           </tr>
           <tr>
             <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Interest Area:</td>
-            <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(interestLabel)}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${interestLabel}</td>
           </tr>
         </table>
         
         ${data.message ? `
           <h3 style="margin-top: 20px;">Message:</h3>
-          <p style="background: #f5f5f5; padding: 15px; border-radius: 5px;">${escapeHtml(data.message).replace(/\n/g, "<br>")}</p>
+          <p style="background: #f5f5f5; padding: 15px; border-radius: 5px;">${data.message.replace(/\n/g, "<br>")}</p>
         ` : ""}
         
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
@@ -104,72 +100,52 @@ Note: This person has acknowledged that participation does not constitute party 
 
     if (error) {
       console.error("Resend email error:", error);
-      // Don't throw - log registration minimally
-      if (process.env.NODE_ENV !== "production") {
-        console.log("=== International Wing Registration (email failed) ===");
-        console.log("Name:", data.name);
-        console.log("Country:", data.country);
-        console.log("=======================================================");
-      }
+      // Don't throw - still log the registration
+      console.log("=== International Wing Registration (email failed) ===");
+      console.log("Name:", data.name);
+      console.log("Email:", data.email);
+      console.log("Country:", data.country);
+      console.log("=======================================================");
       return { success: true, emailSent: false };
     }
 
     return { success: true, emailSent: true };
   } catch (emailError) {
     console.error("Email sending failed:", emailError);
-    // Log registration minimally
-    if (process.env.NODE_ENV !== "production") {
-      console.log("=== International Wing Registration (email exception) ===");
-      console.log("Name:", data.name);
-      console.log("Country:", data.country);
-      console.log("=========================================================");
-    }
+    // Log registration even if email fails
+    console.log("=== International Wing Registration (email exception) ===");
+    console.log("Name:", data.name);
+    console.log("Email:", data.email);
+    console.log("Country:", data.country);
+    console.log("Interest:", interestLabel);
+    console.log("=========================================================");
     return { success: true, emailSent: false };
   }
 }
 
-// SECURITY: Hide this route from browsers — return 404 for non-POST
-export async function GET() {
-  return NextResponse.json(null, { status: 404 });
-}
-
 export async function POST(request: NextRequest) {
   try {
-    // Origin validation (CSRF protection)
-    if (!validateOrigin(request)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
     // Get client IP for rate limiting
-    const ip = getClientIP(request);
+    const ip = request.headers.get("x-forwarded-for") || 
+               request.headers.get("x-real-ip") || 
+               "unknown";
 
-    // Rate limiting: 2 requests per hour per IP (Redis-backed)
-    const rl = await rateLimit(ip, "intl-join", RATE_LIMITS.internationalJoin.maxRequests, RATE_LIMITS.internationalJoin.windowMs, RATE_LIMITS.internationalJoin.blockDuration);
+    // Rate limiting: 5 requests per 30 minutes per IP
+    const rateLimit = checkRateLimit(`intl-join:${ip}`, 5, 30 * 60 * 1000);
     
-    if (!rl.allowed) {
+    if (!rateLimit.allowed) {
       return NextResponse.json(
         { error: "Too many requests. Please try again later." },
         { 
           status: 429,
           headers: {
-            "Retry-After": Math.ceil(rl.resetIn / 1000).toString(),
+            "Retry-After": Math.ceil(rateLimit.resetIn / 1000).toString(),
           },
         }
       );
     }
 
-    const body = await request.json();
-
-    // Verify CAPTCHA token
-    const isCaptchaValid = await verifyTurnstileToken(body.turnstileToken, ip);
-    if (!isCaptchaValid) {
-      return NextResponse.json(
-        { error: "CAPTCHA verification failed. Please try again." },
-        { status: 403 }
-      );
-    }
-
-    const data: InternationalJoinData = body;
+    const data: InternationalJoinData = await request.json();
 
     // Validate required fields
     if (!data.name?.trim()) {
@@ -220,13 +196,12 @@ export async function POST(request: NextRequest) {
     // Send notification email (won't fail even if email fails)
     const result = await sendNotificationEmail(data);
     
-    if (process.env.NODE_ENV !== "production") {
-      console.log("Registration processed:", {
-        name: data.name,
-        country: data.country,
-        emailSent: result.emailSent,
-      });
-    }
+    console.log("Registration processed:", {
+      name: data.name,
+      email: data.email,
+      country: data.country,
+      emailSent: result.emailSent,
+    });
 
     return NextResponse.json({
       success: true,

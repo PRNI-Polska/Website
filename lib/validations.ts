@@ -5,27 +5,21 @@ import { z } from "zod";
 // SECURITY HELPERS
 // ============================================================================
 
-// Patterns to detect potential XSS/injection attempts.
-// SECURITY: Patterns are intentionally simple to avoid ReDoS (catastrophic
-// backtracking).  Complex nested quantifiers have been replaced with safe
-// linear-time alternatives.
+// Patterns to detect potential XSS/injection attempts
 const DANGEROUS_PATTERNS = [
-  /<script/gi,       // Opening script tag (simple, no backtracking)
+  /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
   /javascript:/gi,
-  /on\w+\s*=/gi,     // onclick=, onerror=, etc.
+  /on\w+\s*=/gi, // onclick=, onerror=, etc.
   /data:\s*text\/html/gi,
   /vbscript:/gi,
 ];
 
 // Check for dangerous content
 function containsDangerousContent(value: string): boolean {
-  return DANGEROUS_PATTERNS.some((pattern) => {
-    pattern.lastIndex = 0; // Reset stateful regexes (global flag)
-    return pattern.test(value);
-  });
+  return DANGEROUS_PATTERNS.some((pattern) => pattern.test(value));
 }
 
-// Safe string refinement — applies XSS pattern check
+// Safe string refinement
 const safeString = (schema: z.ZodString) =>
   schema.refine(
     (val) => !containsDangerousContent(val),
@@ -52,27 +46,20 @@ export const announcementCategoryEnum = z.enum([
 export const contentStatusEnum = z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]);
 
 export const createAnnouncementSchema = z.object({
-  title: safeString(
-    z
-      .string()
-      .min(1, "Title is required")
-      .max(200, "Title must be less than 200 characters")
-  ),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(200, "Title must be less than 200 characters"),
   slug: z
     .string()
     .min(1, "Slug is required")
     .max(200, "Slug must be less than 200 characters")
     .regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
-  excerpt: safeString(
-    z
-      .string()
-      .min(1, "Excerpt is required")
-      .max(500, "Excerpt must be less than 500 characters")
-  ),
-  content: z.string().min(1, "Content is required")
-    .refine((val) => !containsDangerousContent(val), {
-      message: "Content contains potentially dangerous elements",
-    }),
+  excerpt: z
+    .string()
+    .min(1, "Excerpt is required")
+    .max(500, "Excerpt must be less than 500 characters"),
+  content: z.string().min(1, "Content is required"),
   category: announcementCategoryEnum,
   featuredImage: z.string().url().optional().or(z.literal("")),
   status: contentStatusEnum.default("DRAFT"),
@@ -90,29 +77,20 @@ export type UpdateAnnouncementInput = z.infer<typeof updateAnnouncementSchema>;
 // EVENT SCHEMAS
 // ============================================================================
 export const createEventSchema = z.object({
-  title: safeString(
-    z
-      .string()
-      .min(1, "Title is required")
-      .max(200, "Title must be less than 200 characters")
-  ),
-  description: z.string().min(1, "Description is required")
-    .refine((val) => !containsDangerousContent(val), {
-      message: "Description contains potentially dangerous elements",
-    }),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(200, "Title must be less than 200 characters"),
+  description: z.string().min(1, "Description is required"),
   startDateTime: z.string().datetime("Invalid start date/time"),
   endDateTime: z.string().datetime("Invalid end date/time"),
-  location: safeString(
-    z
-      .string()
-      .min(1, "Location is required")
-      .max(500, "Location must be less than 500 characters")
-  ),
+  location: z
+    .string()
+    .min(1, "Location is required")
+    .max(500, "Location must be less than 500 characters"),
   rsvpLink: z.string().url().optional().or(z.literal("")),
   organizerContact: z.string().max(200).optional().or(z.literal("")),
-  tags: safeString(
-    z.string().max(500, "Tags must be less than 500 characters")
-  ),
+  tags: z.string().max(500, "Tags must be less than 500 characters"),
   status: contentStatusEnum.default("DRAFT"),
 }).refine((data) => new Date(data.endDateTime) > new Date(data.startDateTime), {
   message: "End date must be after start date",
@@ -121,17 +99,14 @@ export const createEventSchema = z.object({
 
 export const updateEventSchema = z.object({
   id: z.string().cuid(),
-  title: safeString(z.string().min(1).max(200)).optional(),
-  description: z.string().min(1)
-    .refine((val) => !containsDangerousContent(val), {
-      message: "Description contains potentially dangerous elements",
-    }).optional(),
+  title: z.string().min(1).max(200).optional(),
+  description: z.string().min(1).optional(),
   startDateTime: z.string().datetime().optional(),
   endDateTime: z.string().datetime().optional(),
-  location: safeString(z.string().min(1).max(500)).optional(),
+  location: z.string().min(1).max(500).optional(),
   rsvpLink: z.string().url().optional().or(z.literal("")),
   organizerContact: z.string().max(200).optional().or(z.literal("")),
-  tags: safeString(z.string().max(500)).optional(),
+  tags: z.string().max(500).optional(),
   status: contentStatusEnum.optional(),
 });
 
@@ -142,21 +117,16 @@ export type UpdateEventInput = z.infer<typeof updateEventSchema>;
 // MANIFESTO SECTION SCHEMAS
 // ============================================================================
 export const createManifestoSectionSchema = z.object({
-  title: safeString(
-    z
-      .string()
-      .min(1, "Title is required")
-      .max(200, "Title must be less than 200 characters")
-  ),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(200, "Title must be less than 200 characters"),
   slug: z
     .string()
     .min(1, "Slug is required")
     .max(200, "Slug must be less than 200 characters")
     .regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
-  content: z.string().min(1, "Content is required")
-    .refine((val) => !containsDangerousContent(val), {
-      message: "Content contains potentially dangerous elements",
-    }),
+  content: z.string().min(1, "Content is required"),
   order: z.number().int().min(0),
   parentId: z.string().cuid().optional().nullable(),
   status: contentStatusEnum.default("DRAFT"),
@@ -173,24 +143,18 @@ export type UpdateManifestoSectionInput = z.infer<typeof updateManifestoSectionS
 // TEAM MEMBER SCHEMAS
 // ============================================================================
 export const createTeamMemberSchema = z.object({
-  name: safeString(
-    z
-      .string()
-      .min(1, "Name is required")
-      .max(100, "Name must be less than 100 characters")
-  ),
-  role: safeString(
-    z
-      .string()
-      .min(1, "Role is required")
-      .max(100, "Role must be less than 100 characters")
-  ),
-  bio: safeString(
-    z
-      .string()
-      .min(1, "Bio is required")
-      .max(1000, "Bio must be less than 1000 characters")
-  ),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(100, "Name must be less than 100 characters"),
+  role: z
+    .string()
+    .min(1, "Role is required")
+    .max(100, "Role must be less than 100 characters"),
+  bio: z
+    .string()
+    .min(1, "Bio is required")
+    .max(1000, "Bio must be less than 1000 characters"),
   photoUrl: z.string().url().optional().or(z.literal("")),
   email: z.string().email().optional().or(z.literal("")),
   order: z.number().int().min(0),
@@ -208,70 +172,15 @@ export type UpdateTeamMemberInput = z.infer<typeof updateTeamMemberSchema>;
 // CONTACT FORM SCHEMA (Enhanced Security)
 // ============================================================================
 
-// Blocked email domains (disposable / temporary email services used for spam)
-// This is a curated list of the most common ones; for comprehensive coverage
-// consider using a package like `disposable-email-domains` from npm.
+// Blocked email domains (disposable email services often used for spam)
 const BLOCKED_EMAIL_DOMAINS = [
-  // Major disposable providers
   "tempmail.com",
   "throwaway.email",
   "guerrillamail.com",
-  "guerrillamail.info",
-  "guerrillamail.net",
-  "guerrillamail.org",
-  "guerrillamail.de",
   "10minutemail.com",
-  "10minutemail.net",
   "mailinator.com",
   "yopmail.com",
-  "yopmail.fr",
   "trashmail.com",
-  "trashmail.me",
-  "trashmail.net",
-  "sharklasers.com",
-  "guerrillamailblock.com",
-  "grr.la",
-  "dispostable.com",
-  "mailnesia.com",
-  "maildrop.cc",
-  "discard.email",
-  "mohmal.com",
-  "fakeinbox.com",
-  "tempail.com",
-  "temp-mail.org",
-  "temp-mail.io",
-  "emailondeck.com",
-  "getnada.com",
-  "burnermail.io",
-  "inboxbear.com",
-  "mailsac.com",
-  "harakirimail.com",
-  "throwaway.email",
-  "mailcatch.com",
-  "mytemp.email",
-  "tempinbox.com",
-  "getairmail.com",
-  "tmail.ws",
-  "spamgourmet.com",
-  "mailnull.com",
-  "jetable.org",
-  "mintemail.com",
-  "nowmymail.com",
-  "spamfree24.org",
-  "trashymail.com",
-  "binkmail.com",
-  "bobmail.info",
-  "chammy.info",
-  "devnullmail.com",
-  "filzmail.com",
-  "letthemeatspam.com",
-  "mailexpire.com",
-  "mailzilla.com",
-  "tempmail.net",
-  "tempr.email",
-  "wegwerfmail.de",
-  "wegwerfmail.net",
-  "wh4f.org",
 ];
 
 export const contactFormSchema = z.object({
@@ -379,33 +288,17 @@ export const loginSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
-// For admin password changes (enforces VERY strong passwords)
+// For admin password changes (enforces strong passwords)
 export const passwordChangeSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
   newPassword: z
     .string()
-    .min(20, "Password must be at least 20 characters")
+    .min(12, "Password must be at least 12 characters")
     .max(128, "Password must be less than 128 characters")
-    .regex(/[A-Z].*[A-Z]/, "Password must contain at least 2 uppercase letters")
-    .regex(/[a-z].*[a-z]/, "Password must contain at least 2 lowercase letters")
-    .regex(/[0-9].*[0-9]/, "Password must contain at least 2 numbers")
-    .regex(/[^A-Za-z0-9].*[^A-Za-z0-9]/, "Password must contain at least 2 special characters")
-    .refine(
-      (val) => {
-        // Reject passwords with 3+ repeating characters (e.g. "aaa", "111")
-        return !/(.)\1{2,}/.test(val);
-      },
-      { message: "Password must not contain 3 or more repeating characters" }
-    )
-    .refine(
-      (val) => {
-        // Reject common keyboard patterns
-        const patterns = ["qwerty", "asdfgh", "zxcvbn", "123456", "abcdef", "password", "admin"];
-        const lower = val.toLowerCase();
-        return !patterns.some((p) => lower.includes(p));
-      },
-      { message: "Password contains a common pattern and is too predictable" }
-    ),
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
   confirmPassword: z.string(),
 }).refine((data) => data.newPassword === data.confirmPassword, {
   message: "Passwords don't match",

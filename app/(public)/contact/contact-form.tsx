@@ -11,17 +11,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { contactFormSchema, type ContactFormInput } from "@/lib/validations";
 import { cn } from "@/lib/utils";
-import { useI18n } from "@/lib/i18n";
-import { Turnstile } from "@/components/turnstile";
 
 type FormState = "idle" | "loading" | "success" | "error";
 
 export function ContactForm() {
-  const { t } = useI18n();
   const [formState, setFormState] = useState<FormState>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
-  const [turnstileToken, setTurnstileToken] = useState<string>("");
-  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 
   const {
     register,
@@ -40,7 +35,7 @@ export function ContactForm() {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, turnstileToken }),
+        body: JSON.stringify(data),
       });
 
       const result = await response.json();
@@ -51,14 +46,11 @@ export function ContactForm() {
 
       setFormState("success");
       reset();
-      setTurnstileToken("");
-      setTurnstileResetKey((k) => k + 1);
     } catch (error) {
       setFormState("error");
       setErrorMessage(
         error instanceof Error ? error.message : "An unexpected error occurred"
       );
-      setTurnstileResetKey((k) => k + 1);
     }
   };
 
@@ -66,15 +58,15 @@ export function ContactForm() {
     return (
       <div className="text-center py-8">
         <CheckCircle2 className="mx-auto h-12 w-12 text-success mb-4" />
-        <h3 className="text-lg font-semibold mb-2">{t("contact.form.success")}</h3>
+        <h3 className="text-lg font-semibold mb-2">Message Sent!</h3>
         <p className="text-muted-foreground mb-4">
-          {t("contact.form.success.text")}
+          Thank you for reaching out. We&apos;ll get back to you soon.
         </p>
         <Button
           variant="outline"
           onClick={() => setFormState("idle")}
         >
-          {t("contact.form.sendAnother")}
+          Send Another Message
         </Button>
       </div>
     );
@@ -93,10 +85,10 @@ export function ContactForm() {
       <div className="grid sm:grid-cols-2 gap-6">
         {/* Name */}
         <div className="space-y-2">
-          <Label htmlFor="name">{t("contact.form.name")} *</Label>
+          <Label htmlFor="name">Name *</Label>
           <Input
             id="name"
-            placeholder={t("contact.form.name.placeholder")}
+            placeholder="Your name"
             {...register("name")}
             aria-invalid={errors.name ? "true" : "false"}
             className={cn(errors.name && "border-destructive")}
@@ -108,11 +100,11 @@ export function ContactForm() {
 
         {/* Email */}
         <div className="space-y-2">
-          <Label htmlFor="email">{t("contact.form.email")} *</Label>
+          <Label htmlFor="email">Email *</Label>
           <Input
             id="email"
             type="email"
-            placeholder={t("contact.form.email.placeholder")}
+            placeholder="your@email.com"
             {...register("email")}
             aria-invalid={errors.email ? "true" : "false"}
             className={cn(errors.email && "border-destructive")}
@@ -125,10 +117,10 @@ export function ContactForm() {
 
       {/* Subject */}
       <div className="space-y-2">
-        <Label htmlFor="subject">{t("contact.form.subject")} *</Label>
+        <Label htmlFor="subject">Subject *</Label>
         <Input
           id="subject"
-          placeholder={t("contact.form.subject.placeholder")}
+          placeholder="What is this about?"
           {...register("subject")}
           aria-invalid={errors.subject ? "true" : "false"}
           className={cn(errors.subject && "border-destructive")}
@@ -140,10 +132,10 @@ export function ContactForm() {
 
       {/* Message */}
       <div className="space-y-2">
-        <Label htmlFor="message">{t("contact.form.message")} *</Label>
+        <Label htmlFor="message">Message *</Label>
         <Textarea
           id="message"
-          placeholder={t("contact.form.message.placeholder")}
+          placeholder="Your message..."
           rows={6}
           {...register("message")}
           aria-invalid={errors.message ? "true" : "false"}
@@ -166,13 +158,6 @@ export function ContactForm() {
         />
       </div>
 
-      {/* CAPTCHA */}
-      <Turnstile
-        onVerify={setTurnstileToken}
-        onExpire={() => setTurnstileToken("")}
-        resetKey={turnstileResetKey}
-      />
-
       {/* Submit */}
       <Button
         type="submit"
@@ -183,15 +168,15 @@ export function ContactForm() {
         {formState === "loading" ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            {t("contact.form.sending")}
+            Sending...
           </>
         ) : (
-          t("contact.form.send")
+          "Send Message"
         )}
       </Button>
 
       <p className="text-xs text-muted-foreground">
-        {t("contact.form.required")}
+        * Required fields. Your information will be kept confidential.
       </p>
     </form>
   );

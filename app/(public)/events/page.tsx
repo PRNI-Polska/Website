@@ -1,6 +1,7 @@
 // file: app/(public)/events/page.tsx
+import { Suspense } from "react";
 import { prisma } from "@/lib/db";
-import { EventsPageWrapper } from "./events-page-wrapper";
+import { EventsClient } from "./events-client";
 import type { Metadata } from "next";
 
 // Force dynamic rendering - no caching
@@ -34,5 +35,32 @@ async function getEvents() {
 export default async function EventsPage() {
   const events = await getEvents();
 
-  return <EventsPageWrapper events={events} />;
+  return (
+    <div className="container-custom py-12">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl md:text-4xl font-heading font-bold mb-2">
+          Kalendarz Wydarzeń
+        </h1>
+        <p className="text-muted-foreground">
+          Dołącz do naszych wydarzeń i bądź częścią zmian.
+        </p>
+      </div>
+
+      {events.length > 0 ? (
+        <Suspense fallback={<div className="h-96 bg-muted animate-pulse rounded-lg" />}>
+          <EventsClient events={events} />
+        </Suspense>
+      ) : (
+        <div className="text-center py-16">
+          <p className="text-xl text-muted-foreground mb-2">
+            Brak nadchodzących wydarzeń
+          </p>
+          <p className="text-muted-foreground">
+            Sprawdź ponownie wkrótce!
+          </p>
+        </div>
+      )}
+    </div>
+  );
 }

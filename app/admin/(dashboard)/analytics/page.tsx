@@ -1,9 +1,10 @@
 // file: app/admin/(dashboard)/analytics/page.tsx
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -912,6 +913,315 @@ export default function AnalyticsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Full Visit Log - searchable, paginated, all-time */}
+      <FullVisitsLog />
     </div>
+  );
+}
+
+// ============================================
+// Full visit log — paginated, searchable, all-time
+// ============================================
+
+interface Visit {
+  id: string;
+  createdAt: string;
+  path: string;
+  country: string | null;
+  region: string | null;
+  city: string | null;
+  device: string | null;
+  browser: string | null;
+  os: string | null;
+  referrer: string | null;
+  sessionId: string | null;
+}
+
+interface VisitsResponse {
+  visits: Visit[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+function FullVisitsLog() {
+  const [visits, setVisits] = useState<Visit[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(50);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [sortDir, setSortDir] = useState<"desc" | "asc">("desc");
+
+  const fetchVisits = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: String(page),
+        pageSize: String(pageSize),
+        sort: sortDir,
+      });
+      if (search) params.set("search", search);
+      if (from) params.set("from", from);
+      if (to) params.set("to", to);
+
+      const res = await fetch(`/api/admin/analytics/visits?${params.toString()}`);
+      if (!res.ok) throw new Error("fetch failed");
+      const json: VisitsResponse = await res.json();
+      setVisits(json.visits);
+      setTotal(json.total);
+      setTotalPages(json.totalPages);
+    } catch (err) {
+      console.error("Failed to load visit log:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, pageSize, sortDir, search, from, to]);
+
+  useEffect(() => {
+    fetchVisits();
+  }, [fetchVisits]);
+
+  function applySearch() {
+    setPage(1);
+    setSearch(searchInput.trim());
+  }
+
+  function clearFilters() {
+    setSearchInput("");
+    setSearch("");
+    setFrom("");
+    setTo("");
+    setSortDir("desc");
+    setPage(1);
+  }
+
+  function exportCsv() {
+    const params = new URLSearchParams({
+      sort: sortDir,
+      export: "csv",
+    });
+    if (search) params.set("search", search);
+    if (from) params.set("from", from);
+    if (to) params.set("to", to);
+    window.location.href = `/api/admin/analytics/visits?${params.toString()}`;
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <CardTitle>Full Visit Log</CardTitle>
+            <p className="text-xs text-muted-foreground mt-1">
+              Every recorded visit since the beginning. Filter, search, and export.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary">{total.toLocaleString()} total</Badge>
+            <Button variant="outline" size="sm" onClick={exportCsv} disabled={total === 0}>
+              Export CSV
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {/* Controls */}
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5 mb-4">
+          <div className="lg:col-span-2">
+            <label className="text-xs text-muted-foreground">Search</label>
+            <div className="flex gap-2">
+              <Input
+                placeholder="path / country / city / browser..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") applySearch();
+                }}
+              />
+              <Button variant="secondary" size="sm" onClick={applySearch}>
+                Go
+              </Button>
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">From</label>
+            <Input
+              type="date"
+              value={from}
+              onChange={(e) => {
+                setFrom(e.target.value);
+                setPage(1);
+              }}
+            />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">To</label>
+            <Input
+              type="date"
+              value={to}
+              onChange={(e) => {
+                setTo(e.target.value);
+                setPage(1);
+              }}
+            />
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground">Sort</label>
+            <Select
+              value={sortDir}
+              onValueChange={(v) => {
+                setSortDir(v as "desc" | "asc");
+                setPage(1);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="desc">Newest first</SelectItem>
+                <SelectItem value="asc">Oldest first</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between mb-3">
+          <Button variant="ghost" size="sm" onClick={clearFilters}>
+            Clear filters
+          </Button>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>Per page</span>
+            <Select
+              value={String(pageSize)}
+              onValueChange={(v) => {
+                setPageSize(parseInt(v, 10));
+                setPage(1);
+              }}
+            >
+              <SelectTrigger className="w-[90px] h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+                <SelectItem value="250">250</SelectItem>
+                <SelectItem value="500">500</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        {/* Table */}
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-600" />
+          </div>
+        ) : visits.length === 0 ? (
+          <p className="text-muted-foreground text-center py-8">
+            No visits match the current filters.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-2 px-2 font-medium whitespace-nowrap">Time</th>
+                  <th className="text-left py-2 px-2 font-medium">Page</th>
+                  <th className="text-left py-2 px-2 font-medium">Location</th>
+                  <th className="text-left py-2 px-2 font-medium">Device</th>
+                  <th className="text-left py-2 px-2 font-medium">Browser</th>
+                  <th className="text-left py-2 px-2 font-medium">OS</th>
+                  <th className="text-left py-2 px-2 font-medium">Referrer</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visits.map((v) => {
+                  const locParts = [
+                    v.city,
+                    v.region,
+                    countryNames[v.country || ""] || v.country,
+                  ].filter(Boolean);
+                  return (
+                    <tr key={v.id} className="border-b last:border-0 hover:bg-muted/50">
+                      <td className="py-2 px-2 text-muted-foreground whitespace-nowrap">
+                        {new Date(v.createdAt).toLocaleString()}
+                      </td>
+                      <td className="py-2 px-2 font-mono text-xs max-w-[260px] truncate" title={v.path}>
+                        {v.path}
+                      </td>
+                      <td className="py-2 px-2">{locParts.length ? locParts.join(", ") : "Unknown"}</td>
+                      <td className="py-2 px-2 capitalize">{v.device || "—"}</td>
+                      <td className="py-2 px-2">{v.browser || "—"}</td>
+                      <td className="py-2 px-2">{v.os || "—"}</td>
+                      <td
+                        className="py-2 px-2 text-xs text-muted-foreground max-w-[200px] truncate"
+                        title={v.referrer || ""}
+                      >
+                        {v.referrer || "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {total > 0 && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4">
+            <p className="text-xs text-muted-foreground">
+              Showing {Math.min((page - 1) * pageSize + 1, total).toLocaleString()}–
+              {Math.min(page * pageSize, total).toLocaleString()} of {total.toLocaleString()}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(1)}
+                disabled={page <= 1}
+              >
+                « First
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1}
+              >
+                ‹ Prev
+              </Button>
+              <span className="text-sm font-medium px-2">
+                Page {page} / {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+              >
+                Next ›
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPage(totalPages)}
+                disabled={page >= totalPages}
+              >
+                Last »
+              </Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

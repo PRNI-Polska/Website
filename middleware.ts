@@ -16,6 +16,7 @@ import {
   trackRateLimitHit,
   trackSuspiciousRequest,
   isIPBlocked,
+  setBaseUrl,
 } from "@/lib/security-alerts";
 
 // ============================================
@@ -271,6 +272,9 @@ export default withAuth(
     // ============================================
     // SECURITY ALERT SYSTEM - Track all requests
     // ============================================
+    // Set the base URL so alerts can be persisted via internal API
+    setBaseUrl(req.url);
+
     // Check if IP is already blocked by threat system
     const ipBlockStatus = isIPBlocked(ip);
     if (ipBlockStatus.blocked) {

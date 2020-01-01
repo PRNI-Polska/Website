@@ -1,11 +1,44 @@
 // file: app/api/analytics/track/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { checkRateLimit } from "@/lib/utils";
+
+// Maximum lengths for input fields to prevent DB abuse
+const MAX_PATH_LENGTH = 500;
+const MAX_REFERRER_LENGTH = 1000;
+const MAX_SESSION_ID_LENGTH = 100;
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: 30 requests per minute per IP (middleware also enforces this,
+    // but this is a defense-in-depth backup for when middleware matcher is bypassed)
+    const ip = request.headers.get("cf-connecting-ip") ||
+               request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+               request.headers.get("x-real-ip") ||
+               "unknown";
+
+    const rateLimit = checkRateLimit(`analytics:${ip}`, 30, 60 * 1000);
+    if (!rateLimit.allowed) {
+      return NextResponse.json({ success: true }); // Silent fail to not break pages
+    }
+
     const body = await request.json();
     const { path, referrer, sessionId } = body;
+
+    // Validate and sanitize inputs
+    if (typeof path !== "string" && path !== undefined) {
+      return NextResponse.json({ success: true }); // Silent reject
+    }
+
+    const sanitizedPath = typeof path === "string" 
+      ? path.slice(0, MAX_PATH_LENGTH).replace(/[<>"']/g, "") 
+      : "/";
+    const sanitizedReferrer = typeof referrer === "string"
+      ? referrer.slice(0, MAX_REFERRER_LENGTH).replace(/[<>"']/g, "")
+      : null;
+    const sanitizedSessionId = typeof sessionId === "string"
+      ? sessionId.slice(0, MAX_SESSION_ID_LENGTH).replace(/[^a-zA-Z0-9\-_]/g, "")
+      : null;
 
     // Get geolocation - check Cloudflare headers first, then Vercel
     const country = request.headers.get("cf-ipcountry") || 
@@ -23,15 +56,15 @@ export async function POST(request: NextRequest) {
 
     await prisma.pageView.create({
       data: {
-        path: path || "/",
+        path: sanitizedPath,
         country,
         city: city ? decodeURIComponent(city) : null,
         region,
         device,
         browser,
         os,
-        referrer: referrer || null,
-        sessionId: sessionId || null,
+        referrer: sanitizedReferrer,
+        sessionId: sanitizedSessionId,
       },
     });
 

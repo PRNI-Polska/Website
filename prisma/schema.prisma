@@ -169,6 +169,30 @@ model SiteSettings {
 }
 
 // ============================================================================
+// SECURITY ALERT MODEL - Attack detection & monitoring
+// ============================================================================
+model SecurityAlert {
+  id          String    @id @default(cuid())
+  type        String    // BRUTE_FORCE, API_SPAM, XSS_ATTEMPT, SQL_INJECTION, etc.
+  severity    String    // low, medium, high, critical
+  ipAddress   String
+  path        String?   // Request path that triggered the alert
+  userAgent   String?   // User agent of the requester
+  details     String    // Human-readable description
+  metadata    String?   // JSON string with additional context
+  resolved    Boolean   @default(false)
+  resolvedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  
+  @@index([severity])
+  @@index([type])
+  @@index([ipAddress])
+  @@index([resolved])
+  @@index([createdAt])
+  @@map("security_alerts")
+}
+
+// ============================================================================
 // PAGE VIEW MODEL - Analytics tracking
 // ============================================================================
 model PageView {

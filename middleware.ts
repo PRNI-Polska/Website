@@ -5,10 +5,18 @@
 // - DDoS (layer 7)
 // - XSS, CSRF, Clickjacking
 // - Unauthorized admin access
+// - API spam & bot floods
+// Integrates with security alert system for real-time attack warnings
 
 import { withAuth } from "next-auth/middleware";
 import { NextResponse, NextRequest } from "next/server";
 import type { NextRequestWithAuth } from "next-auth/middleware";
+import {
+  trackRequest,
+  trackRateLimitHit,
+  trackSuspiciousRequest,
+  isIPBlocked,
+} from "@/lib/security-alerts";
 
 // ============================================
 // SECURITY HEADERS (STRICT)
@@ -34,10 +42,10 @@ const securityHeaders = {
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
 };
 
-// Strict Content Security Policy
+// Strict Content Security Policy (removed 'unsafe-eval' for better XSS protection)
 const csp = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval';
+  script-src 'self' 'unsafe-inline';
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   img-src 'self' data: https: blob:;
   font-src 'self' data: https://fonts.gstatic.com;
@@ -141,55 +149,91 @@ const RATE_LIMITS = {
   admin: { maxRequests: 50, interval: 60 * 1000, blockDuration: 0 },
   // Public pages: 100 per minute per IP
   public: { maxRequests: 100, interval: 60 * 1000, blockDuration: 5 * 60 * 1000 },
+  // Analytics: 30 per minute (prevent DB spam)
+  analytics: { maxRequests: 30, interval: 60 * 1000, blockDuration: 5 * 60 * 1000 },
+  // International join: 5 per 30 minutes
+  internationalJoin: { maxRequests: 5, interval: 30 * 60 * 1000, blockDuration: 0 },
+  // Recruitment: 5 per 30 minutes
+  recruitment: { maxRequests: 5, interval: 30 * 60 * 1000, blockDuration: 0 },
 };
 
 // ============================================
 // SUSPICIOUS REQUEST DETECTION
 // ============================================
-function isSuspiciousRequest(request: NextRequest): boolean {
+function detectSuspiciousPattern(request: NextRequest): { suspicious: boolean; patternType: string } {
   const userAgent = request.headers.get("user-agent") || "";
   const path = request.nextUrl.pathname;
   
   // Block common attack patterns
-  const suspiciousPatterns = [
-    /\.\./,           // Path traversal
-    /<script/i,       // XSS attempt
-    /union\s+select/i, // SQL injection
-    /eval\(/i,        // Code injection
-    /javascript:/i,   // XSS via protocol
-    /on\w+\s*=/i,     // Event handler XSS
-    /wp-admin/i,      // WordPress scanner
-    /wp-login/i,      // WordPress scanner
-    /phpmyadmin/i,    // phpMyAdmin scanner
-    /\.php$/i,        // PHP file access
-    /\.asp$/i,        // ASP file access
-    /\.env/i,         // Env file access
-    /\.git/i,         // Git folder access
-    /\.htaccess/i,    // Apache config access
+  const pathPatterns: [RegExp, string][] = [
+    [/\.\./, "path_traversal"],
+    [/<script/i, "xss"],
+    [/union\s+select/i, "sql_injection"],
+    [/eval\(/i, "payload_injection"],
+    [/javascript:/i, "xss"],
+    [/on\w+\s*=/i, "xss"],
+    [/wp-admin/i, "scanner"],
+    [/wp-login/i, "scanner"],
+    [/phpmyadmin/i, "scanner"],
+    [/\.php$/i, "scanner"],
+    [/\.asp$/i, "scanner"],
+    [/\.env/i, "env_access"],
+    [/\.git/i, "env_access"],
+    [/\.htaccess/i, "env_access"],
+    [/\/etc\/passwd/i, "path_traversal"],
+    [/\/proc\/self/i, "path_traversal"],
+    [/cmd\.exe/i, "payload_injection"],
+    [/powershell/i, "payload_injection"],
+    [/\bexec\b.*\(/i, "payload_injection"],
+    [/\bdrop\s+table\b/i, "sql_injection"],
+    [/\binsert\s+into\b/i, "sql_injection"],
+    [/\bdelete\s+from\b/i, "sql_injection"],
+    [/\bor\s+1\s*=\s*1/i, "sql_injection"],
+    [/\badmin.*\.bak/i, "scanner"],
+    [/\bbackup.*\.sql/i, "scanner"],
+    [/\/xmlrpc\.php/i, "scanner"],
+    [/\/wp-content/i, "scanner"],
+    [/\/wp-includes/i, "scanner"],
   ];
   
-  if (suspiciousPatterns.some(pattern => pattern.test(path))) {
-    return true;
+  for (const [pattern, type] of pathPatterns) {
+    if (pattern.test(path)) {
+      return { suspicious: true, patternType: type };
+    }
   }
   
   // Block suspicious user agents
-  const blockedAgents = [
-    /sqlmap/i,
-    /nikto/i,
-    /nmap/i,
-    /masscan/i,
-    /zgrab/i,
-    /gobuster/i,
-    /dirbuster/i,
-    /wpscan/i,
-    /curl\/[0-9]/i,  // Raw curl without proper UA
+  const uaPatterns: [RegExp, string][] = [
+    [/sqlmap/i, "sql_injection"],
+    [/nikto/i, "scanner"],
+    [/nmap/i, "scanner"],
+    [/masscan/i, "scanner"],
+    [/zgrab/i, "scanner"],
+    [/gobuster/i, "scanner"],
+    [/dirbuster/i, "scanner"],
+    [/wpscan/i, "scanner"],
+    [/acunetix/i, "scanner"],
+    [/nessus/i, "scanner"],
+    [/openvas/i, "scanner"],
+    [/havij/i, "sql_injection"],
+    [/curl\/[0-9]/i, "suspicious_ua"],
+    [/python-requests/i, "suspicious_ua"],
+    [/go-http-client/i, "suspicious_ua"],
+    [/java\//i, "suspicious_ua"],
   ];
   
-  if (blockedAgents.some(pattern => pattern.test(userAgent))) {
-    return true;
+  for (const [pattern, type] of uaPatterns) {
+    if (pattern.test(userAgent)) {
+      return { suspicious: true, patternType: type };
+    }
   }
   
-  return false;
+  // Check for empty/missing user agent (likely a bot)
+  if (!userAgent || userAgent.length < 10) {
+    return { suspicious: true, patternType: "suspicious_ua" };
+  }
+  
+  return { suspicious: false, patternType: "" };
 }
 
 // ============================================
@@ -225,10 +269,34 @@ export default withAuth(
     const userAgent = req.headers.get("user-agent") || "unknown";
     
     // ============================================
+    // SECURITY ALERT SYSTEM - Track all requests
+    // ============================================
+    // Check if IP is already blocked by threat system
+    const ipBlockStatus = isIPBlocked(ip);
+    if (ipBlockStatus.blocked) {
+      logSecurityEvent("THREAT_BLOCKED", { ip, pathname, reason: ipBlockStatus.reason });
+      return new NextResponse(null, { status: 403 });
+    }
+
+    // Track this request in the alert system
+    const requestTracking = trackRequest(ip, pathname);
+    if (requestTracking.blocked) {
+      logSecurityEvent("FLOOD_BLOCKED", { ip, pathname, reason: requestTracking.reason });
+      const response = NextResponse.json(
+        { error: "Access denied", message: "Your IP has been temporarily blocked." },
+        { status: 403 }
+      );
+      return applySecurityHeaders(response);
+    }
+
+    // ============================================
     // SUSPICIOUS REQUEST BLOCKING
     // ============================================
-    if (isSuspiciousRequest(req)) {
-      logSecurityEvent("BLOCKED_SUSPICIOUS", { ip, pathname, userAgent });
+    const suspiciousCheck = detectSuspiciousPattern(req);
+    if (suspiciousCheck.suspicious) {
+      logSecurityEvent("BLOCKED_SUSPICIOUS", { ip, pathname, userAgent, pattern: suspiciousCheck.patternType });
+      // Feed into security alert system
+      trackSuspiciousRequest(ip, pathname, userAgent, suspiciousCheck.patternType);
       return new NextResponse(null, { status: 404 });
     }
     
@@ -238,14 +306,19 @@ export default withAuth(
     const isLoginPage = pathname === "/admin/login";
     const isAuthApi = pathname.startsWith("/api/auth");
     const isContactApi = pathname === "/api/contact";
-    const isPublicApi = pathname.startsWith("/api/") && !isAdminApiRoute && !isAuthApi;
+    const isAnalyticsApi = pathname === "/api/analytics/track";
+    const isInternationalJoinApi = pathname === "/api/international-join";
+    const isRecruitmentApi = pathname === "/api/recruitment";
+    const isPublicApi = pathname.startsWith("/api/") && !isAdminApiRoute && !isAuthApi && !isContactApi && !isAnalyticsApi && !isInternationalJoinApi && !isRecruitmentApi;
     
     // ============================================
     // RATE LIMITING
     // ============================================
     let rateLimit: RateLimitResult | null = null;
+    let rateLimitType = "";
     
     if (isAuthApi || isLoginPage) {
+      rateLimitType = "auth";
       rateLimit = checkRateLimit(
         `auth:${ip}`,
         RATE_LIMITS.auth.maxRequests,
@@ -256,18 +329,43 @@ export default withAuth(
         logSecurityEvent("RATE_LIMITED_AUTH", { ip, blocked: rateLimit.blocked });
       }
     } else if (isContactApi) {
+      rateLimitType = "contact";
       rateLimit = checkRateLimit(
         `contact:${ip}`,
         RATE_LIMITS.contact.maxRequests,
         RATE_LIMITS.contact.interval
       );
+    } else if (isAnalyticsApi) {
+      rateLimitType = "analytics";
+      rateLimit = checkRateLimit(
+        `analytics:${ip}`,
+        RATE_LIMITS.analytics.maxRequests,
+        RATE_LIMITS.analytics.interval,
+        RATE_LIMITS.analytics.blockDuration
+      );
+    } else if (isInternationalJoinApi) {
+      rateLimitType = "international-join";
+      rateLimit = checkRateLimit(
+        `intl-join:${ip}`,
+        RATE_LIMITS.internationalJoin.maxRequests,
+        RATE_LIMITS.internationalJoin.interval
+      );
+    } else if (isRecruitmentApi) {
+      rateLimitType = "recruitment";
+      rateLimit = checkRateLimit(
+        `recruitment:${ip}`,
+        RATE_LIMITS.recruitment.maxRequests,
+        RATE_LIMITS.recruitment.interval
+      );
     } else if (isAdminApiRoute) {
+      rateLimitType = "admin";
       rateLimit = checkRateLimit(
         `admin:${ip}`,
         RATE_LIMITS.admin.maxRequests,
         RATE_LIMITS.admin.interval
       );
     } else if (isPublicApi) {
+      rateLimitType = "public";
       rateLimit = checkRateLimit(
         `public:${ip}`,
         RATE_LIMITS.public.maxRequests,
@@ -277,6 +375,9 @@ export default withAuth(
     }
     
     if (rateLimit && !rateLimit.allowed) {
+      // Track rate limit hit in alert system
+      trackRateLimitHit(ip, pathname, rateLimitType);
+
       const response = NextResponse.json(
         {
           error: "Too many requests",
@@ -297,6 +398,7 @@ export default withAuth(
     if ((isAdminRoute || isAdminApiRoute) && !isLoginPage) {
       if (!isIPAllowed(ip)) {
         logSecurityEvent("BLOCKED_ADMIN_IP", { ip, pathname });
+        trackSuspiciousRequest(ip, pathname, userAgent, "admin_probe");
         const response = NextResponse.json(
           { error: "Access denied" },
           { status: 403 }
@@ -323,6 +425,7 @@ export default withAuth(
     // Protect admin routes and API routes
     if ((isAdminRoute || isAdminApiRoute) && !token) {
       logSecurityEvent("UNAUTHORIZED_ADMIN_ACCESS", { ip, pathname });
+      trackSuspiciousRequest(ip, pathname, userAgent, "admin_probe");
       const response = NextResponse.redirect(new URL("/admin/login", req.url));
       return applySecurityHeaders(response);
     }
@@ -375,6 +478,12 @@ export const config = {
     "/api/auth/:path*",
     // Contact route (for rate limiting)
     "/api/contact",
+    // Analytics route (NOW rate limited)
+    "/api/analytics/track",
+    // International join route (for rate limiting)
+    "/api/international-join",
+    // Recruitment route (for rate limiting)
+    "/api/recruitment",
     // Public API routes (for rate limiting)
     "/api/calendar/:path*",
   ],

@@ -1,5 +1,4 @@
 import { MetadataRoute } from "next";
-import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -21,36 +20,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/wings/international`, lastModified: new Date(), changeFrequency: "monthly" as const, priority: 0.6 },
   ];
 
-  let blogPosts: Array<{ slug: string; updatedAt: Date }> = [];
+  let dynamicPages: MetadataRoute.Sitemap = [];
   try {
-    blogPosts = await prisma.blogPost.findMany({
-      where: { status: "PUBLISHED" },
-      select: { slug: true, updatedAt: true },
-    });
-  } catch {}
+    const { prisma } = await import("@/lib/db");
 
-  let announcements: Array<{ slug: string; updatedAt: Date }> = [];
-  try {
-    announcements = await prisma.announcement.findMany({
-      where: { status: "PUBLISHED" },
-      select: { slug: true, updatedAt: true },
-    });
-  } catch {}
+    const [blogPosts, announcements] = await Promise.all([
+      prisma.blogPost.findMany({
+        where: { status: "PUBLISHED" },
+        select: { slug: true, updatedAt: true },
+      }),
+      prisma.announcement.findMany({
+        where: { status: "PUBLISHED" },
+        select: { slug: true, updatedAt: true },
+      }),
+    ]);
 
-  const dynamicPages = [
-    ...blogPosts.map((post) => ({
-      url: `${baseUrl}/blog/${post.slug}`,
-      lastModified: post.updatedAt,
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    })),
-    ...announcements.map((a) => ({
-      url: `${baseUrl}/announcements/${a.slug}`,
-      lastModified: a.updatedAt,
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    })),
-  ];
+    dynamicPages = [
+      ...blogPosts.map((post) => ({
+        url: `${baseUrl}/blog/${post.slug}`,
+        lastModified: post.updatedAt,
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      })),
+      ...announcements.map((a) => ({
+        url: `${baseUrl}/announcements/${a.slug}`,
+        lastModified: a.updatedAt,
+        changeFrequency: "weekly" as const,
+        priority: 0.7,
+      })),
+    ];
+  } catch {}
 
   return [...staticPages, ...dynamicPages];
 }

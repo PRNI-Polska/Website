@@ -39,7 +39,8 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
           backgroundImage: "url('/sword.png')",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
-          backgroundSize: "auto 90vh",
+          backgroundSize: "auto 110vh",
+          opacity: 1,
         }}
       />
 

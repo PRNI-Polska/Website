@@ -7,10 +7,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { path, referrer, sessionId } = body;
 
-    // Get geolocation from Vercel headers (available on Vercel deployment)
-    const country = request.headers.get("x-vercel-ip-country") || null;
-    const city = request.headers.get("x-vercel-ip-city") || null;
-    const region = request.headers.get("x-vercel-ip-country-region") || null;
+    // Get geolocation - check Cloudflare headers first, then Vercel
+    const country = request.headers.get("cf-ipcountry") || 
+                    request.headers.get("x-vercel-ip-country") || null;
+    const city = request.headers.get("cf-ipcity") || 
+                 request.headers.get("x-vercel-ip-city") || null;
+    const region = request.headers.get("cf-region") || 
+                   request.headers.get("x-vercel-ip-country-region") || null;
 
     // Parse user agent
     const userAgent = request.headers.get("user-agent") || null;

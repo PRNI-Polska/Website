@@ -14,7 +14,7 @@ const content = {
     s1P1Before:
       "Administratorem danych osobowych przetwarzanych w związku z korzystaniem z serwisu internetowego",
     s1P1Mid: "jest",
-    s1P1After: "(dalej: „Administrator").",
+    s1P1After: "(dalej: 'Administrator').",
     s1P2Before:
       "W sprawach dotyczących ochrony danych osobowych możesz skontaktować się z Administratorem pod adresem e-mail:",
 
@@ -72,7 +72,7 @@ const content = {
       },
       { label: "Sprostowanie", desc: "poprawienie nieprawidłowych danych;" },
       {
-        label: "Usunięcie („prawo do bycia zapomnianym")",
+        label: "Usunięcie ('prawo do bycia zapomnianym')",
         desc: "w przypadkach przewidzianych prawem;",
       },
       { label: "Ograniczenie przetwarzania", desc: "" },
@@ -210,7 +210,7 @@ const content = {
     s1P1Before:
       "Verantwortlicher für die Verarbeitung personenbezogener Daten im Zusammenhang mit der Nutzung der Website",
     s1P1Mid: "ist",
-    s1P1After: "(nachfolgend: „Verantwortlicher").",
+    s1P1After: "(nachfolgend: 'Verantwortlicher').",
     s1P2Before:
       "In Angelegenheiten des Datenschutzes können Sie den Verantwortlichen unter folgender E-Mail-Adresse kontaktieren:",
 
@@ -268,7 +268,7 @@ const content = {
       },
       { label: "Berichtigung", desc: "Korrektur unrichtiger Daten;" },
       {
-        label: "Löschung („Recht auf Vergessenwerden")",
+        label: "Löschung ('Recht auf Vergessenwerden')",
         desc: "in den gesetzlich vorgesehenen Fällen;",
       },
       { label: "Einschränkung der Verarbeitung", desc: "" },

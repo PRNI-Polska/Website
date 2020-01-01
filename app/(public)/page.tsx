@@ -204,16 +204,9 @@ export default function HomePage() {
       <div className="section-divider my-0" />
 
       {/* Call to Action */}
-      <section className="py-24 md:py-40 bg-primary text-primary-foreground relative overflow-hidden">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: "url('/balcony-flag.png')",
-            backgroundSize: "cover",
-            backgroundPosition: "center 30%",
-          }}
-        />
-        <div className="absolute inset-0 bg-primary/50 md:bg-primary/30" />
+      <section className="py-24 md:py-32 bg-primary text-primary-foreground relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-1/2 translate-y-1/2" />
         <div className="absolute top-0 left-0 right-0 h-1 bg-white/20" />
         
         <div className="container-custom text-center relative">

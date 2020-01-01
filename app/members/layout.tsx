@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogOut, Loader2, Hash, MessageCircle, FileText, Newspaper, Bell, BellOff } from "lucide-react";
+import { LogOut, Loader2, Hash, MessageCircle, FileText, Newspaper, Bell, BellOff, ShoppingBag } from "lucide-react";
 import { MemberLangProvider, useMemberLang } from "@/lib/members/LangContext";
 import type { MemberLang } from "@/lib/members/i18n";
 
@@ -187,6 +187,7 @@ function MembersLayoutInner({ member, loggingOut, handleLogout, pathname, childr
                 { href: "/members/channels", icon: Hash, label: t("nav.channels") },
                 { href: "/members/messages", icon: MessageCircle, label: t("nav.messages") },
                 { href: "/members/documents", icon: FileText, label: t("nav.documents") },
+                { href: "/members/merch", icon: ShoppingBag, label: t("nav.merch") },
               ].map((item) => (
                 <Link
                   key={item.href}

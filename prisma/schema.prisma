@@ -297,7 +297,7 @@ model MemberDocument {
 model SiteSettings {
   id              String    @id @default("default")
   siteName        String    @default("Political Party")
-  siteDescription String    @default("Building a better future together")
+  siteDescription String    @default("Naród Ponad Wszystkim")
   manifestoPdfUrl String?   // URL to downloadable PDF
   contactEmail    String?
   socialLinks     String?   // JSON string with social media links

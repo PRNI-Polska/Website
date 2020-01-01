@@ -47,9 +47,9 @@ export const translations: Translations = {
   
   // Hero section
   "hero.title": { 
-    en: "The future starts now", 
-    pl: "Przyszłość zaczyna się teraz",
-    de: "Die Zukunft beginnt jetzt"
+    en: "Nation above Everything", 
+    pl: "Naród Ponad Wszystkim",
+    de: "Nation über alles"
   },
   "hero.subtitle": { 
     en: "Building a strong, unified Poland rooted in tradition and national identity.", 

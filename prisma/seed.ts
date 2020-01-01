@@ -329,7 +329,7 @@ We believe in:
     create: {
       id: "default",
       siteName: "PRNI Political Party",
-      siteDescription: "Building a better future together",
+      siteDescription: "Naród Ponad Wszystkim",
       contactEmail: "info@prni.org",
     },
   });

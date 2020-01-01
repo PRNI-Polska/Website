@@ -39,7 +39,7 @@ export async function GET() {
   <channel>
     <title>PRNI — Polski Ruch Narodowo-Integralistyczny</title>
     <link>${host}</link>
-    <description>Komunikaty PRNI (Polski Ruch Narodowo-Integralistyczny) — Przyszłość zaczyna się teraz</description>
+    <description>Komunikaty PRNI (Polski Ruch Narodowo-Integralistyczny) — Naród Ponad Wszystkim</description>
     <language>pl</language>
     <lastBuildDate>${now}</lastBuildDate>
     <atom:link href="${host}/feed.xml" rel="self" type="application/rss+xml"/>

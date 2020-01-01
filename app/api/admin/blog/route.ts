@@ -30,7 +30,11 @@ export async function POST(request: NextRequest) {
     const user = await requireAdmin();
     const body = await request.json();
 
-    const { title, slug, excerpt, content, authorName, authorRole, category, status, featuredImage } = body;
+    const {
+      title, slug, excerpt, content,
+      titleEn, titleDe, excerptEn, excerptDe, contentEn, contentDe,
+      authorName, authorRole, category, status, featuredImage,
+    } = body;
 
     if (!title || !excerpt || !content || !authorName) {
       return NextResponse.json(
@@ -64,6 +68,12 @@ export async function POST(request: NextRequest) {
         slug: finalSlug,
         excerpt,
         content,
+        titleEn: titleEn || null,
+        titleDe: titleDe || null,
+        excerptEn: excerptEn || null,
+        excerptDe: excerptDe || null,
+        contentEn: contentEn || null,
+        contentDe: contentDe || null,
         authorName,
         authorRole: authorRole || null,
         category: category || "OPINION",

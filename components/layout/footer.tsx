@@ -16,6 +16,7 @@ const navigationKeys = [
   { key: "nav.merch", href: "/merch" },
   { key: "nav.wings", href: "/wings" },
   { key: "nav.about", href: "/about" },
+  { key: "nav.press", href: "/press" },
   { key: "nav.contact", href: "/contact" },
 ];
 

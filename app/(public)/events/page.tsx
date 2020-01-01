@@ -8,8 +8,12 @@ import type { Metadata } from "next";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Wydarzenia",
-  description: "Dołącz do naszych wydarzeń i bądź częścią zmian.",
+  title: "Wydarzenia PRNI",
+  description:
+    "Wydarzenia PRNI (Polski Ruch Narodowo-Integralistyczny). Dołącz do naszych wydarzeń i bądź częścią zmian. PRNI events.",
+  alternates: {
+    canonical: "https://prni.org.pl/events",
+  },
 };
 
 async function getEvents() {

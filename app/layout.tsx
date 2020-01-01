@@ -45,9 +45,12 @@ export const metadata: Metadata = {
   },
   description: "PRNI (Polski Ruch Narodowo-Integralistyczny) — Naród Ponad Wszystkim. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
   keywords: [
-    "PRNI", "Polski Ruch Narodowo-Integralistyczny", "narodowy integralizm",
+    "PRNI", "Polski Ruch Narodowo-Integralistyczny",
+    "PRNI Polska", "PRNI Poland", "PRNI Polen",
+    "narodowy integralizm", "National Integralism", "Nationaler Integralismus",
     "ruch narodowy", "polska polityka", "suwerenność", "tradycja", "naród",
-    "integralizm", "manifest", "ruch polityczny", "Poland", "National Integralism",
+    "integralizm", "manifest", "ruch polityczny",
+    "Polish National-Integralist Movement", "Polnische National-Integralistische Bewegung",
   ],
   authors: [{ name: "PRNI" }],
   creator: "PRNI",
@@ -91,6 +94,12 @@ export const metadata: Metadata = {
   verification: {},
   alternates: {
     canonical: "https://prni.org.pl",
+    languages: {
+      "pl": "https://prni.org.pl",
+      "en": "https://prni.org.pl",
+      "de": "https://prni.org.pl",
+      "x-default": "https://prni.org.pl",
+    },
   },
 };
 

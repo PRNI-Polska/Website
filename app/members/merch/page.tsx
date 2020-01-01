@@ -262,13 +262,29 @@ export default function MembersMerchPage() {
 
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
-        <button
-          onClick={() => { setDetail(null); setSelectedVariant(null); }}
-          className="flex items-center gap-2 text-sm text-[#666] hover:text-white transition mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t("merch.backToStore")}
-        </button>
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => { setDetail(null); setSelectedVariant(null); }}
+            className="flex items-center gap-2 text-sm text-[#666] hover:text-white transition"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {t("merch.backToStore")}
+          </button>
+          <div className="relative">
+            <select
+              value={displayCurrency}
+              onChange={(e) => handleCurrencyChange(e.target.value)}
+              className="appearance-none bg-[#111] border border-[#333] rounded-lg px-3 py-2 pr-8 text-sm text-white hover:border-[#555] transition cursor-pointer focus:outline-none focus:border-[#555]"
+            >
+              {CURRENCY_OPTIONS.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#666] pointer-events-none" />
+          </div>
+        </div>
 
         {detailLoading ? (
           <div className="flex items-center justify-center py-20">

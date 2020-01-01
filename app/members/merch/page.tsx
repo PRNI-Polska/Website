@@ -144,8 +144,10 @@ export default function MembersMerchPage() {
   const [orderState, setOrderState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [orderError, setOrderError] = useState("");
 
-  const [checkoutStep, setCheckoutStep] = useState<"cart" | "shipping">("cart");
+  const [checkoutStep, setCheckoutStep] = useState<"cart" | "shipping" | "review">("cart");
   const [address, setAddress] = useState<ShippingAddress>(EMPTY_ADDRESS);
+  const [shippingCost, setShippingCost] = useState<number | null>(null);
+  const [estimating, setEstimating] = useState(false);
 
   const [displayCurrency, setDisplayCurrency] = useState<string>("PLN");
   const [rates, setRates] = useState<Record<string, number> | null>(null);
@@ -159,6 +161,19 @@ export default function MembersMerchPage() {
     const savedAddr = localStorage.getItem("merch-address");
     if (savedAddr) {
       try { setAddress(JSON.parse(savedAddr)); } catch { /* ignore */ }
+    }
+    const params = new URLSearchParams(window.location.search);
+    const orderParam = params.get("order");
+    if (orderParam === "success") {
+      setOrderState("success");
+      setCartOpen(true);
+      setCart([]);
+      window.history.replaceState({}, "", "/members/merch");
+    } else if (orderParam === "cancelled") {
+      setOrderState("error");
+      setOrderError("cancelled");
+      setCartOpen(true);
+      window.history.replaceState({}, "", "/members/merch");
     }
   }, []);
 
@@ -256,32 +271,69 @@ export default function MembersMerchPage() {
   const cartTotal = cart.reduce((sum, c) => sum + parseFloat(c.price) * c.qty, 0);
   const cartCurrency = cart[0]?.currency || "CHF";
 
-  async function handlePlaceOrder() {
+  async function handleEstimateShipping() {
     if (!address.name || !address.address1 || !address.city || !address.zip || !address.country_code || !address.email) {
       setOrderError(t("merch.requiredField"));
       return;
     }
 
-    setOrderState("loading");
+    setEstimating(true);
     setOrderError("");
-
     localStorage.setItem("merch-address", JSON.stringify(address));
 
     try {
-      const res = await fetch("/api/members/merch/order", {
+      const res = await fetch("/api/members/merch/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: cart.map((c) => ({ productUid: c.productUid, qty: c.qty })),
+          recipient: {
+            name: address.name,
+            address1: address.address1,
+            city: address.city,
+            country_code: address.country_code,
+            zip: address.zip,
+            email: address.email,
+          },
+        }),
+      });
+
+      if (!res.ok) throw new Error("Quote failed");
+      const data = await res.json();
+      const methods = data.quote?.shipmentMethodUids || data.quote?.shippingMethods || [];
+      const cheapest = Array.isArray(methods) && methods.length > 0
+        ? Math.min(...methods.map((m: { price?: number }) => m.price || 0))
+        : 0;
+
+      setShippingCost(cheapest);
+      setCheckoutStep("review");
+    } catch {
+      setShippingCost(0);
+      setCheckoutStep("review");
+    } finally {
+      setEstimating(false);
+    }
+  }
+
+  async function handlePay() {
+    setOrderState("loading");
+    setOrderError("");
+
+    try {
+      const res = await fetch("/api/members/merch/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: cart.map((c) => ({
             variantId: c.variantId,
             productUid: c.productUid,
-            qty: c.qty,
             productName: c.productName,
             variantName: c.variantName,
             size: c.size,
             color: c.color,
             price: c.price,
-            currency: c.currency,
+            qty: c.qty,
+            image: c.image,
           })),
           recipient: {
             name: address.name,
@@ -294,15 +346,18 @@ export default function MembersMerchPage() {
             phone: address.phone || undefined,
             email: address.email,
           },
+          shippingCost: shippingCost || 0,
+          currency: cart[0]?.currency || "EUR",
         }),
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Failed");
+
+      if (!res.ok) throw new Error("Checkout failed");
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL");
       }
-      setOrderState("success");
-      setCart([]);
-      setCheckoutStep("cart");
     } catch (err) {
       setOrderState("error");
       setOrderError(err instanceof Error ? err.message : t("merch.orderError"));
@@ -314,7 +369,8 @@ export default function MembersMerchPage() {
     cartTotal, cartCurrency, orderState, setOrderState,
     orderError, t, displayPrice,
     checkoutStep, setCheckoutStep, address, setAddress,
-    handlePlaceOrder,
+    handleEstimateShipping, handlePay,
+    shippingCost, estimating,
   };
 
   if (detail || detailLoading) {
@@ -496,7 +552,8 @@ function CartDrawer({
   cartTotal, cartCurrency, orderState, setOrderState,
   orderError, t, displayPrice,
   checkoutStep, setCheckoutStep, address, setAddress,
-  handlePlaceOrder,
+  handleEstimateShipping, handlePay,
+  shippingCost, estimating,
 }: {
   cart: CartItem[];
   cartOpen: boolean;
@@ -510,17 +567,20 @@ function CartDrawer({
   orderError: string;
   t: (key: MemberTranslationKey) => string;
   displayPrice: (price: string | number, fromCurrency: string) => string;
-  checkoutStep: "cart" | "shipping";
-  setCheckoutStep: (v: "cart" | "shipping") => void;
+  checkoutStep: "cart" | "shipping" | "review";
+  setCheckoutStep: (v: "cart" | "shipping" | "review") => void;
   address: ShippingAddress;
   setAddress: (v: ShippingAddress) => void;
-  handlePlaceOrder: () => void;
+  handleEstimateShipping: () => void;
+  handlePay: () => void;
+  shippingCost: number | null;
+  estimating: boolean;
 }) {
   if (!cartOpen) return null;
 
   function closeDrawer() {
     setCartOpen(false);
-    if (orderState === "success") {
+    if (orderState === "success" || orderState === "error") {
       setOrderState("idle");
       setCheckoutStep("cart");
     }
@@ -530,39 +590,108 @@ function CartDrawer({
     setAddress({ ...address, [field]: value });
   }
 
+  const grandTotal = cartTotal + (shippingCost || 0);
+
   return (
     <>
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90]" onClick={closeDrawer} />
       <div className="fixed top-0 right-0 h-full w-full max-w-md bg-[#0d0d0d] border-l border-[#1a1a1a] z-[100] flex flex-col">
         <div className="flex items-center justify-between p-4 border-b border-[#1a1a1a]">
           <h2 className="font-semibold">
-            {checkoutStep === "shipping" ? t("merch.shippingInfo") : t("merch.cart")}
+            {checkoutStep === "review" ? t("merch.total") : checkoutStep === "shipping" ? t("merch.shippingInfo") : t("merch.cart")}
           </h2>
           <button onClick={closeDrawer} className="p-1 hover:bg-[#1a1a1a] rounded transition">
             <X className="h-5 w-5" />
           </button>
         </div>
 
+        {/* Success after Stripe payment */}
         {orderState === "success" ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
             <div className="w-14 h-14 rounded-full bg-green-500/10 flex items-center justify-center mb-4">
               <Check className="h-7 w-7 text-green-500" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">{t("merch.orderPlaced")}</h3>
-            <p className="text-sm text-[#888]">{t("merch.orderConfirmed")}</p>
+            <h3 className="text-lg font-semibold mb-2">{t("merch.orderPaid")}</h3>
+            <p className="text-sm text-[#888]">{t("merch.orderPaidDesc")}</p>
           </div>
-        ) : cart.length === 0 && checkoutStep === "cart" ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-[#666]">
-            <ShoppingCart className="h-8 w-8 mb-3" />
-            <p className="text-sm">{t("merch.cartEmpty")}</p>
+        ) : orderState === "error" && orderError === "cancelled" ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+            <AlertCircle className="h-10 w-10 text-[#666] mb-4" />
+            <h3 className="text-lg font-semibold mb-2">{t("merch.orderCancelled")}</h3>
+            <p className="text-sm text-[#888] mb-4">{t("merch.orderCancelledDesc")}</p>
+            <button onClick={() => { setOrderState("idle"); setCheckoutStep("review"); }}
+              className="px-4 py-2 bg-[#1a1a1a] text-sm rounded-lg hover:bg-[#222] transition">
+              {t("merch.retry")}
+            </button>
           </div>
+
+        /* Step 3: Review & Pay */
+        ) : checkoutStep === "review" ? (
+          <>
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <button onClick={() => setCheckoutStep("shipping")}
+                className="flex items-center gap-1.5 text-xs text-[#666] hover:text-white transition mb-2">
+                <ArrowLeft className="h-3 w-3" />
+                {t("merch.backToCart")}
+              </button>
+
+              <div className="space-y-2 text-sm">
+                {cart.map((item) => (
+                  <div key={item.variantId} className="flex justify-between">
+                    <span className="text-[#888]">{item.productName} ({item.size}) x{item.qty}</span>
+                    <span>{displayPrice(parseFloat(item.price) * item.qty, item.currency)}</span>
+                  </div>
+                ))}
+
+                <div className="border-t border-[#1a1a1a] pt-2 space-y-1">
+                  <div className="flex justify-between text-[#888]">
+                    <span>{t("merch.subtotal")}</span>
+                    <span className="text-white">{displayPrice(cartTotal, cartCurrency)}</span>
+                  </div>
+                  <div className="flex justify-between text-[#888]">
+                    <span>{t("merch.shippingEstimate")}</span>
+                    <span className="text-white">
+                      {shippingCost === 0 ? t("merch.freeShipping") :
+                       shippingCost != null ? displayPrice(shippingCost, cartCurrency) : "—"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex justify-between font-semibold text-base pt-2 border-t border-[#1a1a1a]">
+                  <span>{t("merch.total")}</span>
+                  <span>{displayPrice(grandTotal, cartCurrency)}</span>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-[#111] rounded-lg border border-[#1a1a1a] text-xs text-[#888] space-y-1">
+                <p className="font-medium text-[#aaa]">{t("merch.shippingInfo")}</p>
+                <p>{address.name}</p>
+                <p>{address.address1}{address.address2 ? `, ${address.address2}` : ""}</p>
+                <p>{address.zip} {address.city}, {address.country_code}</p>
+                {address.email && <p>{address.email}</p>}
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-[#1a1a1a] space-y-3">
+              {orderError && orderError !== "cancelled" && (
+                <p className="text-red-400 text-xs text-center">{orderError}</p>
+              )}
+              <button onClick={handlePay}
+                disabled={orderState === "loading"}
+                className="w-full py-3 bg-white text-black font-semibold rounded-lg hover:bg-[#ddd] transition text-sm disabled:opacity-50 flex items-center justify-center gap-2">
+                {orderState === "loading" ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" />{t("merch.redirectingToPayment")}</>
+                ) : t("merch.payNow")}
+              </button>
+            </div>
+          </>
+
+        /* Step 2: Shipping address */
         ) : checkoutStep === "shipping" ? (
           <>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              <button
-                onClick={() => setCheckoutStep("cart")}
-                className="flex items-center gap-1.5 text-xs text-[#666] hover:text-white transition mb-2"
-              >
+              <button onClick={() => setCheckoutStep("cart")}
+                className="flex items-center gap-1.5 text-xs text-[#666] hover:text-white transition mb-2">
                 <ArrowLeft className="h-3 w-3" />
                 {t("merch.backToCart")}
               </button>
@@ -591,11 +720,9 @@ function CartDrawer({
                   {t("merch.country")}<span className="text-red-400 ml-0.5">*</span>
                 </label>
                 <div className="relative">
-                  <select
-                    value={address.country_code}
+                  <select value={address.country_code}
                     onChange={(e) => updateAddr("country_code", e.target.value)}
-                    className="w-full appearance-none bg-[#111] border border-[#333] rounded-lg px-3 py-2 pr-8 text-sm text-white focus:outline-none focus:border-[#555] transition"
-                  >
+                    className="w-full appearance-none bg-[#111] border border-[#333] rounded-lg px-3 py-2 pr-8 text-sm text-white focus:outline-none focus:border-[#555] transition">
                     {COUNTRIES.map((c) => (
                       <option key={c.code} value={c.code}>{c.name}</option>
                     ))}
@@ -606,36 +733,28 @@ function CartDrawer({
 
               <FormInput label={t("merch.phone")} value={address.phone}
                 onChange={(v) => updateAddr("phone", v)} type="tel" placeholder="+48 123 456 789" />
-
-              <div className="pt-3 border-t border-[#1a1a1a] space-y-2 text-sm">
-                {cart.map((item) => (
-                  <div key={item.variantId} className="flex justify-between text-[#888]">
-                    <span>{item.productName} ({item.size}) x{item.qty}</span>
-                    <span className="text-white">{displayPrice(parseFloat(item.price) * item.qty, item.currency)}</span>
-                  </div>
-                ))}
-                <div className="flex justify-between font-semibold pt-2 border-t border-[#1a1a1a]">
-                  <span>{t("merch.total")}</span>
-                  <span>{displayPrice(cartTotal, cartCurrency)}</span>
-                </div>
-              </div>
             </div>
 
             <div className="p-4 border-t border-[#1a1a1a] space-y-3">
               {orderError && (
                 <p className="text-red-400 text-xs text-center">{orderError}</p>
               )}
-              <button
-                onClick={handlePlaceOrder}
-                disabled={orderState === "loading"}
-                className="w-full py-3 bg-white text-black font-semibold rounded-lg hover:bg-[#ddd] transition text-sm disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {orderState === "loading" ? (
-                  <><Loader2 className="h-4 w-4 animate-spin" />{t("merch.ordering")}</>
-                ) : t("merch.placeOrder")}
+              <button onClick={handleEstimateShipping}
+                disabled={estimating}
+                className="w-full py-3 bg-white text-black font-semibold rounded-lg hover:bg-[#ddd] transition text-sm disabled:opacity-50 flex items-center justify-center gap-2">
+                {estimating ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" />{t("merch.estimating")}</>
+                ) : t("merch.calculateShipping")}
               </button>
             </div>
           </>
+
+        /* Step 1: Cart */
+        ) : cart.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-[#666]">
+            <ShoppingCart className="h-8 w-8 mb-3" />
+            <p className="text-sm">{t("merch.cartEmpty")}</p>
+          </div>
         ) : (
           <>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">

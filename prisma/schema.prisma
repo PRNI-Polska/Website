@@ -10,17 +10,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// For SQLite (local development):
+// Database configuration - uses DATABASE_URL from environment
+// PostgreSQL for production: DATABASE_URL="postgresql://..."
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
-// For PostgreSQL (production), uncomment this and comment out SQLite:
-// datasource db {
-//   provider = "postgresql"
-//   url      = env("DATABASE_URL")
-// }
 
 // ============================================================================
 // USER MODEL - Single admin account

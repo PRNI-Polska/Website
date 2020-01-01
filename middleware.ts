@@ -175,24 +175,31 @@ export default withAuth(
     // ============================================
     const token = req.nextauth.token;
 
+    const adminGateKey = process.env.ADMIN_GATE_KEY;
+
     if (isLoginPage) {
       if (token) {
         const response = NextResponse.redirect(new URL("/admin", req.url));
         return applySecurityHeaders(response);
+      }
+      if (adminGateKey && req.nextUrl.searchParams.get("key") !== adminGateKey) {
+        return applySecurityHeaders(new NextResponse(null, { status: 404 }));
       }
       const response = NextResponse.next();
       return applySecurityHeaders(response);
     }
 
     if ((isAdminRoute || isAdminApiRoute) && !token) {
+      if (adminGateKey) {
+        return applySecurityHeaders(new NextResponse(null, { status: 404 }));
+      }
       const response = NextResponse.redirect(new URL("/admin/login", req.url));
       return applySecurityHeaders(response);
     }
 
     if ((isAdminRoute || isAdminApiRoute) && token?.role !== "ADMIN") {
       console.warn("[SECURITY] Non-admin user attempted admin access");
-      const response = NextResponse.redirect(new URL("/admin/login", req.url));
-      return applySecurityHeaders(response);
+      return applySecurityHeaders(new NextResponse(null, { status: 404 }));
     }
 
     const response = NextResponse.next();

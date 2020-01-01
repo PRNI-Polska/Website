@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireMember } from "@/lib/member-auth";
+import { decrypt } from "@/lib/encryption";
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
       messageCount: ch._count.messages,
       lastMessage: ch.messages[0]
         ? {
-            content: ch.messages[0].content,
+            content: decrypt(ch.messages[0].content),
             senderName: ch.messages[0].sender.displayName,
             createdAt: ch.messages[0].createdAt,
           }

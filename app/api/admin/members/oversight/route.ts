@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { decrypt } from "@/lib/encryption";
 
 export async function GET(request: NextRequest) {
   try {
@@ -31,7 +32,11 @@ export async function GET(request: NextRequest) {
         prisma.directMessage.count({ where }),
       ]);
 
-      return NextResponse.json({ messages, total, pages: Math.ceil(total / limit) });
+      return NextResponse.json({
+        messages: messages.map((m) => ({ ...m, content: decrypt(m.content) })),
+        total,
+        pages: Math.ceil(total / limit),
+      });
     }
 
     if (type === "channels") {
@@ -56,7 +61,11 @@ export async function GET(request: NextRequest) {
         prisma.channelMessage.count({ where }),
       ]);
 
-      return NextResponse.json({ messages, total, pages: Math.ceil(total / limit) });
+      return NextResponse.json({
+        messages: messages.map((m) => ({ ...m, content: decrypt(m.content) })),
+        total,
+        pages: Math.ceil(total / limit),
+      });
     }
 
     if (type === "members") {

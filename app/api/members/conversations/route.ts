@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireMember } from "@/lib/member-auth";
+import { decrypt } from "@/lib/encryption";
 
 export async function GET(request: NextRequest) {
   let member;
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
           member: partner,
           lastMessage: lastMessage
             ? {
-                content: lastMessage.content,
+                content: decrypt(lastMessage.content),
                 createdAt: lastMessage.createdAt,
                 isOwn: lastMessage.senderId === member.id,
               }

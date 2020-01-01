@@ -25,6 +25,7 @@ const navigationKeys = [
   { key: "nav.home", href: "/" },
   { key: "nav.announcements", href: "/announcements" },
   { key: "nav.events", href: "/events" },
+  { key: "nav.gallery", href: "/gallery" },
   { key: "nav.manifesto", href: "/manifesto" },
   { key: "nav.recruitment", href: "/recruitment" },
   { key: "nav.merch", href: "/merch" },

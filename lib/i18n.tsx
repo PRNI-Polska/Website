@@ -22,6 +22,7 @@ export const translations: Translations = {
   "nav.manifesto": { en: "Manifesto", pl: "Manifest", de: "Manifest" },
   "nav.recruitment": { en: "Recruitment", pl: "Rekrutacja", de: "Rekrutierung" },
   "nav.merch": { en: "Merch", pl: "Merch", de: "Merch" },
+  "nav.gallery": { en: "Gallery", pl: "Galeria", de: "Galerie" },
   "nav.about": { en: "About National Integralism", pl: "O Narodowym Integralizmie", de: "Über den Nationalen Integralismus" },
   "nav.press": { en: "Press & Media", pl: "Prasa i Media", de: "Presse & Medien" },
   "nav.contact": { en: "Contact", pl: "Kontakt", de: "Kontakt" },
@@ -302,6 +303,23 @@ export const translations: Translations = {
     pl: "* Pola wymagane. Twoje informacje pozostaną poufne.",
     de: "* Pflichtfelder. Deine Informationen bleiben vertraulich.",
   },
+
+  // Gallery
+  "gallery.title": { en: "Gallery", pl: "Galeria", de: "Galerie" },
+  "gallery.subtitle": {
+    en: "Photos from PRNI marches, events and initiatives.",
+    pl: "Zdjęcia z marszów, wydarzeń i akcji PRNI.",
+    de: "Fotos von PRNI-Märschen, -Veranstaltungen und -Aktionen.",
+  },
+  "gallery.empty": {
+    en: "No photos yet — check back soon.",
+    pl: "Brak zdjęć — zajrzyj wkrótce.",
+    de: "Noch keine Fotos — schau bald wieder vorbei.",
+  },
+  "gallery.viewImage": { en: "View image", pl: "Zobacz zdjęcie", de: "Bild ansehen" },
+  "gallery.close": { en: "Close", pl: "Zamknij", de: "Schließen" },
+  "gallery.next": { en: "Next", pl: "Następne", de: "Weiter" },
+  "gallery.prev": { en: "Previous", pl: "Poprzednie", de: "Zurück" },
   
   // Sections
   "section.news": { en: "Latest News", pl: "Najnowsze Wiadomości", de: "Neueste Nachrichten" },

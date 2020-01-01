@@ -308,6 +308,32 @@ model SiteSettings {
 }
 
 // ============================================================================
+// GALLERY IMAGE MODEL - Photos from PRNI events/actions with captions
+// ============================================================================
+model GalleryImage {
+  id         String    @id @default(cuid())
+  data       Bytes     // Raw image bytes (JPEG/PNG/WebP)
+  mimeType   String    // e.g. "image/jpeg"
+  width      Int?
+  height     Int?
+  sizeBytes  Int?      // File size for admin display
+  caption    String    // Polish (default) caption / description
+  captionEn  String?
+  captionDe  String?
+  location   String?   // e.g. "Warszawa, 2024"
+  eventDate  DateTime?
+  order      Int       @default(0)
+  isPublic   Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([order])
+  @@index([isPublic])
+  @@index([eventDate])
+  @@map("gallery_images")
+}
+
+// ============================================================================
 // PAGE VIEW MODEL - Analytics tracking
 // ============================================================================
 model PageView {

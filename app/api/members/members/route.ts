@@ -32,7 +32,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ members: allMembers });
     }
 
-    // Regular wing members can only see: same role + admins + leadership
+    // Basic MEMBER role (new/unverified) can only see admins + leadership
+    if (member.role === "MEMBER") {
+      const visible = allMembers.filter((m) => UNRESTRICTED_ROLES.includes(m.role));
+      return NextResponse.json({ members: visible });
+    }
+
+    // Wing members can see: same role + admins + leadership
     const visible = allMembers.filter(
       (m) => m.role === member.role || UNRESTRICTED_ROLES.includes(m.role)
     );

@@ -117,6 +117,12 @@ export async function POST(
     }
 
     const UNRESTRICTED = ["ADMIN", "LEADERSHIP"];
+
+    // New members (MEMBER role) can only message admin/leadership
+    if (member.role === "MEMBER" && !UNRESTRICTED.includes(receiver.role)) {
+      return NextResponse.json({ error: "New members can only message leadership" }, { status: 403 });
+    }
+
     if (!UNRESTRICTED.includes(member.role) && !UNRESTRICTED.includes(receiver.role) && member.role !== receiver.role) {
       return NextResponse.json({ error: "Cannot message members outside your wing" }, { status: 403 });
     }

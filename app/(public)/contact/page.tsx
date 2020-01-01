@@ -1,24 +1,23 @@
 // file: app/(public)/contact/page.tsx
+"use client";
+
 import { Mail } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ContactForm } from "./contact-form";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Contact Us",
-  description: "Get in touch with us. We'd love to hear from you.",
-};
+import { useI18n } from "@/lib/i18n";
 
 export default function ContactPage() {
+  const { t } = useI18n();
+
   return (
     <div className="container-custom py-12">
       {/* Header */}
       <div className="max-w-3xl mx-auto text-center mb-12 animate-fade-in-up">
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold mb-4">
-          Kontakt
+          {t("contact.title")}
         </h1>
         <p className="text-xl text-muted-foreground">
-          Masz pytanie lub chcesz się zaangażować? Chętnie Cię wysłuchamy.
+          {t("contact.subtitle")}
         </p>
       </div>
 
@@ -47,9 +46,9 @@ export default function ContactPage() {
         <div className="lg:col-span-2 animate-fade-in-up animation-delay-200">
           <Card className="hover-lift">
             <CardHeader>
-              <CardTitle>Wyślij wiadomość</CardTitle>
+              <CardTitle>{t("contact.form.title")}</CardTitle>
               <CardDescription>
-                Wypełnij formularz poniżej, a my skontaktujemy się z Tobą najszybciej jak to możliwe.
+                {t("contact.form.description")}
               </CardDescription>
             </CardHeader>
             <CardContent>

@@ -11,10 +11,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { contactFormSchema, type ContactFormInput } from "@/lib/validations";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
 
 type FormState = "idle" | "loading" | "success" | "error";
 
 export function ContactForm() {
+  const { t } = useI18n();
   const [formState, setFormState] = useState<FormState>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
 
@@ -58,15 +60,15 @@ export function ContactForm() {
     return (
       <div className="text-center py-8">
         <CheckCircle2 className="mx-auto h-12 w-12 text-success mb-4" />
-        <h3 className="text-lg font-semibold mb-2">Message Sent!</h3>
+        <h3 className="text-lg font-semibold mb-2">{t("contact.form.success")}</h3>
         <p className="text-muted-foreground mb-4">
-          Thank you for reaching out. We&apos;ll get back to you soon.
+          {t("contact.form.success.text")}
         </p>
         <Button
           variant="outline"
           onClick={() => setFormState("idle")}
         >
-          Send Another Message
+          {t("contact.form.sendAnother")}
         </Button>
       </div>
     );
@@ -85,10 +87,10 @@ export function ContactForm() {
       <div className="grid sm:grid-cols-2 gap-6">
         {/* Name */}
         <div className="space-y-2">
-          <Label htmlFor="name">Name *</Label>
+          <Label htmlFor="name">{t("contact.form.name")} *</Label>
           <Input
             id="name"
-            placeholder="Your name"
+            placeholder={t("contact.form.name.placeholder")}
             {...register("name")}
             aria-invalid={errors.name ? "true" : "false"}
             className={cn(errors.name && "border-destructive")}
@@ -100,11 +102,11 @@ export function ContactForm() {
 
         {/* Email */}
         <div className="space-y-2">
-          <Label htmlFor="email">Email *</Label>
+          <Label htmlFor="email">{t("contact.form.email")} *</Label>
           <Input
             id="email"
             type="email"
-            placeholder="your@email.com"
+            placeholder={t("contact.form.email.placeholder")}
             {...register("email")}
             aria-invalid={errors.email ? "true" : "false"}
             className={cn(errors.email && "border-destructive")}
@@ -117,10 +119,10 @@ export function ContactForm() {
 
       {/* Subject */}
       <div className="space-y-2">
-        <Label htmlFor="subject">Subject *</Label>
+        <Label htmlFor="subject">{t("contact.form.subject")} *</Label>
         <Input
           id="subject"
-          placeholder="What is this about?"
+          placeholder={t("contact.form.subject.placeholder")}
           {...register("subject")}
           aria-invalid={errors.subject ? "true" : "false"}
           className={cn(errors.subject && "border-destructive")}
@@ -132,10 +134,10 @@ export function ContactForm() {
 
       {/* Message */}
       <div className="space-y-2">
-        <Label htmlFor="message">Message *</Label>
+        <Label htmlFor="message">{t("contact.form.message")} *</Label>
         <Textarea
           id="message"
-          placeholder="Your message..."
+          placeholder={t("contact.form.message.placeholder")}
           rows={6}
           {...register("message")}
           aria-invalid={errors.message ? "true" : "false"}
@@ -168,15 +170,15 @@ export function ContactForm() {
         {formState === "loading" ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Sending...
+            {t("contact.form.sending")}
           </>
         ) : (
-          "Send Message"
+          t("contact.form.send")
         )}
       </Button>
 
       <p className="text-xs text-muted-foreground">
-        * Required fields. Your information will be kept confidential.
+        {t("contact.form.required")}
       </p>
     </form>
   );

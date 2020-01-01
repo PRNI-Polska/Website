@@ -121,7 +121,7 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {leadership.map((member, index) => (
               <AnimatedSection key={member.id} delay={index * 100} animation="scale">
-                <TeamMemberCard member={member} featured />
+                <TeamMemberCard member={member} featured contactLabel={t("about.member.contact")} />
               </AnimatedSection>
             ))}
           </div>
@@ -143,7 +143,7 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {team.map((member, index) => (
               <AnimatedSection key={member.id} delay={index * 75} animation="fade-up">
-                <TeamMemberCard member={member} />
+                <TeamMemberCard member={member} contactLabel={t("about.member.contact")} />
               </AnimatedSection>
             ))}
           </div>
@@ -175,9 +175,10 @@ interface TeamMemberCardProps {
     email: string | null;
   };
   featured?: boolean;
+  contactLabel: string;
 }
 
-function TeamMemberCard({ member, featured }: TeamMemberCardProps) {
+function TeamMemberCard({ member, featured, contactLabel }: TeamMemberCardProps) {
   const initials = member.name
     .split(" ")
     .map((n) => n[0])
@@ -213,7 +214,7 @@ function TeamMemberCard({ member, featured }: TeamMemberCardProps) {
             className="inline-flex items-center gap-1 mt-3 text-sm text-primary hover:underline"
           >
             <Mail className="h-4 w-4" />
-            Contact
+            {contactLabel}
           </a>
         )}
       </CardContent>

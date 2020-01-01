@@ -214,6 +214,91 @@ export const translations: Translations = {
   "about.team": { pl: "Nasz Zespół", en: "Our Team", de: "Unser Team" },
   "about.team.subtitle": { pl: "Oddani ludzie pracujący nad realizacją naszej wizji.", en: "The dedicated people working to make our vision a reality.", de: "Die engagierten Menschen, die daran arbeiten, unsere Vision Wirklichkeit werden zu lassen." },
   "about.team.coming": { pl: "Informacje o zespole wkrótce.", en: "Team information coming soon.", de: "Teaminformationen folgen in Kürze." },
+  "about.member.contact": { pl: "Kontakt", en: "Contact", de: "Kontakt" },
+  
+  // Contact page
+  "contact.form.title": { pl: "Wyślij wiadomość", en: "Send a Message", de: "Nachricht senden" },
+  "contact.form.description": { 
+    pl: "Wypełnij formularz poniżej, a my skontaktujemy się z Tobą najszybciej jak to możliwe.",
+    en: "Fill out the form below and we'll get back to you as soon as possible.", 
+    de: "Füllen Sie das Formular aus und wir werden uns so schnell wie möglich bei Ihnen melden."
+  },
+  "contact.form.name.placeholder": { pl: "Twoje imię", en: "Your name", de: "Ihr Name" },
+  "contact.form.email.placeholder": { pl: "twoj@email.com", en: "your@email.com", de: "ihre@email.com" },
+  "contact.form.subject.placeholder": { pl: "O czym chcesz porozmawiać?", en: "What is this about?", de: "Worum geht es?" },
+  "contact.form.message.placeholder": { pl: "Twoja wiadomość...", en: "Your message...", de: "Ihre Nachricht..." },
+  "contact.form.success.text": { 
+    pl: "Dziękujemy za kontakt. Odpowiemy najszybciej jak to możliwe.",
+    en: "Thank you for reaching out. We'll get back to you soon.", 
+    de: "Vielen Dank für Ihre Nachricht. Wir werden uns bald bei Ihnen melden."
+  },
+  "contact.form.sendAnother": { pl: "Wyślij kolejną wiadomość", en: "Send Another Message", de: "Weitere Nachricht senden" },
+  "contact.form.required": { 
+    pl: "* Wymagane pola. Twoje dane będą poufne.",
+    en: "* Required fields. Your information will be kept confidential.", 
+    de: "* Pflichtfelder. Ihre Daten werden vertraulich behandelt."
+  },
+  
+  // Events page
+  "events.title": { pl: "Wydarzenia", en: "Events", de: "Veranstaltungen" },
+  "events.subtitle": { 
+    pl: "Odkryj nadchodzące wydarzenia i dołącz do naszych inicjatyw.",
+    en: "Discover upcoming events and join our initiatives.", 
+    de: "Entdecken Sie kommende Veranstaltungen und nehmen Sie an unseren Initiativen teil."
+  },
+  "events.calendar": { pl: "Kalendarz", en: "Calendar", de: "Kalender" },
+  "events.list": { pl: "Lista", en: "List", de: "Liste" },
+  "events.subscribe": { pl: "Subskrybuj kalendarz", en: "Subscribe to Calendar", de: "Kalender abonnieren" },
+  "events.today": { pl: "Dziś", en: "Today", de: "Heute" },
+  "events.upcoming": { pl: "Nadchodzące wydarzenia", en: "Upcoming Events", de: "Kommende Veranstaltungen" },
+  "events.past": { pl: "Minione wydarzenia", en: "Past Events", de: "Vergangene Veranstaltungen" },
+  "events.none": { pl: "Brak zaplanowanych wydarzeń.", en: "No upcoming events scheduled.", de: "Keine kommenden Veranstaltungen geplant." },
+  "events.rsvp": { pl: "Zapisz się", en: "RSVP", de: "Anmelden" },
+  "events.addToCalendar": { pl: "Dodaj do kalendarza", en: "Add to Calendar", de: "Zum Kalender hinzufügen" },
+  "events.contactOrganizer": { pl: "Kontakt z organizatorem", en: "Contact Organizer", de: "Organisator kontaktieren" },
+  "events.more": { pl: "więcej", en: "more", de: "mehr" },
+  
+  // Days of week
+  "days.sun": { pl: "Ndz", en: "Sun", de: "So" },
+  "days.mon": { pl: "Pon", en: "Mon", de: "Mo" },
+  "days.tue": { pl: "Wt", en: "Tue", de: "Di" },
+  "days.wed": { pl: "Śr", en: "Wed", de: "Mi" },
+  "days.thu": { pl: "Czw", en: "Thu", de: "Do" },
+  "days.fri": { pl: "Pt", en: "Fri", de: "Fr" },
+  "days.sat": { pl: "Sob", en: "Sat", de: "Sa" },
+  
+  // Announcements page
+  "announcements.title": { pl: "Komunikaty", en: "Announcements", de: "Mitteilungen" },
+  "announcements.subtitle": { 
+    pl: "Bądź na bieżąco z najnowszymi wiadomościami naszego ruchu.",
+    en: "Stay updated with the latest news and announcements from our party.", 
+    de: "Bleiben Sie über die neuesten Nachrichten und Mitteilungen unserer Partei informiert."
+  },
+  "announcements.search": { pl: "Szukaj komunikatów...", en: "Search announcements...", de: "Mitteilungen suchen..." },
+  "announcements.all": { pl: "Wszystkie", en: "All", de: "Alle" },
+  "announcements.showing": { pl: "Wyświetlanie", en: "Showing", de: "Anzeige" },
+  "announcements.of": { pl: "z", en: "of", de: "von" },
+  "announcements.for": { pl: "dla", en: "for", de: "für" },
+  "announcements.in": { pl: "w", en: "in", de: "in" },
+  "announcements.none": { pl: "Nie znaleziono komunikatów.", en: "No announcements found.", de: "Keine Mitteilungen gefunden." },
+  "announcements.adjustFilters": { pl: "Spróbuj zmienić filtry.", en: "Try adjusting your filters.", de: "Versuchen Sie, Ihre Filter anzupassen." },
+  "announcements.previous": { pl: "Poprzednia", en: "Previous", de: "Zurück" },
+  "announcements.next": { pl: "Następna", en: "Next", de: "Weiter" },
+  
+  // Category labels
+  "category.NEWS": { pl: "Wiadomości", en: "News", de: "Nachrichten" },
+  "category.PRESS_RELEASE": { pl: "Komunikat prasowy", en: "Press Release", de: "Pressemitteilung" },
+  "category.POLICY": { pl: "Polityka", en: "Policy", de: "Politik" },
+  "category.CAMPAIGN": { pl: "Kampania", en: "Campaign", de: "Kampagne" },
+  "category.COMMUNITY": { pl: "Społeczność", en: "Community", de: "Gemeinschaft" },
+  "category.OTHER": { pl: "Inne", en: "Other", de: "Andere" },
+  
+  // Party name (full with locale awareness)
+  "party.name.full": {
+    pl: "Polski Ruch Narodowo-Integralistyczny",
+    en: "Polish National-Integralist Movement",
+    de: "Polnische National-Integralistische Bewegung"
+  },
 };
 
 interface I18nContextType {

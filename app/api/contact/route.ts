@@ -27,7 +27,7 @@ async function sendEmail(data: {
   const { error } = await resend.emails.send({
     from: "PRNI Website <onboarding@resend.dev>",
     to: process.env.CONTACT_EMAIL || "prni.official@gmail.com",
-    replyTo: data.email,
+    reply_to: data.email,
     subject: `[PRNI Kontakt] ${data.subject}`,
     text: `Nowa wiadomość z formularza kontaktowego:\n\nImię: ${data.name}\nEmail: ${data.email}\nTemat: ${data.subject}\n\nWiadomość:\n${data.message}`,
     html: `

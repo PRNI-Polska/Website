@@ -618,14 +618,35 @@ html {
   font-size: 17px;
 }
 
-/* Body text - larger and darker */
-body {
-  font-size: 1.125rem;
+/* =========================================
+   MOBILE READABILITY FIXES
+   ========================================= */
+
+/* Force left-alignment for body text on all screens (better readability) */
+main p, main div, main span, main li, 
+section p, section div, section span,
+.text-muted-foreground {
+  text-align: left !important;
+  max-width: 800px;    /* Prevents lines from getting too long on desktop */
+  margin-left: auto;   /* Centers the text block itself */
+  margin-right: auto;
 }
 
-p, li, span {
-  font-size: 1.125rem;
+/* Ensure headings remain centered for design balance */
+h1, h2, h3, h4, h5, h6 {
+  text-align: center !important;
 }
+
+/* Improve Typography (Size & Contrast) */
+p, li, .text-muted-foreground {
+  font-size: 17px !important;      /* Larger, legible size */
+  line-height: 1.75 !important;    /* More breathing room between lines */
+  color: #0d0d0d !important;       /* High contrast (almost black) text */
+}
+
+/* =========================================
+   END FIXES
+   ========================================= */
 
 /* Larger base font on mobile for better readability */
 @media (max-width: 768px) {
@@ -644,19 +665,9 @@ p, li, span {
     line-height: 1.15 !important;
   }
   
-  /* Better text sizing on mobile */
-  body {
-    font-size: 1.1875rem;
-  }
-  
-  p, li {
-    font-size: 1.1875rem;
-    line-height: 1.85;
-  }
-  
-  /* Card content larger on mobile */
-  .text-muted-foreground {
-    font-size: 1.125rem;
+  /* Even larger text on mobile */
+  p, li, .text-muted-foreground {
+    font-size: 18px !important;
   }
   
   /* More breathing room for headings on mobile */

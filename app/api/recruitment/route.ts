@@ -5,14 +5,17 @@ import { escapeHtml, trackHoneypotTrigger } from "@/lib/security-alerts";
 import { rateLimit, getClientIP, validateOrigin, RATE_LIMITS } from "@/lib/rate-limit";
 
 async function sendEmail(data: { name: string; email: string; location?: string; message: string }) {
-  // If no API key configured, just log
+  // If no API key configured, log minimally
   if (!process.env.RESEND_API_KEY) {
-    console.log("Recruitment submission (no email configured):", {
-      from: `${data.name} <${data.email}>`,
-      location: data.location || "",
-      message: data.message,
-      timestamp: new Date().toISOString(),
-    });
+    if (process.env.NODE_ENV === "production") {
+      console.log("Recruitment submission received (no email service configured)");
+    } else {
+      console.log("Recruitment submission (no email configured):", {
+        from: `${data.name} <${data.email}>`,
+        location: data.location || "",
+        timestamp: new Date().toISOString(),
+      });
+    }
     return { success: true };
   }
 
@@ -20,11 +23,15 @@ async function sendEmail(data: { name: string; email: string; location?: string;
     const { Resend } = await import("resend");
     const resend = new Resend(process.env.RESEND_API_KEY);
 
+    // Sanitize subject line to prevent email header injection
+    const safeName = data.name.replace(/[\r\n]/g, "").slice(0, 50);
+    const safeEmail = data.email.replace(/[\r\n]/g, "").slice(0, 80);
+    const safeLocation = data.location ? data.location.replace(/[\r\n]/g, "").slice(0, 40) : "";
     const subjectBits = [
       "[PRNI Recruitment]",
-      data.name,
-      `(${data.email})`,
-      data.location ? `— ${data.location}` : "",
+      safeName,
+      `(${safeEmail})`,
+      safeLocation ? `— ${safeLocation}` : "",
     ].filter(Boolean);
 
     const { error } = await resend.emails.send({
@@ -52,11 +59,13 @@ async function sendEmail(data: { name: string; email: string; location?: string;
   } catch (emailError) {
     console.error("Recruitment email sending failed:", emailError);
     // Don't throw: still allow the form to succeed
-    console.log("Recruitment submission (email exception):", {
-      from: `${data.name} <${data.email}>`,
-      location: data.location || "",
-      timestamp: new Date().toISOString(),
-    });
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Recruitment submission (email exception):", {
+        from: `${data.name} <${data.email}>`,
+        location: data.location || "",
+        timestamp: new Date().toISOString(),
+      });
+    }
     return { success: true };
   }
 
@@ -90,7 +99,10 @@ export async function POST(request: NextRequest) {
     const parsed = recruitmentFormSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid form data", details: parsed.error.flatten() },
+        {
+          error: "Invalid form data",
+          ...(process.env.NODE_ENV !== "production" && { details: parsed.error.flatten() }),
+        },
         { status: 400 }
       );
     }

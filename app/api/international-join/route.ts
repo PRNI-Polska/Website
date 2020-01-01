@@ -24,17 +24,19 @@ const INTEREST_LABELS: Record<string, string> = {
 async function sendNotificationEmail(data: InternationalJoinData) {
   const interestLabel = INTEREST_LABELS[data.interest] || data.interest;
   
-  // If no API key configured, just log
+  // If no API key configured, log minimally
   if (!process.env.RESEND_API_KEY) {
-    console.log("=== International Wing Registration (no email configured) ===");
-    console.log("Name:", data.name);
-    console.log("Email:", data.email);
-    console.log("Country:", data.country);
-    console.log("Languages:", data.languages || "Not specified");
-    console.log("Interest:", interestLabel);
-    console.log("Message:", data.message || "No message");
-    console.log("Timestamp:", new Date().toISOString());
-    console.log("==============================================================");
+    if (process.env.NODE_ENV === "production") {
+      console.log("International Wing registration received (no email service configured)");
+    } else {
+      console.log("=== International Wing Registration (no email configured) ===");
+      console.log("Name:", data.name);
+      console.log("Email:", data.email);
+      console.log("Country:", data.country);
+      console.log("Interest:", interestLabel);
+      console.log("Timestamp:", new Date().toISOString());
+      console.log("==============================================================");
+    }
     return { success: true, emailSent: false };
   }
 
@@ -46,7 +48,7 @@ async function sendNotificationEmail(data: InternationalJoinData) {
     const { error } = await resend.emails.send({
       from: "PRNI Website <noreply@prni.org.pl>",
       to: process.env.CONTACT_EMAIL || "prni.official@gmail.com",
-      subject: `[PRNI International Wing] New Registration: ${data.name} (${data.email})`,
+      subject: `[PRNI International Wing] New Registration: ${data.name.replace(/[\r\n]/g, "").slice(0, 50)}`,
       text: `New International Wing Registration
 
 Name: ${data.name}
@@ -101,25 +103,26 @@ Note: This person has acknowledged that participation does not constitute party 
 
     if (error) {
       console.error("Resend email error:", error);
-      // Don't throw - still log the registration
-      console.log("=== International Wing Registration (email failed) ===");
-      console.log("Name:", data.name);
-      console.log("Email:", data.email);
-      console.log("Country:", data.country);
-      console.log("=======================================================");
+      // Don't throw - log registration minimally
+      if (process.env.NODE_ENV !== "production") {
+        console.log("=== International Wing Registration (email failed) ===");
+        console.log("Name:", data.name);
+        console.log("Country:", data.country);
+        console.log("=======================================================");
+      }
       return { success: true, emailSent: false };
     }
 
     return { success: true, emailSent: true };
   } catch (emailError) {
     console.error("Email sending failed:", emailError);
-    // Log registration even if email fails
-    console.log("=== International Wing Registration (email exception) ===");
-    console.log("Name:", data.name);
-    console.log("Email:", data.email);
-    console.log("Country:", data.country);
-    console.log("Interest:", interestLabel);
-    console.log("=========================================================");
+    // Log registration minimally
+    if (process.env.NODE_ENV !== "production") {
+      console.log("=== International Wing Registration (email exception) ===");
+      console.log("Name:", data.name);
+      console.log("Country:", data.country);
+      console.log("=========================================================");
+    }
     return { success: true, emailSent: false };
   }
 }
@@ -200,12 +203,13 @@ export async function POST(request: NextRequest) {
     // Send notification email (won't fail even if email fails)
     const result = await sendNotificationEmail(data);
     
-    console.log("Registration processed:", {
-      name: data.name,
-      email: data.email,
-      country: data.country,
-      emailSent: result.emailSent,
-    });
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Registration processed:", {
+        name: data.name,
+        country: data.country,
+        emailSent: result.emailSent,
+      });
+    }
 
     return NextResponse.json({
       success: true,

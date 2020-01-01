@@ -1,5 +1,6 @@
 // file: app/layout.tsx
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Playfair_Display, Crimson_Pro, JetBrains_Mono, DM_Sans, Syne } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
@@ -108,11 +109,16 @@ export const metadata: Metadata = {
 // Get theme from environment variable or default to "classic"
 const theme = process.env.NEXT_PUBLIC_THEME || "classic";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Read the per-request CSP nonce set by the middleware.
+  // Next.js 13.4.20+ automatically applies this nonce to its own inline scripts.
+  const headersList = await headers();
+  const nonce = headersList.get("x-nonce") ?? "";
+
   // Set CSS variables based on theme
   const fontVariables = theme === "modern"
     ? `${dmSans.variable} ${syne.variable} ${jetbrainsMono.variable}`

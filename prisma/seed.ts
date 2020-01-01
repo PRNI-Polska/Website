@@ -22,9 +22,32 @@ async function main() {
   console.log("🌱 Starting database seed...\n");
 
   // 1. Create Admin User
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@prni.org";
-  const adminPassword = process.env.ADMIN_PASSWORD || "admin123!";
-  
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (!adminEmail || !adminPassword) {
+    console.error("\n❌ ADMIN_EMAIL and ADMIN_PASSWORD environment variables are REQUIRED.");
+    console.error("   Set them in your .env.local file before running the seed script.");
+    console.error("   Example:");
+    console.error('     ADMIN_EMAIL="admin@prni.org"');
+    console.error('     ADMIN_PASSWORD="YourStr0ng!P@ssword-Here"');
+    process.exit(1);
+  }
+
+  // Enforce strong password requirements
+  const passwordErrors: string[] = [];
+  if (adminPassword.length < 12) passwordErrors.push("Must be at least 12 characters");
+  if (!/[A-Z]/.test(adminPassword)) passwordErrors.push("Must contain an uppercase letter");
+  if (!/[a-z]/.test(adminPassword)) passwordErrors.push("Must contain a lowercase letter");
+  if (!/[0-9]/.test(adminPassword)) passwordErrors.push("Must contain a number");
+  if (!/[^A-Za-z0-9]/.test(adminPassword)) passwordErrors.push("Must contain a special character");
+
+  if (passwordErrors.length > 0) {
+    console.error("\n❌ ADMIN_PASSWORD does not meet security requirements:");
+    passwordErrors.forEach((e) => console.error(`   - ${e}`));
+    process.exit(1);
+  }
+
   console.log("Creating admin user...");
   const passwordHash = await hash(adminPassword, 12);
   

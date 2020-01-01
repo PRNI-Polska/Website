@@ -15,17 +15,30 @@ import { cn } from "@/lib/utils";
 
 type Step = "credentials" | "2fa";
 
+/**
+ * Validate that a callbackUrl is safe (same-origin only).
+ * Prevents open-redirect attacks via the ?callbackUrl= query param.
+ */
+function sanitizeCallbackUrl(url: string | null): string {
+  if (!url) return "/admin";
+  // Only allow relative paths starting with /
+  if (url.startsWith("/") && !url.startsWith("//")) return url;
+  // Reject absolute URLs and protocol-relative URLs
+  return "/admin";
+}
+
 export default function AdminLoginClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/admin";
+  const callbackUrl = sanitizeCallbackUrl(searchParams.get("callbackUrl"));
 
   const [step, setStep] = useState<Step>("credentials");
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [challengeToken, setChallengeToken] = useState<string>("");
   const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  // Password is stored temporarily and cleared after 2FA request
+  const passwordRef = useRef<string>("");
   const [codeDigits, setCodeDigits] = useState<string[]>(["", "", "", "", "", ""]);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -63,7 +76,8 @@ export default function AdminLoginClient() {
       // Password verified, 2FA code sent
       setChallengeToken(result.challengeToken);
       setEmail(data.email);
-      setPassword(data.password);
+      // Store password in ref (not state) for the signIn call; clear from form
+      passwordRef.current = data.password;
       setStep("2fa");
       setCodeDigits(["", "", "", "", "", ""]);
 
@@ -142,10 +156,13 @@ export default function AdminLoginClient() {
       // Code verified! Now sign in via NextAuth with the challenge token
       const signInResult = await signIn("credentials", {
         email,
-        password,
+        password: passwordRef.current,
         challengeToken,
         redirect: false,
       });
+
+      // SECURITY: clear password from memory immediately after use
+      passwordRef.current = "";
 
       if (signInResult?.error) {
         setLoginError("Login failed. Please try again.");
@@ -156,6 +173,8 @@ export default function AdminLoginClient() {
       }
     } catch {
       setLoginError("An unexpected error occurred");
+      // SECURITY: clear password on error too
+      passwordRef.current = "";
     } finally {
       setIsLoading(false);
     }
@@ -286,6 +305,7 @@ export default function AdminLoginClient() {
                     setLoginError(null);
                     setChallengeToken("");
                     setCodeDigits(["", "", "", "", "", ""]);
+                    passwordRef.current = "";
                   }}
                   disabled={isLoading}
                   className="w-full"

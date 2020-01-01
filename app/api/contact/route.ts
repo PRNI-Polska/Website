@@ -11,14 +11,18 @@ async function sendEmail(data: {
   subject: string;
   message: string;
 }) {
-  // If no API key configured, just log
+  // If no API key configured, log minimally
   if (!process.env.RESEND_API_KEY) {
-    console.log("Contact form submission (no email configured):", {
-      from: `${data.name} <${data.email}>`,
-      subject: data.subject,
-      message: data.message,
-      timestamp: new Date().toISOString(),
-    });
+    // SECURITY: In production, don't log full user data to console
+    if (process.env.NODE_ENV === "production") {
+      console.log("Contact form submission received (no email service configured)");
+    } else {
+      console.log("Contact form submission (no email configured):", {
+        from: `${data.name} <${data.email}>`,
+        subject: data.subject,
+        timestamp: new Date().toISOString(),
+      });
+    }
     return { success: true };
   }
 
@@ -56,11 +60,13 @@ async function sendEmail(data: {
   } catch (emailError) {
     console.error("Email sending failed:", emailError);
     // Don't throw: still allow the form to succeed
-    console.log("Contact form submission (email exception):", {
-      from: `${data.name} <${data.email}>`,
-      subject: data.subject,
-      timestamp: new Date().toISOString(),
-    });
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Contact form submission (email exception):", {
+        from: `${data.name} <${data.email}>`,
+        subject: data.subject,
+        timestamp: new Date().toISOString(),
+      });
+    }
     return { success: true };
   }
 
@@ -98,7 +104,10 @@ export async function POST(request: NextRequest) {
     const parsed = contactFormSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid form data", details: parsed.error.flatten() },
+        {
+          error: "Invalid form data",
+          ...(process.env.NODE_ENV !== "production" && { details: parsed.error.flatten() }),
+        },
         { status: 400 }
       );
     }

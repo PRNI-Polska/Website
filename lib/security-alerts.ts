@@ -358,7 +358,7 @@ function persistAlert(alert: SecurityAlert): void {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-Internal-Secret": process.env.NEXTAUTH_SECRET ?? "",
+      "X-Internal-Secret": process.env.INTERNAL_API_SECRET || process.env.NEXTAUTH_SECRET || "",
     },
     body: payload,
   })

@@ -146,6 +146,27 @@ export async function rateLimit(
   // --- Try Redis first ---
   const limiter = getLimiter(prefix, maxRequests, windowMs);
 
+  // SECURITY: In production, if Redis is not available, enforce a very
+  // conservative in-memory fallback and log a loud warning.  The in-memory
+  // Map is NOT shared across serverless function instances, so an attacker
+  // can bypass limits by hitting different instances.  The fallback here is
+  // intentionally 5x stricter to partially compensate.
+  if (!limiter && process.env.NODE_ENV === "production") {
+    console.error(
+      `[RATE-LIMIT] Redis unavailable in PRODUCTION for prefix="${prefix}". ` +
+        "Falling back to in-memory (NOT safe for serverless). " +
+        "Configure UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN ASAP."
+    );
+    // Use much stricter limits to partially mitigate the serverless gap
+    const strictMax = Math.max(1, Math.floor(maxRequests / 5));
+    return memoryLimit(
+      `${prefix}:${identifier}`,
+      strictMax,
+      windowMs,
+      blockDurationMs > 0 ? blockDurationMs * 2 : windowMs,
+    );
+  }
+
   if (limiter) {
     try {
       const res = await limiter.limit(identifier);
@@ -288,5 +309,11 @@ export const RATE_LIMITS = {
     maxRequests: 2,
     windowMs: 60 * 60 * 1000,
     blockDuration: 60 * 60 * 1000,
+  },
+  /** Lenient limit for public page views — prevents aggressive scraping. */
+  pages: {
+    maxRequests: 120,
+    windowMs: 60 * 1000,
+    blockDuration: 5 * 60 * 1000,
   },
 } as const;

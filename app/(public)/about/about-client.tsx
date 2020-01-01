@@ -55,11 +55,11 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
         className="fixed inset-0 pointer-events-none z-0"
         aria-hidden="true"
         style={{
-          backgroundImage: "url('/sword.png')",
+          backgroundImage: "url('/sword-banner.png')",
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
-          backgroundSize: "auto 110vh",
-          opacity: 0.07,
+          backgroundSize: "auto 95vh",
+          opacity: 0.08,
         }}
       />
 

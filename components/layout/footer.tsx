@@ -3,9 +3,23 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { Instagram } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useI18n } from "@/lib/i18n";
 import { NewsletterSignup } from "@/components/newsletter-signup";
+
+function TikTokIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43V8.78a8.16 8.16 0 0 0 4.77 1.53V6.86a4.85 4.85 0 0 1-1.84-.17Z" />
+    </svg>
+  );
+}
 
 const navigationKeys = [
   { key: "nav.home", href: "/" },
@@ -51,6 +65,27 @@ export function Footer() {
             <p className="text-muted-foreground max-w-md">
               {t("footer.tagline")}
             </p>
+
+            <div className="flex items-center gap-3 mt-5">
+              <a
+                href="https://www.instagram.com/prni_official/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="PRNI on Instagram (@prni_official)"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors"
+              >
+                <Instagram className="h-5 w-5" />
+              </a>
+              <a
+                href="https://www.tiktok.com/@prni_official"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="PRNI on TikTok (@prni_official)"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors"
+              >
+                <TikTokIcon className="h-5 w-5" />
+              </a>
+            </div>
           </div>
 
           {/* Navigation */}

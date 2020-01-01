@@ -203,16 +203,15 @@
   }
   
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
-    background-image: url('/background.png');
+    /* Polish flag: white top, red bottom */
+    background: linear-gradient(to bottom, #ffffff 0%, #ffffff 50%, #dc143c 50%, #dc143c 100%);
     background-attachment: fixed;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    min-height: 100vh;
   }
   
-  /* Very light overlay - flag clearly visible */
+  /* Light overlay for text readability */
   body::before {
     content: '';
     position: fixed;
@@ -220,7 +219,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: hsl(var(--background) / 0.35);
+    background: rgba(255, 255, 255, 0.75);
     z-index: -1;
     pointer-events: none;
   }

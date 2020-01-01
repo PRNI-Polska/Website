@@ -99,6 +99,24 @@ export const memberTranslations = {
   "role.FEMALE_WING": { pl: "Kobiece", en: "Female", de: "Frauen" },
   "role.MEMBER": { pl: "Członek", en: "Member", de: "Mitglied" },
 
+  // Messages - read receipts
+  "messages.seen": { pl: "Widziane", en: "Seen", de: "Gesehen" },
+  "messages.delivered": { pl: "Dostarczone", en: "Delivered", de: "Zugestellt" },
+
+  // Profile
+  "profile.title": { pl: "Profil", en: "Profile", de: "Profil" },
+  "profile.bio": { pl: "O mnie", en: "About me", de: "Über mich" },
+  "profile.bioPlaceholder": { pl: "Napisz coś o sobie...", en: "Write something about yourself...", de: "Schreibe etwas über dich..." },
+  "profile.photo": { pl: "Zdjęcie (URL)", en: "Photo (URL)", de: "Foto (URL)" },
+  "profile.save": { pl: "Zapisz", en: "Save", de: "Speichern" },
+  "profile.saved": { pl: "Zapisano", en: "Saved", de: "Gespeichert" },
+  "profile.memberSince": { pl: "Członek od", en: "Member since", de: "Mitglied seit" },
+  "profile.sendMessage": { pl: "Wyślij wiadomość", en: "Send message", de: "Nachricht senden" },
+  "profile.name": { pl: "Imię", en: "Name", de: "Name" },
+
+  // Post views
+  "home.views": { pl: "wyświetleń", en: "views", de: "Aufrufe" },
+
   // Common
   "common.error": { pl: "Wystąpił błąd. Spróbuj ponownie.", en: "An error occurred. Try again.", de: "Ein Fehler ist aufgetreten. Versuche es erneut." },
 } as const;

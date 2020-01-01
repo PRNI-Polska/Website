@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Loader2, FileText, Calendar, ChevronRight } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { Loader2, FileText, Calendar, ChevronRight, Eye } from "lucide-react";
 import { useMemberLang } from "@/lib/members/LangContext";
 
 interface Post {
@@ -19,6 +19,30 @@ export default function MembersDashboard() {
   const { t } = useMemberLang();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewCounts, setViewCounts] = useState<Record<string, number>>({});
+
+  const fetchViewCounts = useCallback(async (postIds: string[]) => {
+    if (postIds.length === 0) return;
+    try {
+      const res = await fetch(`/api/members/posts/views?postIds=${postIds.join(",")}`);
+      if (res.ok) {
+        const data = await res.json();
+        setViewCounts(data.viewCounts || {});
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  function trackView(postId: string) {
+    fetch("/api/members/posts/views", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ postId }),
+    }).catch(() => {});
+    setViewCounts((prev) => ({
+      ...prev,
+      [postId]: (prev[postId] || 0) + 1,
+    }));
+  }
 
   useEffect(() => {
     async function fetchContent() {
@@ -58,6 +82,7 @@ export default function MembersDashboard() {
         );
 
         setPosts(all);
+        fetchViewCounts(all.map((p) => p.id));
       } catch {
         /* ignore */
       } finally {
@@ -66,7 +91,7 @@ export default function MembersDashboard() {
     }
 
     fetchContent();
-  }, []);
+  }, [fetchViewCounts]);
 
   if (loading) {
     return (
@@ -97,6 +122,7 @@ export default function MembersDashboard() {
             href={post.type === "blog" ? `/blog/${post.slug}` : `/announcements/${post.slug}`}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackView(post.id)}
             className="block border border-[#1a1a1a] rounded-xl p-5 hover:border-[#333] transition bg-[#0d0d0d] group"
           >
             <div className="flex items-start justify-between gap-4">
@@ -121,6 +147,11 @@ export default function MembersDashboard() {
                     {new Date(post.publishedAt).toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" })}
                   </span>
                   {post.authorName && <span>· {post.authorName}</span>}
+                  {(viewCounts[post.id] || 0) > 0 && (
+                    <span className="flex items-center gap-1">
+                      · <Eye className="h-3 w-3" /> {viewCounts[post.id]} {t("home.views")}
+                    </span>
+                  )}
                 </div>
               </div>
               <ChevronRight className="h-5 w-5 text-[#333] group-hover:text-[#888] transition shrink-0 mt-1" />

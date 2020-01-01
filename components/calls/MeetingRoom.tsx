@@ -9,11 +9,11 @@ import { AdminControls } from "./AdminControls";
 import { ChatPanel, type ChatMessage } from "./ChatPanel";
 import { useCallsLang } from "@/lib/calls/LangContext";
 
-interface MeetingRoomProps { session: SessionData; onLeave: () => void; }
+interface MeetingRoomProps { session: SessionData; onLeave: () => void; onTranscriptUpdate?: (entries: Array<{peerId:string;role:string;text:string;timestamp:number}>) => void; }
 interface PeerState { peerId: string; role: Role; isSpeaking: boolean; audioStream: MediaStream | null; }
 function canSpeak(r: Role) { return r === "admin" || r === "speaker"; }
 
-export function MeetingRoom({ session, onLeave }: MeetingRoomProps) {
+export function MeetingRoom({ session, onLeave, onTranscriptUpdate }: MeetingRoomProps) {
   const { t } = useCallsLang();
   const managerRef = useRef<WebRTCManager | null>(null);
   const [peers, setPeers] = useState<Map<string, PeerState>>(new Map());
@@ -30,6 +30,12 @@ export function MeetingRoom({ session, onLeave }: MeetingRoomProps) {
   const [chatCooldown, setChatCooldown] = useState(0);
   const [notification, setNotification] = useState<string | null>(null);
   const localAnalyserRef = useRef<{interval:ReturnType<typeof setInterval>;ctx:AudioContext}|null>(null);
+  const [captionsEnabled, setCaptionsEnabled] = useState(true);
+  const [currentCaption, setCurrentCaption] = useState<{peerId:string;text:string;isFinal:boolean}|null>(null);
+  const [transcript, setTranscript] = useState<Array<{peerId:string;role:string;text:string;timestamp:number}>>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null);
+  const captionTimeoutRef = useRef<ReturnType<typeof setTimeout>|null>(null);
 
   const notify = (msg: string) => { setNotification(msg); setTimeout(() => setNotification(null), 3000); };
   useEffect(() => { const i = setInterval(() => setElapsed(e => e + 1), 1000); return () => clearInterval(i); }, []);
@@ -58,6 +64,14 @@ export function MeetingRoom({ session, onLeave }: MeetingRoomProps) {
         case "speak-request-resolved": setSpeakRequests(p=>p.filter(r=>r.peerId!==ev.peerId)); break;
         case "chat-message": setChatMessages(prev=>[...prev.slice(-200),{id:`${ev.timestamp}-${ev.fromPeerId}`,fromPeerId:ev.fromPeerId,fromRole:ev.fromRole,text:ev.text,timestamp:ev.timestamp}]); break;
         case "chat-cooldown": setChatCooldown(ev.remainingSeconds); break;
+        case "transcription":
+          if(ev.isFinal){
+            setTranscript(prev=>[...prev,{peerId:ev.fromPeerId,role:ev.fromRole,text:ev.text,timestamp:ev.timestamp}]);
+          }
+          setCurrentCaption({peerId:ev.fromPeerId,text:ev.text,isFinal:ev.isFinal});
+          if(captionTimeoutRef.current)clearTimeout(captionTimeoutRef.current);
+          captionTimeoutRef.current=setTimeout(()=>setCurrentCaption(null),4000);
+          break;
         case "kicked": managerRef.current?.destroy(); onLeave(); break;
         case "reconnecting": setIsConnected(false); setError(null); notify(t("reconnecting")); break;
         case "error": setError(ev.message); break;
@@ -66,10 +80,41 @@ export function MeetingRoom({ session, onLeave }: MeetingRoomProps) {
     mgr.start();
     let lci:ReturnType<typeof setInterval>|null=null;
     if(canSpeak(session.role)){lci=setInterval(()=>{const s=mgr.getLocalStream();if(!s)return;try{const ac=new AudioContext();const src=ac.createMediaStreamSource(s);const an=ac.createAnalyser();an.fftSize=512;src.connect(an);const d=new Uint8Array(an.frequencyBinCount);const pi=setInterval(()=>{an.getByteFrequencyData(d);let sum=0;for(let i=0;i<d.length;i++)sum+=d[i];setLocalSpeaking(sum/d.length>15);},100);localAnalyserRef.current={interval:pi,ctx:ac};if(lci)clearInterval(lci);}catch{}},500);}
-    return()=>{if(lci)clearInterval(lci);if(localAnalyserRef.current){clearInterval(localAnalyserRef.current.interval);localAnalyserRef.current.ctx.close();}unsub();mgr.destroy();};
+    // Speech Recognition for live transcription
+    const SpeechRecognition = (window as unknown as Record<string,unknown>).SpeechRecognition || (window as unknown as Record<string,unknown>).webkitSpeechRecognition;
+    if(SpeechRecognition && canSpeak(session.role)){
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const recognition = new (SpeechRecognition as any)();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "pl-PL";
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      recognition.onresult=(event:any)=>{
+        for(let i=event.resultIndex;i<event.results.length;i++){
+          const result=event.results[i];
+          const text=result[0].transcript;
+          if(text.trim()){
+            mgr.getSignaling().sendTranscription(text.trim(),result.isFinal);
+            if(result.isFinal){
+              setTranscript(prev=>[...prev,{peerId:"local",role:session.role,text:text.trim(),timestamp:Date.now()}]);
+            }
+            setCurrentCaption({peerId:"local",text:text.trim(),isFinal:result.isFinal});
+            if(captionTimeoutRef.current)clearTimeout(captionTimeoutRef.current);
+            captionTimeoutRef.current=setTimeout(()=>setCurrentCaption(null),4000);
+          }
+        }
+      };
+      recognition.onerror=()=>{};
+      recognition.onend=()=>{try{recognition.start();}catch{}};
+      try{recognition.start();}catch{}
+      recognitionRef.current=recognition;
+    }
+
+    return()=>{if(lci)clearInterval(lci);if(localAnalyserRef.current){clearInterval(localAnalyserRef.current.interval);localAnalyserRef.current.ctx.close();}if(recognitionRef.current){try{recognitionRef.current.stop();}catch{}}if(captionTimeoutRef.current)clearTimeout(captionTimeoutRef.current);unsub();mgr.destroy();};
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
+  useEffect(()=>{if(onTranscriptUpdate)onTranscriptUpdate(transcript);},[transcript,onTranscriptUpdate]);
   const toggleMute=useCallback(()=>{if(managerRef.current)setIsMuted(managerRef.current.toggleMute());},[]);
   const leave=useCallback(()=>{managerRef.current?.destroy();onLeave();},[onLeave]);
   const vote=useCallback((id:string,i:number)=>{managerRef.current?.getSignaling().vote(id,i);setPolls(p=>{const n=new Map(p);const x=n.get(id);if(x)n.set(id,{...x,voted:true});return n;});},[]);
@@ -162,10 +207,24 @@ export function MeetingRoom({ session, onLeave }: MeetingRoomProps) {
                 )}
               </>
             )}
+            <button onClick={()=>setCaptionsEnabled(v=>!v)} className={`flex items-center gap-2 px-5 py-3.5 rounded text-sm font-medium transition-all duration-200 ${captionsEnabled?"bg-[#151515] border border-[#252525] text-white":"bg-[#0e0e0e] border border-[#1a1a1a] text-neutral-600"}`}>
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>
+              {t("captions")}
+            </button>
             <button onClick={leave} className="px-7 py-3.5 bg-red-950/30 border border-red-900/30 rounded text-red-500 font-medium text-sm hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-200">
               {t("leaveMeeting")}
             </button>
           </div>
+
+          {/* Live captions */}
+          {captionsEnabled && currentCaption && (
+            <div className="mt-6 text-center calls-animate-fade-in">
+              <div className="inline-block bg-black/80 border border-[#333] rounded-lg px-6 py-3 max-w-2xl">
+                <span className="text-[10px] text-neutral-500 font-mono mr-2">{currentCaption.peerId==="local"?t("you"):currentCaption.peerId.slice(0,6)}</span>
+                <span className={`text-sm text-white ${currentCaption.isFinal?"":"italic text-neutral-300"}`}>{currentCaption.text}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="space-y-4">

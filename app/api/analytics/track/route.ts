@@ -1,7 +1,7 @@
 // file: app/api/analytics/track/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { rateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
+import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 
 // Maximum lengths for input fields to prevent DB abuse
 const MAX_PATH_LENGTH = 500;
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     // Rate limiting: defense-in-depth backup (middleware also enforces this)
     const ip = getClientIP(request);
 
-    const rl = await rateLimit(ip, "analytics", RATE_LIMITS.analytics.maxRequests, RATE_LIMITS.analytics.windowMs, RATE_LIMITS.analytics.blockDuration);
+    const rl = checkRateLimit(`analytics:${ip}`, RATE_LIMITS.public);
     if (!rl.allowed) {
       return NextResponse.json({ success: true }); // Silent fail to not break pages
     }

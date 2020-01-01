@@ -11,6 +11,7 @@ import {
   Users,
   ExternalLink,
   Phone,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +21,7 @@ const navigation = [
   { name: "Events", href: "/admin/events", icon: Calendar },
   { name: "Manifesto", href: "/admin/manifesto", icon: Book },
   { name: "Team", href: "/admin/team", icon: Users },
+  { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Komunikator", href: "/admin/calls", icon: Phone },
 ];
 

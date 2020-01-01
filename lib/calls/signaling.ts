@@ -30,6 +30,7 @@ export type SignalingEventMap = {
   "you-were-kicked": Record<string, never>;
   reconnecting: Record<string, never>;
   reconnected: Record<string, never>;
+  transcription: { fromPeerId: string; fromRole: Role; text: string; isFinal: boolean; timestamp: number };
 };
 
 type EventHandler<K extends keyof SignalingEventMap> = (data: SignalingEventMap[K]) => void;
@@ -126,6 +127,7 @@ export class SignalingClient {
   vote(pollId: string, optionIndex: number): void { this.send({ type: "vote", pollId, optionIndex }); }
 
   sendChat(text: string): void { this.send({ type: "chat", text }); }
+  sendTranscription(text: string, isFinal: boolean): void { this.send({ type: "transcription", text, isFinal }); }
   requestSpeak(): void { this.send({ type: "request-speak" }); }
   approveSpeak(targetPeerId: string): void { this.send({ type: "approve-speak", targetPeerId }); }
   denySpeak(targetPeerId: string): void { this.send({ type: "deny-speak", targetPeerId }); }

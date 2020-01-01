@@ -30,7 +30,8 @@ export type WebRTCEvent =
   | { type: "reconnecting" }
   | { type: "reconnected" }
   | { type: "chat-message"; fromPeerId: string; fromRole: Role; text: string; timestamp: number }
-  | { type: "chat-cooldown"; remainingSeconds: number };
+  | { type: "chat-cooldown"; remainingSeconds: number }
+  | { type: "transcription"; fromPeerId: string; fromRole: Role; text: string; isFinal: boolean; timestamp: number };
 
 function canSpeak(role: Role): boolean {
   return role === "admin" || role === "speaker";
@@ -184,6 +185,7 @@ export class WebRTCManager {
     this.cleanupFns.push(this.signaling.on("reconnecting", () => this.emit({ type: "reconnecting" })));
     this.cleanupFns.push(this.signaling.on("chat-message", (data) => this.emit({ type: "chat-message", ...data })));
     this.cleanupFns.push(this.signaling.on("chat-cooldown", (data) => this.emit({ type: "chat-cooldown", ...data })));
+    this.cleanupFns.push(this.signaling.on("transcription", (data) => this.emit({ type: "transcription", ...data })));
 
     this.signaling.connect(this.session.session);
   }

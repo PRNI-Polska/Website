@@ -1,7 +1,10 @@
 import { getCatalogPricesBatch } from "./gelato";
 
+// Add just enough to cover Stripe's processing fee (2.9% + €0.25)
+// so the org breaks exactly even after payment processing.
 export function applyMarkup(costEur: number): number {
-  return Math.round(costEur * 100) / 100;
+  const withFee = (costEur + 0.25) / (1 - 0.029);
+  return Math.ceil(withFee * 100) / 100;
 }
 
 /**

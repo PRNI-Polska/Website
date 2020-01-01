@@ -169,6 +169,25 @@ model SiteSettings {
 }
 
 // ============================================================================
+// TWO-FACTOR AUTH MODEL - Email-based 2FA codes
+// ============================================================================
+model TwoFactorCode {
+  id              String    @id @default(cuid())
+  email           String
+  code            String    // 6-digit code
+  challengeToken  String    @unique // Token returned to client after password validation
+  expiresAt       DateTime  // Code expires after 5 minutes
+  verified        Boolean   @default(false) // Set to true after code is verified
+  used            Boolean   @default(false) // Set to true after login completes
+  createdAt       DateTime  @default(now())
+
+  @@index([email])
+  @@index([challengeToken])
+  @@index([expiresAt])
+  @@map("two_factor_codes")
+}
+
+// ============================================================================
 // SECURITY ALERT MODEL - Attack detection & monitoring
 // ============================================================================
 model SecurityAlert {

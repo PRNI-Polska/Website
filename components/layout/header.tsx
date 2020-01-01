@@ -16,6 +16,7 @@ const navigationKeys = [
   { key: "nav.announcements", href: "/announcements" },
   { key: "nav.events", href: "/events" },
   { key: "nav.manifesto", href: "/manifesto" },
+  { key: "nav.merch", href: "/merch" },
   { key: "nav.about", href: "/about" },
   { key: "nav.contact", href: "/contact" },
 ];
@@ -23,7 +24,7 @@ const navigationKeys = [
 export function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur-sm">
@@ -44,9 +45,7 @@ export function Header() {
               PRNI
             </span>
             <span className="text-xs text-muted-foreground leading-tight">
-              {locale === "pl" 
-                ? "Polski Ruch Narodowo-Integralistyczny" 
-                : "Polish National-Integralist Movement"}
+              {t("party.name.full")}
             </span>
           </div>
         </Link>

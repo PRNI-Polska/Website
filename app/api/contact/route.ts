@@ -1,34 +1,50 @@
 // file: app/api/contact/route.ts
 import { NextRequest, NextResponse } from "next/server";
+import { Resend } from "resend";
 import { contactFormSchema } from "@/lib/validations";
 import { checkRateLimit, validateHoneypot } from "@/lib/utils";
 
-// For production, you would use a service like Resend, SendGrid, etc.
-// This is a stub that logs the message
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 async function sendEmail(data: {
   name: string;
   email: string;
   subject: string;
   message: string;
 }) {
-  // In production, integrate with your email service:
-  // 
-  // import { Resend } from 'resend';
-  // const resend = new Resend(process.env.RESEND_API_KEY);
-  // await resend.emails.send({
-  //   from: 'website@prni.org',
-  //   to: process.env.CONTACT_EMAIL || 'info@prni.org',
-  //   subject: `Contact Form: ${data.subject}`,
-  //   text: `From: ${data.name} <${data.email}>\n\n${data.message}`,
-  // });
+  // If no API key configured, just log
+  if (!process.env.RESEND_API_KEY) {
+    console.log("Contact form submission (no email configured):", {
+      from: `${data.name} <${data.email}>`,
+      subject: data.subject,
+      message: data.message,
+      timestamp: new Date().toISOString(),
+    });
+    return { success: true };
+  }
 
-  // For now, just log it
-  console.log("Contact form submission:", {
-    from: `${data.name} <${data.email}>`,
-    subject: data.subject,
-    message: data.message,
-    timestamp: new Date().toISOString(),
+  // Send email via Resend
+  const { error } = await resend.emails.send({
+    from: "PRNI Website <onboarding@resend.dev>",
+    to: process.env.CONTACT_EMAIL || "prni.official@gmail.com",
+    replyTo: data.email,
+    subject: `[PRNI Kontakt] ${data.subject}`,
+    text: `Nowa wiadomość z formularza kontaktowego:\n\nImię: ${data.name}\nEmail: ${data.email}\nTemat: ${data.subject}\n\nWiadomość:\n${data.message}`,
+    html: `
+      <h2>Nowa wiadomość z formularza kontaktowego</h2>
+      <p><strong>Imię:</strong> ${data.name}</p>
+      <p><strong>Email:</strong> <a href="mailto:${data.email}">${data.email}</a></p>
+      <p><strong>Temat:</strong> ${data.subject}</p>
+      <hr>
+      <p><strong>Wiadomość:</strong></p>
+      <p>${data.message.replace(/\n/g, "<br>")}</p>
+    `,
   });
+
+  if (error) {
+    console.error("Failed to send email:", error);
+    throw new Error("Failed to send email");
+  }
 
   return { success: true };
 }

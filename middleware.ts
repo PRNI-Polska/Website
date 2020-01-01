@@ -275,19 +275,19 @@ function blockAndLog(
 ): NextResponse {
   const url = req.nextUrl.clone();
   url.pathname = "/api/internal/security-log";
-
-  const headers = new Headers(req.headers);
-  headers.set("X-Security-Alert-Type", alertType);
-  headers.set("X-Security-Alert-Severity", severity);
-  headers.set("X-Security-Alert-IP", ip);
-  headers.set("X-Security-Alert-Path", req.nextUrl.pathname);
-  headers.set("X-Security-Alert-UA", req.headers.get("user-agent") || "unknown");
-  headers.set("X-Security-Alert-Details", details);
+  
+  // Pass alert data as URL params (headers can get stripped in rewrites)
+  url.searchParams.set("t", alertType);
+  url.searchParams.set("s", severity);
+  url.searchParams.set("ip", ip);
+  url.searchParams.set("p", req.nextUrl.pathname);
+  url.searchParams.set("ua", (req.headers.get("user-agent") || "unknown").slice(0, 200));
+  url.searchParams.set("d", details.slice(0, 500));
   if (patternType) {
-    headers.set("X-Security-Alert-Metadata", JSON.stringify({ patternType }));
+    url.searchParams.set("pt", patternType);
   }
 
-  return NextResponse.rewrite(url, { request: { headers } });
+  return NextResponse.rewrite(url);
 }
 
 // ============================================

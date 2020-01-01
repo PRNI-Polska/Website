@@ -359,7 +359,24 @@ export default function AdminMembersPage() {
                           className="border-b last:border-0"
                         >
                           <td className="py-3 px-4 text-sm font-medium">
-                            {member.displayName}
+                            <input
+                              type="text"
+                              defaultValue={member.displayName}
+                              onBlur={async (e) => {
+                                const newName = e.target.value.trim();
+                                if (newName && newName !== member.displayName && newName.length >= 2) {
+                                  const res = await fetch(`/api/admin/members/${member.id}`, {
+                                    method: "PATCH",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ displayName: newName }),
+                                  });
+                                  if (res.ok) {
+                                    setMembers((prev) => prev.map((m) => m.id === member.id ? { ...m, displayName: newName } : m));
+                                  }
+                                }
+                              }}
+                              className="bg-transparent border-b border-transparent hover:border-border focus:border-foreground outline-none w-full py-0.5 transition-colors"
+                            />
                           </td>
                           <td className="py-3 px-4 text-sm text-muted-foreground">
                             {member.email}

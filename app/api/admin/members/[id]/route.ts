@@ -35,6 +35,10 @@ export async function PATCH(
       data.role = body.role;
     }
 
+    if (typeof body.displayName === "string" && body.displayName.trim().length >= 2) {
+      data.displayName = body.displayName.trim();
+    }
+
     const updated = await prisma.member.update({
       where: { id },
       data,

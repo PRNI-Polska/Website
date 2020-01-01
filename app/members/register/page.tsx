@@ -4,9 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { Loader2, Check, X } from "lucide-react";
 import { useMemberLang } from "@/lib/members/LangContext";
+import type { MemberLang } from "@/lib/members/i18n";
 
 export default function MemberRegisterPage() {
-  const { t } = useMemberLang();
+  const { t, lang, setLang } = useMemberLang();
   const [inviteCode, setInviteCode] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -69,6 +70,16 @@ export default function MemberRegisterPage() {
   return (
     <div className="min-h-screen bg-[#060606] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
+        <div className="flex justify-center mb-6">
+          <div className="flex items-center gap-0 border border-[#1a1a1a] rounded overflow-hidden">
+            {(["pl", "en", "de"] as MemberLang[]).map((l) => (
+              <button key={l} onClick={() => setLang(l)}
+                className={`px-3 py-1.5 text-xs font-semibold transition-all ${lang === l ? "bg-white text-black" : "text-[#555] hover:text-white hover:bg-[#151515]"}`}>
+                {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="text-center mb-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="PRNI" className="w-16 h-16 mx-auto mb-4 opacity-90" />

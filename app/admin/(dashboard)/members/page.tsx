@@ -67,6 +67,9 @@ export default function AdminMembersPage() {
   const [newChannelDesc, setNewChannelDesc] = useState("");
   const [newChannelRoles, setNewChannelRoles] = useState("");
   const [creatingChannel, setCreatingChannel] = useState(false);
+  const [selectedWing, setSelectedWing] = useState<string | null>(null);
+
+  const filteredMembers = selectedWing ? members.filter((m) => m.role === selectedWing) : members;
 
   const MEMBER_ROLES = [
     { value: "ADMIN", label: "Admin (Zarząd)" },
@@ -311,23 +314,47 @@ export default function AdminMembersPage() {
         </TabsList>
 
         <TabsContent value="members" className="space-y-4 mt-4">
+          {/* Wing stats */}
+          {!loadingMembers && members.length > 0 && (
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              {MEMBER_ROLES.map((r) => {
+                const count = members.filter((m) => m.role === r.value).length;
+                return (
+                  <div key={r.value} className={`rounded-lg border p-3 text-center ${selectedWing === r.value ? "border-primary bg-primary/10" : "border-border"}`}>
+                    <button onClick={() => setSelectedWing(selectedWing === r.value ? null : r.value)} className="w-full">
+                      <p className="text-2xl font-bold">{count}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{r.label}</p>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                Registered Members
-              </CardTitle>
-              <CardDescription>
-                {members.length} total member
-                {members.length !== 1 ? "s" : ""}
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5" />
+                    {selectedWing ? MEMBER_ROLES.find((r) => r.value === selectedWing)?.label : "All Members"}
+                  </CardTitle>
+                  <CardDescription>
+                    {filteredMembers.length} member{filteredMembers.length !== 1 ? "s" : ""}
+                    {selectedWing && ` · ${members.length} total`}
+                  </CardDescription>
+                </div>
+                {selectedWing && (
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedWing(null)}>Show all</Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent>
               {loadingMembers ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
-              ) : members.length > 0 ? (
+              ) : filteredMembers.length > 0 ? (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
@@ -353,7 +380,7 @@ export default function AdminMembersPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {members.map((member) => (
+                      {filteredMembers.map((member) => (
                         <tr
                           key={member.id}
                           className="border-b last:border-0"

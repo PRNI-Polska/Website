@@ -77,12 +77,12 @@ export default function MembersLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#090909] text-[#e8e8e8]">
+    <div className="h-screen flex flex-col bg-[#090909] text-[#e8e8e8]" style={{ height: "100dvh" }}>
       <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
       <meta name="googlebot" content="noindex, nofollow" />
       <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, interactive-widget=resizes-content" />
-      <header className="border-b border-[#1a1a1a] bg-[#090909]/95 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-14">
+      <header className="border-b border-[#1a1a1a] bg-[#090909] shrink-0 z-50">
+        <div className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 h-12 sm:h-14">
           <div className="flex items-center gap-6">
             <Link href="/members" className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-[#888]" />
@@ -127,7 +127,11 @@ export default function MembersLayout({
           )}
         </div>
       </header>
-      <main className={pathname.startsWith("/members/channels") || pathname.startsWith("/members/messages") ? "" : "max-w-4xl mx-auto px-6 py-8"}>{children}</main>
+      <main className={`flex-1 overflow-hidden ${pathname.startsWith("/members/channels") || pathname.startsWith("/members/messages") ? "" : "overflow-y-auto"}`}>
+        <div className={pathname.startsWith("/members/channels") || pathname.startsWith("/members/messages") ? "h-full" : "max-w-4xl mx-auto px-6 py-8"}>
+          {children}
+        </div>
+      </main>
     </div>
   );
 }

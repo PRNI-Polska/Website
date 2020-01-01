@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, type FormEvent } from "react";
+import { useState, useCallback, type FormEvent } from "react";
 import { Phone, Copy, Check, ExternalLink, Clock, Shield, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,15 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { createMeeting, type CreatedMeeting } from "@/lib/calls/api";
 
-export default function AdminCallsPage() {
-  const [adminSecret, setAdminSecret] = useState("");
-  const [keyLoaded, setKeyLoaded] = useState(false);
-  const [title, setTitle] = useState("Spotkanie PRNI");
+const ADMIN_KEY = process.env.NEXT_PUBLIC_CALLS_ADMIN_KEY ?? "";
 
-  useEffect(() => {
-    const saved = sessionStorage.getItem("prni-calls-key");
-    if (saved) { setAdminSecret(saved); setKeyLoaded(true); }
-  }, []);
+export default function AdminCallsPage() {
+  const [title, setTitle] = useState("Spotkanie PRNI");
   const [duration, setDuration] = useState(120);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,17 +21,12 @@ export default function AdminCallsPage() {
 
   const handleSubmit = useCallback(async (e: FormEvent) => {
     e.preventDefault();
-    if (!adminSecret) return;
+    if (!ADMIN_KEY) return;
     setLoading(true); setError(null); setResult(null);
-    try {
-      const meeting = await createMeeting(adminSecret, title, duration);
-      setResult(meeting);
-      sessionStorage.setItem("prni-calls-key", adminSecret);
-      setKeyLoaded(true);
-    }
+    try { setResult(await createMeeting(ADMIN_KEY, title, duration)); }
     catch (err) { setError(err instanceof Error ? err.message : "Error"); }
     finally { setLoading(false); }
-  }, [adminSecret, title, duration]);
+  }, [title, duration]);
 
   const copy = (val: string, field: string) => {
     navigator.clipboard.writeText(val);
@@ -85,7 +75,6 @@ export default function AdminCallsPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Create Meeting Form */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -98,22 +87,6 @@ export default function AdminCallsPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="apiKey">API Key</Label>
-                  {keyLoaded && <span className="text-xs text-emerald-500">Saved</span>}
-                </div>
-                <Input
-                  id="apiKey"
-                  type="password"
-                  value={adminSecret}
-                  onChange={(e) => { setAdminSecret(e.target.value); setKeyLoaded(false); }}
-                  placeholder="Paste VaultCall API key..."
-                />
-                <p className="text-xs text-muted-foreground">
-                  Enter once — it stays saved in your browser session.
-                </p>
-              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="meetingName">Meeting Name</Label>
@@ -137,7 +110,7 @@ export default function AdminCallsPage() {
               </div>
               <Button
                 type="submit"
-                disabled={loading || !adminSecret}
+                disabled={loading || !ADMIN_KEY}
                 className="w-full"
               >
                 {loading ? (
@@ -152,6 +125,11 @@ export default function AdminCallsPage() {
                   </>
                 )}
               </Button>
+              {!ADMIN_KEY && (
+                <p className="text-xs text-destructive text-center">
+                  NEXT_PUBLIC_CALLS_ADMIN_KEY not set. Add it in Vercel environment variables.
+                </p>
+              )}
             </form>
 
             {error && (
@@ -162,7 +140,6 @@ export default function AdminCallsPage() {
           </CardContent>
         </Card>
 
-        {/* Info Card */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -206,7 +183,6 @@ export default function AdminCallsPage() {
         </Card>
       </div>
 
-      {/* Created Meeting Result */}
       {result && (
         <Card>
           <CardHeader>

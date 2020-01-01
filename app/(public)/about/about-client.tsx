@@ -24,7 +24,7 @@ const FOUNDING_LEADER: TeamMember = {
   name: "Karol Małszycki",
   role: "Prezes Naczelny Ruchu",
   bio: "",
-  quote: "„Tolerancja jest cechą ludzi bez przekonań" ~ G.K. Chesterton",
+  quote: `\u201ETolerancja jest cech\u0105 ludzi bez przekona\u0144\u201D \u2013 G.K. Chesterton`,
   photoUrl: "/team/karol.png",
   email: null,
   isLeadership: true,

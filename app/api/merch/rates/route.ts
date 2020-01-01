@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getMemberFromRequest } from "@/lib/member-auth";
 
 const SUPPORTED_CURRENCIES = ["PLN", "EUR", "USD", "GBP", "CHF", "CZK", "SEK", "NOK", "DKK", "HUF"];
 
 let cachedRates: { base: string; rates: Record<string, number>; ts: number } | null = null;
-const CACHE_TTL = 3600_000; // 1 hour
+const CACHE_TTL = 3600_000;
 
 async function fetchRates(base: string): Promise<Record<string, number>> {
   if (cachedRates && cachedRates.base === base && Date.now() - cachedRates.ts < CACHE_TTL) {
@@ -29,12 +28,7 @@ async function fetchRates(base: string): Promise<Record<string, number>> {
 }
 
 export async function GET(request: NextRequest) {
-  const member = await getMemberFromRequest(request);
-  if (!member) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const base = request.nextUrl.searchParams.get("base") || "CHF";
+  const base = request.nextUrl.searchParams.get("base") || "EUR";
 
   try {
     const rates = await fetchRates(base.toUpperCase());

@@ -1,22 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getMemberFromRequest } from "@/lib/member-auth";
-import { getStoreProduct, type GelatoStore } from "@/lib/gelato";
+import { getStoreProduct } from "@/lib/gelato";
 import { getVariantRetailPrices } from "@/lib/gelato-prices";
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ productId: string }> }
 ) {
-  const member = await getMemberFromRequest(request);
-  if (!member) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
     const { productId } = await params;
-    const storeParam = request.nextUrl.searchParams.get("store") as GelatoStore | null;
-    const store: GelatoStore = storeParam === "int" ? "int" : "pl";
-    const product = await getStoreProduct(productId, store);
+    const product = await getStoreProduct(productId);
 
     const productUids = product.variants.map((v) => v.productUid);
     const retailPrices = await getVariantRetailPrices(productUids);
@@ -44,7 +36,6 @@ export async function GET(
         name: product.title,
         description: product.description,
         preview_image: product.previewUrl || product.externalPreviewUrl || product.externalThumbnailUrl,
-        variantOptions: product.productVariantOptions,
         variants,
       },
     });

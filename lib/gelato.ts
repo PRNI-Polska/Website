@@ -213,21 +213,60 @@ export async function getCatalogPricesBatch(
   return results;
 }
 
+export interface GelatoQuoteRecipient {
+  country: string;
+  firstName: string;
+  lastName: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  postCode: string;
+  state?: string;
+  email: string;
+  phone?: string;
+}
+
+export interface GelatoQuoteProduct {
+  itemReferenceId: string;
+  productUid: string;
+  quantity: number;
+  files?: { type: string; url: string }[];
+}
+
+export interface GelatoShipmentMethod {
+  name: string;
+  shipmentMethodUid: string;
+  price: number;
+  currency: string;
+  minDeliveryDays: number;
+  maxDeliveryDays: number;
+  type: string;
+}
+
+export interface GelatoQuoteResponse {
+  orderReferenceId: string;
+  quotes: {
+    id: string;
+    fulfillmentCountry: string;
+    shipmentMethods: GelatoShipmentMethod[];
+    products: { itemReferenceId: string; productUid: string; quantity: number; price: number; currency: string }[];
+  }[];
+}
+
 export async function getOrderQuote(
-  shippingAddress: GelatoShippingAddress,
-  items: GelatoOrderItem[],
-  currency: string = "PLN"
-) {
+  recipient: GelatoQuoteRecipient,
+  products: GelatoQuoteProduct[],
+  currency: string = "EUR"
+): Promise<GelatoQuoteResponse> {
   const res = await fetch(`${GELATO_ORDERS}/v4/orders:quote`, {
     method: "POST",
     headers: headers(),
     body: JSON.stringify({
-      orderType: "order",
       orderReferenceId: `quote-${Date.now()}`,
       customerReferenceId: "quote",
       currency,
-      items,
-      shippingAddress,
+      recipient,
+      products,
     }),
   });
 

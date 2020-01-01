@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getMemberFromRequest } from "@/lib/member-auth";
 import { getStripe } from "@/lib/stripe";
 
 export async function POST(request: NextRequest) {
-  const member = await getMemberFromRequest(request);
-  if (!member) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
     const body = await request.json();
     const { items, recipient, shippingCost, currency } = body as {
@@ -31,13 +25,13 @@ export async function POST(request: NextRequest) {
         country_code: string;
         zip: string;
         phone?: string;
-        email?: string;
+        email: string;
       };
       shippingCost: number;
       currency: string;
     };
 
-    if (!items?.length || !recipient?.name) {
+    if (!items?.length || !recipient?.name || !recipient?.email) {
       return NextResponse.json({ error: "Missing data" }, { status: 400 });
     }
 
@@ -76,10 +70,9 @@ export async function POST(request: NextRequest) {
       mode: "payment",
       payment_method_types: ["card"],
       line_items: lineItems,
-      customer_email: recipient.email || member.email,
+      customer_email: recipient.email,
       metadata: {
-        memberId: member.id,
-        memberEmail: member.email,
+        customerEmail: recipient.email,
         items: JSON.stringify(items.map((i) => ({
           variantId: i.variantId,
           productUid: i.productUid,
@@ -97,11 +90,11 @@ export async function POST(request: NextRequest) {
         recipientCountry: recipient.country_code,
         recipientZip: recipient.zip,
         recipientPhone: recipient.phone || "",
-        recipientEmail: recipient.email || member.email,
+        recipientEmail: recipient.email,
         currency: currency || "EUR",
       },
-      success_url: `${origin}/members/merch?order=success`,
-      cancel_url: `${origin}/members/merch?order=cancelled`,
+      success_url: `${origin}/merch?order=success`,
+      cancel_url: `${origin}/merch?order=cancelled`,
     });
 
     return NextResponse.json({ url: session.url });

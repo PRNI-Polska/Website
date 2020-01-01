@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMemberFromRequest } from "@/lib/member-auth";
+import { createOrder, type PrintfulRecipient, type PrintfulOrderItem } from "@/lib/printful";
 import { prisma } from "@/lib/db";
 
 export async function POST(request: NextRequest) {
@@ -10,13 +11,55 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { items } = body as {
-      items: { variantId: number; qty: number; productName?: string; variantName?: string; size?: string; color?: string; price?: string; currency?: string; image?: string }[];
+    const { items, recipient } = body as {
+      items: {
+        variantId: number;
+        qty: number;
+        productName?: string;
+        variantName?: string;
+        size?: string;
+        color?: string;
+        price?: string;
+        currency?: string;
+      }[];
+      recipient: {
+        name: string;
+        address1: string;
+        address2?: string;
+        city: string;
+        state_code?: string;
+        country_code: string;
+        zip: string;
+        phone?: string;
+        email?: string;
+      };
     };
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
+    if (!items || items.length === 0) {
       return NextResponse.json({ error: "No items" }, { status: 400 });
     }
+    if (!recipient || !recipient.name || !recipient.address1 || !recipient.city || !recipient.zip || !recipient.country_code) {
+      return NextResponse.json({ error: "Missing shipping info" }, { status: 400 });
+    }
+
+    const pfRecipient: PrintfulRecipient = {
+      name: recipient.name,
+      address1: recipient.address1,
+      address2: recipient.address2 || undefined,
+      city: recipient.city,
+      state_code: recipient.state_code || undefined,
+      country_code: recipient.country_code,
+      zip: recipient.zip,
+      phone: recipient.phone || undefined,
+      email: recipient.email || member.email,
+    };
+
+    const pfItems: PrintfulOrderItem[] = items.map((i) => ({
+      sync_variant_id: i.variantId,
+      quantity: i.qty,
+    }));
+
+    const pfOrder = await createOrder(pfRecipient, pfItems);
 
     const totalAmount = items.reduce(
       (sum, item) => sum + parseFloat(item.price || "0") * (item.qty || 1),
@@ -25,22 +68,26 @@ export async function POST(request: NextRequest) {
     const currency = items[0]?.currency || "CHF";
 
     try {
-      const order = await prisma.merchOrder.create({
+      await prisma.merchOrder.create({
         data: {
           memberId: member.id,
           items: JSON.stringify(items),
           totalAmount: totalAmount.toFixed(2),
           currency,
-          status: "PENDING",
+          status: "DRAFT",
+          note: `Printful order #${pfOrder.id}`,
         },
       });
-      return NextResponse.json({ order: { id: order.id, status: order.status } });
     } catch (dbErr) {
-      console.error("DB order write failed (table may not exist yet), accepting order anyway:", dbErr);
-      return NextResponse.json({
-        order: { id: `pending-${Date.now()}`, status: "PENDING" },
-      });
+      console.error("DB order write failed (table may not exist):", dbErr);
     }
+
+    return NextResponse.json({
+      order: {
+        id: pfOrder.id,
+        status: pfOrder.status,
+      },
+    });
   } catch (err) {
     console.error("Order creation error:", err);
     return NextResponse.json({ error: "Failed to create order" }, { status: 500 });

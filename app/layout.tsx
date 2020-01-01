@@ -41,9 +41,9 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://prni.org.pl"),
   title: {
     default: "PRNI — Polski Ruch Narodowo-Integralistyczny",
-    template: "%s | PRNI",
+    template: "%s | PRNI — Polski Ruch Narodowo-Integralistyczny",
   },
-  description: "Naród Ponad Wszystkim — ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
+  description: "PRNI (Polski Ruch Narodowo-Integralistyczny) — Naród Ponad Wszystkim. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
   keywords: [
     "PRNI", "Polski Ruch Narodowo-Integralistyczny", "narodowy integralizm",
     "ruch narodowy", "polska polityka", "suwerenność", "tradycja", "naród",
@@ -68,13 +68,13 @@ export const metadata: Metadata = {
     url: "https://prni.org.pl",
     siteName: "PRNI",
     title: "PRNI — Polski Ruch Narodowo-Integralistyczny",
-    description: "Naród Ponad Wszystkim — ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
+    description: "PRNI (Polski Ruch Narodowo-Integralistyczny) — Naród Ponad Wszystkim. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
     images: [{ url: "/logo.png", width: 512, height: 512, alt: "PRNI — Polski Ruch Narodowo-Integralistyczny" }],
   },
   twitter: {
     card: "summary",
     title: "PRNI — Polski Ruch Narodowo-Integralistyczny",
-    description: "Naród Ponad Wszystkim — ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
+    description: "PRNI (Polski Ruch Narodowo-Integralistyczny) — Naród Ponad Wszystkim. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
     images: ["/logo.png"],
   },
   robots: {
@@ -112,7 +112,7 @@ export default function RootLayout({
     : { "--font-sans": "'Crimson Pro', Georgia, serif", "--font-heading": "'Playfair Display', Georgia, serif" } as React.CSSProperties;
 
   return (
-    <html lang="en" data-theme={theme} suppressHydrationWarning>
+    <html lang="pl" data-theme={theme} suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -120,6 +120,45 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="PRNI" />
         <link rel="apple-touch-icon" href="/logo.png" />
         <meta name="theme-color" content="#090909" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "PoliticalParty",
+                  "@id": "https://prni.org.pl/#organization",
+                  name: "PRNI — Polski Ruch Narodowo-Integralistyczny",
+                  alternateName: ["PRNI", "Polski Ruch Narodowo-Integralistyczny", "Polish National-Integralist Movement"],
+                  url: "https://prni.org.pl",
+                  logo: {
+                    "@type": "ImageObject",
+                    url: "https://prni.org.pl/logo.png",
+                    width: 512,
+                    height: 512,
+                  },
+                  image: "https://prni.org.pl/logo.png",
+                  description: "PRNI (Polski Ruch Narodowo-Integralistyczny) — Naród Ponad Wszystkim. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
+                  foundingDate: "2024",
+                  slogan: "Naród Ponad Wszystkim",
+                  areaServed: { "@type": "Country", name: "Poland" },
+                  knowsLanguage: ["pl", "en", "de"],
+                },
+                {
+                  "@type": "WebSite",
+                  "@id": "https://prni.org.pl/#website",
+                  url: "https://prni.org.pl",
+                  name: "PRNI",
+                  alternateName: "Polski Ruch Narodowo-Integralistyczny",
+                  description: "Oficjalna strona PRNI — Polskiego Ruchu Narodowo-Integralistycznego",
+                  publisher: { "@id": "https://prni.org.pl/#organization" },
+                  inLanguage: ["pl", "en", "de"],
+                },
+              ],
+            }),
+          }}
+        />
       </head>
       <body
         className={`${fontVariables} antialiased min-h-screen flex flex-col`}

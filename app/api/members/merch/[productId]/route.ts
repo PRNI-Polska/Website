@@ -19,8 +19,9 @@ export async function GET(
     const variants = product.variants.map((v) => {
       const pricing = getRetailPrice(product.id, v.id);
       const parts = v.title.split(" - ");
-      const color = parts[0] || "";
-      const size = parts[1] || "";
+      const color = parts[0]?.trim() || "";
+      const size = parts[1]?.trim() || "";
+      // parts[2] would be print tech (e.g. "DTG") — we skip it
 
       return {
         id: v.id,

@@ -12,9 +12,7 @@ export async function GET(request: NextRequest) {
   try {
     const products = await getStoreProducts();
 
-    const enriched = products
-      .filter((p) => p.status === "active")
-      .map((p) => {
+    const enriched = products.map((p) => {
         const pricing = getRetailPrice(p.id);
         return {
           id: p.id,

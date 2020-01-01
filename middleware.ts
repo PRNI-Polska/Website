@@ -320,7 +320,7 @@ export default withAuth(
 
     if (!isAuthenticated) {
       // Check if IP is already blocked by the threat system
-      const ipBlockStatus = isIPBlocked(ip);
+      const ipBlockStatus = await isIPBlocked(ip);
       if (ipBlockStatus.blocked) {
         logSecurityEvent("THREAT_BLOCKED", {
           ip,
@@ -340,7 +340,7 @@ export default withAuth(
       }
 
       // Track this request in the alert system
-      const requestTracking = trackRequest(ip, pathname);
+      const requestTracking = await trackRequest(ip, pathname);
       if (requestTracking.blocked) {
         logSecurityEvent("FLOOD_BLOCKED", {
           ip,
@@ -371,7 +371,7 @@ export default withAuth(
         userAgent,
         pattern: suspiciousCheck.patternType,
       });
-      trackSuspiciousRequest(
+      await trackSuspiciousRequest(
         ip,
         pathname,
         userAgent,
@@ -510,8 +510,8 @@ export default withAuth(
     }
 
     if (rateLimitResult && !rateLimitResult.allowed) {
-      // Track the hit in the in-memory alert system
-      trackRateLimitHit(ip, pathname, rateLimitType);
+      // Track the hit in the alert system (Redis-backed)
+      await trackRateLimitHit(ip, pathname, rateLimitType);
 
       // Persistent block — return 403 and log to DB
       if (rateLimitResult.blocked) {
@@ -549,7 +549,7 @@ export default withAuth(
     if ((isAdminRoute || isAdminApiRoute) && !isLoginPage) {
       if (!isIPAllowed(ip)) {
         logSecurityEvent("BLOCKED_ADMIN_IP", { ip, pathname });
-        trackSuspiciousRequest(ip, pathname, userAgent, "admin_probe");
+        await trackSuspiciousRequest(ip, pathname, userAgent, "admin_probe");
         const response = NextResponse.json(
           { error: "Access denied" },
           { status: 403 },
@@ -578,7 +578,7 @@ export default withAuth(
     // Protect admin routes and API routes
     if ((isAdminRoute || isAdminApiRoute) && !token) {
       logSecurityEvent("UNAUTHORIZED_ADMIN_ACCESS", { ip, pathname });
-      trackSuspiciousRequest(ip, pathname, userAgent, "admin_probe");
+      await trackSuspiciousRequest(ip, pathname, userAgent, "admin_probe");
       const response = NextResponse.redirect(
         new URL("/admin/login", req.url),
       );

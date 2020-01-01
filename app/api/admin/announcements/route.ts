@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     const parsed = createAnnouncementSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Validation failed", details: parsed.error.flatten() },
+        { error: "Validation failed", ...(process.env.NODE_ENV !== "production" && { details: parsed.error.flatten() }) },
         { status: 400 }
       );
     }

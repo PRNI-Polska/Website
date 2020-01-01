@@ -377,7 +377,7 @@ We believe in:
   console.log("\n🎉 Database seeding completed successfully!");
   console.log(`\n📋 Admin Login Credentials:`);
   console.log(`   Email: ${adminEmail}`);
-  console.log(`   Password: ${adminPassword}`);
+  console.log(`   Password: ${"*".repeat(adminPassword.length)} (hidden for security)`);
   console.log(`\n⚠️  Remember to change the admin password in production!`);
 }
 

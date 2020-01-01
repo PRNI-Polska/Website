@@ -22,6 +22,7 @@ export const translations: Translations = {
   "nav.manifesto": { en: "Manifesto", pl: "Manifest", de: "Manifest" },
   "nav.about": { en: "About", pl: "O nas", de: "Über uns" },
   "nav.contact": { en: "Contact", pl: "Kontakt", de: "Kontakt" },
+  "nav.join": { en: "Join", pl: "Dołącz", de: "Beitreten" },
   
   // Party names
   "party.name.short": { en: "PRNI", pl: "PRNI", de: "PRNI" },
@@ -42,20 +43,28 @@ export const translations: Translations = {
   // Hero section
   "hero.title": { 
     en: "Nation Above All", 
-    pl: "Naród Ponad Wszystkim" 
+    pl: "Naród Ponad Wszystkim",
+    de: "Nation über alles"
   },
   "hero.subtitle": { 
     en: "Building a strong, unified Poland rooted in tradition and national identity.", 
-    pl: "Budujemy silną, zjednoczoną Polskę zakorzenioną w tradycji i tożsamości narodowej." 
+    pl: "Budujemy silną, zjednoczoną Polskę zakorzenioną w tradycji i tożsamości narodowej.",
+    de: "Wir bauen ein starkes, geeintes Polen, verwurzelt in Tradition und nationaler Identität."
   },
-  "hero.cta.manifesto": { en: "Read Our Manifesto", pl: "Czytaj Manifest" },
-  "hero.cta.join": { en: "Join the Movement", pl: "Dołącz do Ruchu" },
+  "hero.cta.manifesto": { en: "Read Our Manifesto", pl: "Czytaj Manifest", de: "Manifest lesen" },
+  "hero.cta.join": { en: "Join the Movement", pl: "Dołącz do Ruchu", de: "Der Bewegung beitreten" },
   
   // Mission section
-  "mission.title": { en: "Our Mission", pl: "Nasza Misja" },
+  "mission.title": { en: "Our Mission", pl: "Nasza Misja", de: "Unsere Mission" },
   "mission.text": { 
     en: "We believe in the nation as the highest political value. Our movement stands for the preservation of Polish national identity, cultural unity, and the organic state that serves the interests of the nation.", 
-    pl: "Wierzymy w naród jako najwyższą wartość polityczną. Nasz ruch stoi na straży zachowania polskiej tożsamości narodowej, jedności kulturowej oraz organicznego państwa służącego interesom narodu." 
+    pl: "Wierzymy w naród jako najwyższą wartość polityczną. Nasz ruch stoi na straży zachowania polskiej tożsamości narodowej, jedności kulturowej oraz organicznego państwa służącego interesom narodu.",
+    de: "Wir glauben an die Nation als höchsten politischen Wert. Unsere Bewegung steht für die Bewahrung der polnischen nationalen Identität, kulturellen Einheit und des organischen Staates, der den Interessen der Nation dient."
+  },
+  "mission.summary": {
+    en: "We believe in the nation as the highest political value. Our movement stands for the preservation of Polish national identity and cultural unity.",
+    pl: "Wierzymy w naród jako najwyższą wartość polityczną. Nasz ruch stoi na straży zachowania polskiej tożsamości narodowej i jedności kulturowej.",
+    de: "Wir glauben an die Nation als höchsten politischen Wert. Unsere Bewegung steht für die Bewahrung der polnischen nationalen Identität und kulturellen Einheit."
   },
   
   // Ideology sections
@@ -112,8 +121,40 @@ export const translations: Translations = {
     pl: "Poznaj naszą wizję i politykę budowania silniejszej Polski." 
   },
   
+  // Wings
+  "wings.international.title": { en: "International Wing", pl: "Skrzydło Międzynarodowe", de: "Internationale Abteilung" },
+  "wings.international.tagline": { en: "Poland's voice abroad", pl: "Głos Polski za granicą", de: "Polens Stimme im Ausland" },
+  "wings.main.title": { en: "Main Wing", pl: "Skrzydło Główne", de: "Hauptabteilung" },
+  "wings.main.tagline": { en: "The heart of the national movement", pl: "Serce ruchu narodowego", de: "Das Herz der nationalen Bewegung" },
+  "wings.female.title": { en: "Female Wing", pl: "Skrzydło Kobiece", de: "Frauenabteilung" },
+  "wings.female.tagline": { en: "The strength of the nation in women's unity", pl: "Siła narodu w jedności kobiet", de: "Die Stärke der Nation in der Einheit der Frauen" },
+
+  // Announcements
+  "announcements.title": { en: "Announcements", pl: "Komunikaty", de: "Mitteilungen" },
+  "announcements.subtitle": { en: "Official communications from our movement", pl: "Oficjalne komunikaty naszego ruchu", de: "Offizielle Mitteilungen unserer Bewegung" },
+  "announcements.search": { en: "Search announcements...", pl: "Szukaj komunikatów...", de: "Mitteilungen suchen..." },
+  "announcements.all": { en: "All", pl: "Wszystkie", de: "Alle" },
+  "announcements.showing": { en: "Showing", pl: "Wyświetlanie", de: "Anzeigen" },
+  "announcements.of": { en: "of", pl: "z", de: "von" },
+  "announcements.none": { en: "No announcements found", pl: "Brak komunikatów", de: "Keine Mitteilungen gefunden" },
+
+  // Events  
+  "events.title": { en: "Events", pl: "Wydarzenia", de: "Veranstaltungen" },
+  "events.subtitle": { en: "Upcoming gatherings and activities", pl: "Nadchodzące spotkania i działania", de: "Kommende Treffen und Aktivitäten" },
+  "events.search": { en: "Search events...", pl: "Szukaj wydarzeń...", de: "Veranstaltungen suchen..." },
+  "events.all": { en: "All", pl: "Wszystkie", de: "Alle" },
+  "events.upcoming": { en: "Upcoming", pl: "Nadchodzące", de: "Bevorstehend" },
+  "events.past": { en: "Past", pl: "Minione", de: "Vergangen" },
+  "events.showing": { en: "Showing", pl: "Wyświetlanie", de: "Anzeigen" },
+  "events.of": { en: "of", pl: "z", de: "von" },
+  "events.none": { en: "No events found", pl: "Brak wydarzeń", de: "Keine Veranstaltungen gefunden" },
+
+  // Manifesto
+  "manifesto.title": { en: "Our Manifesto", pl: "Nasz Manifest", de: "Unser Manifest" },
+  "manifesto.subtitle": { en: "The foundational document of our movement", pl: "Dokument założycielski naszego ruchu", de: "Das Gründungsdokument unserer Bewegung" },
+
   // CTA
-  "cta.title": { en: "Join Our Movement", pl: "Dołącz do Naszego Ruchu" },
+  "cta.title": { en: "Join Our Movement", pl: "Dołącz do Naszego Ruchu", de: "Treten Sie unserer Bewegung bei" },
   "cta.text": { 
     en: "Be part of the national revival. Together we will build a strong, unified Poland.", 
     pl: "Bądź częścią narodowego odrodzenia. Razem zbudujemy silną, zjednoczoną Polskę." 
@@ -236,29 +277,29 @@ export function useI18n() {
 export function LanguageSwitcher() {
   const { locale, setLocale } = useI18n();
   
+  const languages: { code: Locale; label: string }[] = [
+    { code: "pl", label: "PL" },
+    { code: "en", label: "EN" },
+    { code: "de", label: "DE" },
+  ];
+  
   return (
     <div className="flex items-center gap-1 text-sm">
-      <button
-        onClick={() => setLocale("pl")}
-        className={`px-2 py-1 rounded transition-colors ${
-          locale === "pl" 
-            ? "bg-primary text-primary-foreground" 
-            : "text-muted-foreground hover:text-foreground"
-        }`}
-      >
-        PL
-      </button>
-      <span className="text-muted-foreground">/</span>
-      <button
-        onClick={() => setLocale("en")}
-        className={`px-2 py-1 rounded transition-colors ${
-          locale === "en" 
-            ? "bg-primary text-primary-foreground" 
-            : "text-muted-foreground hover:text-foreground"
-        }`}
-      >
-        EN
-      </button>
+      {languages.map((lang, index) => (
+        <span key={lang.code} className="flex items-center">
+          {index > 0 && <span className="text-muted-foreground mx-0.5">/</span>}
+          <button
+            onClick={() => setLocale(lang.code)}
+            className={`px-2 py-1 rounded transition-colors ${
+              locale === lang.code 
+                ? "bg-primary text-primary-foreground" 
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {lang.label}
+          </button>
+        </span>
+      ))}
     </div>
   );
 }

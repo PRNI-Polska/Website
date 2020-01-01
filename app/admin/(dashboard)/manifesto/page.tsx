@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { DeleteButton } from "@/components/admin/delete-button";
 import { formatDate } from "@/lib/utils";
-import type { ContentStatus } from "@prisma/client";
+import type { ContentStatus } from "@/lib/types";
 
 const statusColors: Record<ContentStatus, string> = {
   DRAFT: "bg-muted text-muted-foreground",

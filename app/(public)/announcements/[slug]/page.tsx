@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { formatDate } from "@/lib/utils";
 import type { Metadata } from "next";
-import type { AnnouncementCategory } from "@prisma/client";
+import type { AnnouncementCategory } from "@/lib/types";
 
 const categoryLabels: Record<AnnouncementCategory, string> = {
   NEWS: "News",

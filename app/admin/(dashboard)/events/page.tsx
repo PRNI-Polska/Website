@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DeleteButton } from "@/components/admin/delete-button";
-import type { ContentStatus } from "@prisma/client";
+import type { ContentStatus } from "@/lib/types";
 
 const statusColors: Record<ContentStatus, string> = {
   DRAFT: "bg-muted text-muted-foreground",

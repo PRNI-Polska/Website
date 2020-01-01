@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatDate } from "@/lib/utils";
 import type { Metadata } from "next";
-import type { AnnouncementCategory } from "@prisma/client";
+import type { AnnouncementCategory } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "Announcements",

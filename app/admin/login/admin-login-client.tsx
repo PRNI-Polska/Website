@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { AlertCircle, Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function AdminLoginClient() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
 
@@ -29,30 +28,22 @@ export default function AdminLoginClient() {
     }
 
     try {
-      const csrfRes = await fetch("/api/auth/csrf");
-      const { csrfToken } = await csrfRes.json();
-
-      const params = new URLSearchParams();
-      params.append("email", email);
-      params.append("password", password);
-      params.append("csrfToken", csrfToken);
-      params.append("callbackUrl", "/admin");
-      params.append("json", "true");
-
-      const res = await fetch("/api/auth/callback/credentials", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: params.toString(),
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
       });
 
-      const data = await res.json().catch(() => null);
-
-      if (data?.url) {
-        window.location.href = "/admin";
-      } else if (res.ok) {
+      if (result?.error) {
+        if (result.error === "CredentialsSignin") {
+          setLoginError("Invalid email or password");
+        } else {
+          setLoginError(result.error);
+        }
+      } else if (result?.ok) {
         window.location.href = "/admin";
       } else {
-        setLoginError("Invalid email or password");
+        setLoginError("An unexpected error occurred");
       }
     } catch (err) {
       console.error("Login error:", err);

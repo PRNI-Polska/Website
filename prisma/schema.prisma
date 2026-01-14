@@ -1,0 +1,175 @@
+// file: prisma/schema.prisma
+// Prisma schema for Political Party Website
+// 
+// This schema supports both PostgreSQL (production) and SQLite (local dev)
+// Set DATABASE_URL in .env to switch between them:
+//   PostgreSQL: postgresql://user:pass@host:5432/dbname
+//   SQLite: file:./dev.db
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// For SQLite (local development):
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// For PostgreSQL (production), uncomment this and comment out SQLite:
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+// ============================================================================
+// USER MODEL - Single admin account
+// ============================================================================
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String?
+  role          String    @default("ADMIN")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  announcements Announcement[]
+  events        Event[]
+  auditLogs     AuditLog[]
+  
+  @@map("users")
+}
+
+// ============================================================================
+// ANNOUNCEMENT MODEL - News and updates
+// ============================================================================
+model Announcement {
+  id            String    @id @default(cuid())
+  title         String
+  slug          String    @unique
+  excerpt       String
+  content       String    // Markdown content
+  category      String    @default("NEWS") // NEWS, PRESS_RELEASE, POLICY, CAMPAIGN, COMMUNITY, OTHER
+  featuredImage String?   // URL to featured image
+  status        String    @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED
+  publishedAt   DateTime?
+  
+  // Audit fields
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  authorId      String
+  author        User      @relation(fields: [authorId], references: [id])
+  
+  @@index([status, publishedAt])
+  @@index([category])
+  @@index([slug])
+  @@map("announcements")
+}
+
+// ============================================================================
+// EVENT MODEL - Calendar events
+// ============================================================================
+model Event {
+  id              String    @id @default(cuid())
+  title           String
+  description     String    // Markdown content
+  startDateTime   DateTime
+  endDateTime     DateTime
+  location        String
+  rsvpLink        String?   // Optional RSVP URL
+  organizerContact String?  // Optional organizer info
+  tags            String    // Comma-separated tags
+  status          String    @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED
+  
+  // Audit fields
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdById     String
+  createdBy       User      @relation(fields: [createdById], references: [id])
+  
+  @@index([status, startDateTime])
+  @@index([startDateTime, endDateTime])
+  @@map("events")
+}
+
+// ============================================================================
+// MANIFESTO SECTION MODEL - Structured manifesto content
+// ============================================================================
+model ManifestoSection {
+  id            String              @id @default(cuid())
+  title         String
+  slug          String              @unique
+  content       String              // Markdown content
+  order         Int                 // For sorting sections
+  parentId      String?             // For sub-sections
+  parent        ManifestoSection?   @relation("SubSections", fields: [parentId], references: [id])
+  children      ManifestoSection[]  @relation("SubSections")
+  status        String              @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED
+  
+  // Audit fields
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  
+  @@index([order])
+  @@index([parentId])
+  @@map("manifesto_sections")
+}
+
+// ============================================================================
+// TEAM MEMBER MODEL - Leadership and team info
+// ============================================================================
+model TeamMember {
+  id          String    @id @default(cuid())
+  name        String
+  role        String    // e.g., "Party Leader", "Secretary"
+  bio         String    // Short biography
+  photoUrl    String?   // URL to photo
+  email       String?   // Optional public email
+  order       Int       // For sorting
+  isLeadership Boolean  @default(false) // Highlight as leadership
+  
+  // Audit fields
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@index([order])
+  @@index([isLeadership])
+  @@map("team_members")
+}
+
+// ============================================================================
+// AUDIT LOG MODEL - Track admin actions
+// ============================================================================
+model AuditLog {
+  id          String    @id @default(cuid())
+  action      String    // e.g., "CREATE", "UPDATE", "DELETE"
+  entityType  String    // e.g., "Announcement", "Event"
+  entityId    String
+  details     String?   // JSON string with additional details
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  createdAt   DateTime  @default(now())
+  
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ============================================================================
+// SITE SETTINGS MODEL - Global site configuration
+// ============================================================================
+model SiteSettings {
+  id              String    @id @default("default")
+  siteName        String    @default("Political Party")
+  siteDescription String    @default("Building a better future together")
+  manifestoPdfUrl String?   // URL to downloadable PDF
+  contactEmail    String?
+  socialLinks     String?   // JSON string with social media links
+  
+  updatedAt       DateTime  @updatedAt
+  
+  @@map("site_settings")
+}

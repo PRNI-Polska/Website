@@ -1,0 +1,131 @@
+// file: prisma/schema.sqlite.prisma
+// SQLite version of the schema for local development
+// To use: rename this to schema.prisma and update DATABASE_URL to "file:./dev.db"
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String?
+  role          String    @default("ADMIN")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  announcements Announcement[]
+  events        Event[]
+  auditLogs     AuditLog[]
+  
+  @@map("users")
+}
+
+model Announcement {
+  id            String    @id @default(cuid())
+  title         String
+  slug          String    @unique
+  excerpt       String
+  content       String
+  category      String    @default("NEWS")
+  featuredImage String?
+  status        String    @default("DRAFT")
+  publishedAt   DateTime?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  authorId      String
+  author        User      @relation(fields: [authorId], references: [id])
+  
+  @@index([status, publishedAt])
+  @@map("announcements")
+}
+
+model Event {
+  id              String    @id @default(cuid())
+  title           String
+  description     String
+  startDateTime   DateTime
+  endDateTime     DateTime
+  location        String
+  rsvpLink        String?
+  organizerContact String?
+  tags            String
+  status          String    @default("DRAFT")
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  createdById     String
+  createdBy       User      @relation(fields: [createdById], references: [id])
+  
+  @@index([status, startDateTime])
+  @@map("events")
+}
+
+model ManifestoSection {
+  id            String              @id @default(cuid())
+  title         String
+  slug          String              @unique
+  content       String
+  order         Int
+  parentId      String?
+  parent        ManifestoSection?   @relation("SubSections", fields: [parentId], references: [id])
+  children      ManifestoSection[]  @relation("SubSections")
+  status        String              @default("DRAFT")
+  
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  
+  @@index([order])
+  @@map("manifesto_sections")
+}
+
+model TeamMember {
+  id          String    @id @default(cuid())
+  name        String
+  role        String
+  bio         String
+  photoUrl    String?
+  email       String?
+  order       Int
+  isLeadership Boolean  @default(false)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@index([order])
+  @@map("team_members")
+}
+
+model AuditLog {
+  id          String    @id @default(cuid())
+  action      String
+  entityType  String
+  entityId    String
+  details     String?
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  createdAt   DateTime  @default(now())
+  
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
+
+model SiteSettings {
+  id              String    @id @default("default")
+  siteName        String    @default("Political Party")
+  siteDescription String    @default("Building a better future together")
+  manifestoPdfUrl String?
+  contactEmail    String?
+  socialLinks     String?
+  
+  updatedAt       DateTime  @updatedAt
+  
+  @@map("site_settings")
+}

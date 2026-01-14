@@ -1,4 +1,5 @@
 // file: app/(public)/manifesto/page.tsx
+import type * as React from "react";
 import Link from "next/link";
 import { Download, FileText, Clock } from "lucide-react";
 import { prisma } from "@/lib/db";
@@ -115,7 +116,7 @@ function ManifestoSectionContent({
   section: ManifestoSection; 
   level?: number;
 }) {
-  const HeadingTag = `h${Math.min(level, 6)}` as keyof JSX.IntrinsicElements;
+  const HeadingTag = `h${Math.min(level, 6)}` as keyof React.JSX.IntrinsicElements;
   
   return (
     <section id={section.slug} className="scroll-mt-header">

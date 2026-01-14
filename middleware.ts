@@ -1,32 +1,54 @@
 // file: middleware.ts
+// SECURITY-HARDENED MIDDLEWARE FOR POLITICAL WEBSITE
+// This middleware implements multiple layers of security to protect against:
+// - Brute force attacks
+// - DDoS (layer 7)
+// - XSS, CSRF, Clickjacking
+// - Unauthorized admin access
+
 import { withAuth } from "next-auth/middleware";
 import { NextResponse, NextRequest } from "next/server";
 import type { NextRequestWithAuth } from "next-auth/middleware";
 
 // ============================================
-// SECURITY HEADERS
+// SECURITY HEADERS (STRICT)
 // ============================================
 const securityHeaders = {
+  // Prevent XSS attacks
   "X-XSS-Protection": "1; mode=block",
+  // Prevent MIME type sniffing
   "X-Content-Type-Options": "nosniff",
+  // Prevent clickjacking
   "X-Frame-Options": "DENY",
+  // Control referrer information
   "Referrer-Policy": "strict-origin-when-cross-origin",
-  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+  // Disable dangerous browser features
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()",
+  // Prevent DNS prefetching to avoid leaking info
+  "X-DNS-Prefetch-Control": "off",
+  // Prevent downloads in IE
+  "X-Download-Options": "noopen",
+  // Prevent content type sniffing
+  "X-Permitted-Cross-Domain-Policies": "none",
+  // Force HTTPS
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
 };
 
+// Strict Content Security Policy
 const csp = `
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval';
-  style-src 'self' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   img-src 'self' data: https: blob:;
-  font-src 'self' data:;
-  connect-src 'self';
+  font-src 'self' data: https://fonts.gstatic.com;
+  connect-src 'self' https://*.neon.tech;
   media-src 'self';
   object-src 'none';
   frame-src 'none';
   frame-ancestors 'none';
   form-action 'self';
   base-uri 'self';
+  upgrade-insecure-requests;
 `.replace(/\s{2,}/g, " ").trim();
 
 function applySecurityHeaders(response: NextResponse): NextResponse {
@@ -38,65 +60,137 @@ function applySecurityHeaders(response: NextResponse): NextResponse {
 }
 
 // ============================================
-// RATE LIMITING (In-Memory)
+// RATE LIMITING (STRICT - FOR POLITICAL SITE)
 // ============================================
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+const rateLimitStore = new Map<string, { count: number; resetTime: number; blocked: boolean }>();
 
-// Clean up expired entries every minute
+// Clean up expired entries every 30 seconds
 if (typeof setInterval !== "undefined") {
   setInterval(() => {
     const now = Date.now();
     for (const [key, value] of rateLimitStore.entries()) {
-      if (now > value.resetTime) {
+      if (now > value.resetTime + 300000) { // Clean after 5 min past reset
         rateLimitStore.delete(key);
       }
     }
-  }, 60000);
+  }, 30000);
 }
 
 function getClientIP(request: NextRequest): string {
-  return (
-    request.headers.get("cf-connecting-ip") ||
-    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
-    request.headers.get("x-real-ip") ||
-    "unknown"
-  );
+  // Cloudflare's real IP header (most reliable when behind CF)
+  const cfIP = request.headers.get("cf-connecting-ip");
+  if (cfIP) return cfIP;
+  
+  // X-Forwarded-For (could be spoofed if not behind proxy)
+  const xff = request.headers.get("x-forwarded-for");
+  if (xff) return xff.split(",")[0].trim();
+  
+  // X-Real-IP
+  const realIP = request.headers.get("x-real-ip");
+  if (realIP) return realIP;
+  
+  return "unknown";
 }
 
 interface RateLimitResult {
   allowed: boolean;
   remaining: number;
   resetIn: number;
+  blocked: boolean;
 }
 
 function checkRateLimit(
   identifier: string,
   maxRequests: number,
-  intervalMs: number
+  intervalMs: number,
+  blockDuration: number = 0
 ): RateLimitResult {
   const now = Date.now();
   const existing = rateLimitStore.get(identifier);
 
+  // Check if permanently blocked
+  if (existing?.blocked && now < existing.resetTime) {
+    return { allowed: false, remaining: 0, resetIn: existing.resetTime - now, blocked: true };
+  }
+
   if (!existing || now > existing.resetTime) {
-    rateLimitStore.set(identifier, { count: 1, resetTime: now + intervalMs });
-    return { allowed: true, remaining: maxRequests - 1, resetIn: intervalMs };
+    rateLimitStore.set(identifier, { count: 1, resetTime: now + intervalMs, blocked: false });
+    return { allowed: true, remaining: maxRequests - 1, resetIn: intervalMs, blocked: false };
   }
 
   if (existing.count >= maxRequests) {
-    return { allowed: false, remaining: 0, resetIn: existing.resetTime - now };
+    // Block the IP for the specified duration if provided
+    if (blockDuration > 0) {
+      existing.blocked = true;
+      existing.resetTime = now + blockDuration;
+    }
+    return { allowed: false, remaining: 0, resetIn: existing.resetTime - now, blocked: existing.blocked };
   }
 
   existing.count++;
-  return { allowed: true, remaining: maxRequests - existing.count, resetIn: existing.resetTime - now };
+  return { allowed: true, remaining: maxRequests - existing.count, resetIn: existing.resetTime - now, blocked: false };
 }
 
-// Rate limit configurations
+// STRICT Rate limit configurations for political website
 const RATE_LIMITS = {
-  auth: { maxRequests: 5, interval: 60 * 1000 },        // 5 per minute
-  contact: { maxRequests: 5, interval: 60 * 60 * 1000 }, // 5 per hour
-  admin: { maxRequests: 100, interval: 60 * 1000 },     // 100 per minute
-  public: { maxRequests: 200, interval: 60 * 1000 },    // 200 per minute
+  // Auth: 3 attempts per minute, block for 30 min after abuse
+  auth: { maxRequests: 3, interval: 60 * 1000, blockDuration: 30 * 60 * 1000 },
+  // Contact form: 3 per hour
+  contact: { maxRequests: 3, interval: 60 * 60 * 1000, blockDuration: 0 },
+  // Admin API: 50 per minute
+  admin: { maxRequests: 50, interval: 60 * 1000, blockDuration: 0 },
+  // Public pages: 100 per minute per IP
+  public: { maxRequests: 100, interval: 60 * 1000, blockDuration: 5 * 60 * 1000 },
 };
+
+// ============================================
+// SUSPICIOUS REQUEST DETECTION
+// ============================================
+function isSuspiciousRequest(request: NextRequest): boolean {
+  const userAgent = request.headers.get("user-agent") || "";
+  const path = request.nextUrl.pathname;
+  
+  // Block common attack patterns
+  const suspiciousPatterns = [
+    /\.\./,           // Path traversal
+    /<script/i,       // XSS attempt
+    /union\s+select/i, // SQL injection
+    /eval\(/i,        // Code injection
+    /javascript:/i,   // XSS via protocol
+    /on\w+\s*=/i,     // Event handler XSS
+    /wp-admin/i,      // WordPress scanner
+    /wp-login/i,      // WordPress scanner
+    /phpmyadmin/i,    // phpMyAdmin scanner
+    /\.php$/i,        // PHP file access
+    /\.asp$/i,        // ASP file access
+    /\.env/i,         // Env file access
+    /\.git/i,         // Git folder access
+    /\.htaccess/i,    // Apache config access
+  ];
+  
+  if (suspiciousPatterns.some(pattern => pattern.test(path))) {
+    return true;
+  }
+  
+  // Block suspicious user agents
+  const blockedAgents = [
+    /sqlmap/i,
+    /nikto/i,
+    /nmap/i,
+    /masscan/i,
+    /zgrab/i,
+    /gobuster/i,
+    /dirbuster/i,
+    /wpscan/i,
+    /curl\/[0-9]/i,  // Raw curl without proper UA
+  ];
+  
+  if (blockedAgents.some(pattern => pattern.test(userAgent))) {
+    return true;
+  }
+  
+  return false;
+}
 
 // ============================================
 // IP ALLOWLIST FOR ADMIN (Optional)
@@ -110,12 +204,33 @@ function isIPAllowed(ip: string): boolean {
 }
 
 // ============================================
+// SECURITY LOGGING
+// ============================================
+function logSecurityEvent(type: string, details: Record<string, unknown>): void {
+  const timestamp = new Date().toISOString();
+  console.log(JSON.stringify({
+    type: `SECURITY:${type}`,
+    timestamp,
+    ...details,
+  }));
+}
+
+// ============================================
 // MAIN MIDDLEWARE
 // ============================================
 export default withAuth(
   function middleware(req: NextRequestWithAuth) {
     const { pathname } = req.nextUrl;
     const ip = getClientIP(req);
+    const userAgent = req.headers.get("user-agent") || "unknown";
+    
+    // ============================================
+    // SUSPICIOUS REQUEST BLOCKING
+    // ============================================
+    if (isSuspiciousRequest(req)) {
+      logSecurityEvent("BLOCKED_SUSPICIOUS", { ip, pathname, userAgent });
+      return new NextResponse(null, { status: 404 });
+    }
     
     // Determine route type
     const isAdminRoute = pathname.startsWith("/admin");
@@ -131,20 +246,43 @@ export default withAuth(
     let rateLimit: RateLimitResult | null = null;
     
     if (isAuthApi || isLoginPage) {
-      rateLimit = checkRateLimit(`auth:${ip}`, RATE_LIMITS.auth.maxRequests, RATE_LIMITS.auth.interval);
+      rateLimit = checkRateLimit(
+        `auth:${ip}`,
+        RATE_LIMITS.auth.maxRequests,
+        RATE_LIMITS.auth.interval,
+        RATE_LIMITS.auth.blockDuration
+      );
+      if (!rateLimit.allowed) {
+        logSecurityEvent("RATE_LIMITED_AUTH", { ip, blocked: rateLimit.blocked });
+      }
     } else if (isContactApi) {
-      rateLimit = checkRateLimit(`contact:${ip}`, RATE_LIMITS.contact.maxRequests, RATE_LIMITS.contact.interval);
+      rateLimit = checkRateLimit(
+        `contact:${ip}`,
+        RATE_LIMITS.contact.maxRequests,
+        RATE_LIMITS.contact.interval
+      );
     } else if (isAdminApiRoute) {
-      rateLimit = checkRateLimit(`admin:${ip}`, RATE_LIMITS.admin.maxRequests, RATE_LIMITS.admin.interval);
+      rateLimit = checkRateLimit(
+        `admin:${ip}`,
+        RATE_LIMITS.admin.maxRequests,
+        RATE_LIMITS.admin.interval
+      );
     } else if (isPublicApi) {
-      rateLimit = checkRateLimit(`public:${ip}`, RATE_LIMITS.public.maxRequests, RATE_LIMITS.public.interval);
+      rateLimit = checkRateLimit(
+        `public:${ip}`,
+        RATE_LIMITS.public.maxRequests,
+        RATE_LIMITS.public.interval,
+        RATE_LIMITS.public.blockDuration
+      );
     }
     
     if (rateLimit && !rateLimit.allowed) {
       const response = NextResponse.json(
         {
           error: "Too many requests",
-          message: "Rate limit exceeded. Please try again later.",
+          message: rateLimit.blocked 
+            ? "Your IP has been temporarily blocked due to suspicious activity."
+            : "Rate limit exceeded. Please try again later.",
           retryAfter: Math.ceil(rateLimit.resetIn / 1000),
         },
         { status: 429 }
@@ -158,7 +296,7 @@ export default withAuth(
     // ============================================
     if ((isAdminRoute || isAdminApiRoute) && !isLoginPage) {
       if (!isIPAllowed(ip)) {
-        console.warn(`[SECURITY] Blocked admin access from IP: ${ip}`);
+        logSecurityEvent("BLOCKED_ADMIN_IP", { ip, pathname });
         const response = NextResponse.json(
           { error: "Access denied" },
           { status: 403 }
@@ -184,13 +322,14 @@ export default withAuth(
 
     // Protect admin routes and API routes
     if ((isAdminRoute || isAdminApiRoute) && !token) {
+      logSecurityEvent("UNAUTHORIZED_ADMIN_ACCESS", { ip, pathname });
       const response = NextResponse.redirect(new URL("/admin/login", req.url));
       return applySecurityHeaders(response);
     }
 
     // Verify admin role
     if ((isAdminRoute || isAdminApiRoute) && token?.role !== "ADMIN") {
-      console.warn(`[SECURITY] Non-admin user attempted admin access: ${token?.email}`);
+      logSecurityEvent("NON_ADMIN_ACCESS_ATTEMPT", { ip, pathname, email: token?.email });
       const response = NextResponse.redirect(new URL("/admin/login", req.url));
       return applySecurityHeaders(response);
     }

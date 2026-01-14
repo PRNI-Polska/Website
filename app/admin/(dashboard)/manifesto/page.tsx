@@ -99,7 +99,7 @@ function SectionRow({
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <span className={`text-xs px-2 py-1 rounded ${statusColors[section.status]}`}>
+        <span className={`text-xs px-2 py-1 rounded ${statusColors[section.status as ContentStatus]}`}>
           {section.status.toLowerCase()}
         </span>
         <span className="text-xs text-muted-foreground">

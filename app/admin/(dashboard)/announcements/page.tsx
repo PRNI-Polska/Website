@@ -101,13 +101,13 @@ export default async function AdminAnnouncementsPage() {
                       </td>
                       <td className="py-3 px-4">
                         <Badge variant="outline">
-                          {categoryLabels[announcement.category]}
+                          {categoryLabels[announcement.category as AnnouncementCategory]}
                         </Badge>
                       </td>
                       <td className="py-3 px-4">
                         <span
                           className={`text-xs px-2 py-1 rounded ${
-                            statusColors[announcement.status]
+                            statusColors[announcement.status as ContentStatus]
                           }`}
                         >
                           {announcement.status.toLowerCase()}

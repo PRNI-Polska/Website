@@ -168,3 +168,27 @@ model SiteSettings {
   
   @@map("site_settings")
 }
+
+// ============================================================================
+// PAGE VIEW MODEL - Analytics tracking
+// ============================================================================
+model PageView {
+  id          String    @id @default(cuid())
+  path        String    // Page path visited
+  country     String?   // Country from IP geolocation
+  city        String?   // City from IP geolocation
+  region      String?   // Region/state from IP geolocation
+  device      String?   // Device type: desktop, mobile, tablet
+  browser     String?   // Browser name
+  os          String?   // Operating system
+  referrer    String?   // Referrer URL
+  userAgent   String?   // Full user agent string
+  sessionId   String?   // Anonymous session identifier
+  createdAt   DateTime  @default(now())
+  
+  @@index([createdAt])
+  @@index([path])
+  @@index([country])
+  @@index([sessionId])
+  @@map("page_views")
+}

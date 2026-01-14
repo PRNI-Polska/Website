@@ -25,19 +25,31 @@ import { createAnnouncementSchema, type CreateAnnouncementInput } from "@/lib/va
 import { slugify, cn } from "@/lib/utils";
 import type { Announcement } from "@prisma/client";
 
+// Type-safe category values
+const CATEGORY_VALUES = ["NEWS", "PRESS_RELEASE", "POLICY", "CAMPAIGN", "COMMUNITY", "OTHER"] as const;
+type Category = (typeof CATEGORY_VALUES)[number];
+const isCategory = (v: unknown): v is Category =>
+  typeof v === "string" && (CATEGORY_VALUES as readonly string[]).includes(v);
+
+// Type-safe status values
+const STATUS_VALUES = ["DRAFT", "PUBLISHED", "ARCHIVED"] as const;
+type Status = (typeof STATUS_VALUES)[number];
+const isStatus = (v: unknown): v is Status =>
+  typeof v === "string" && (STATUS_VALUES as readonly string[]).includes(v);
+
 const categories = [
-  { value: "NEWS", label: "News" },
-  { value: "PRESS_RELEASE", label: "Press Release" },
-  { value: "POLICY", label: "Policy" },
-  { value: "CAMPAIGN", label: "Campaign" },
-  { value: "COMMUNITY", label: "Community" },
-  { value: "OTHER", label: "Other" },
+  { value: "NEWS" as const, label: "News" },
+  { value: "PRESS_RELEASE" as const, label: "Press Release" },
+  { value: "POLICY" as const, label: "Policy" },
+  { value: "CAMPAIGN" as const, label: "Campaign" },
+  { value: "COMMUNITY" as const, label: "Community" },
+  { value: "OTHER" as const, label: "Other" },
 ];
 
 const statuses = [
-  { value: "DRAFT", label: "Draft" },
-  { value: "PUBLISHED", label: "Published" },
-  { value: "ARCHIVED", label: "Archived" },
+  { value: "DRAFT" as const, label: "Draft" },
+  { value: "PUBLISHED" as const, label: "Published" },
+  { value: "ARCHIVED" as const, label: "Archived" },
 ];
 
 interface AnnouncementFormProps {
@@ -62,9 +74,9 @@ export function AnnouncementForm({ announcement }: AnnouncementFormProps) {
           slug: announcement.slug,
           excerpt: announcement.excerpt,
           content: announcement.content,
-          category: announcement.category,
+          category: isCategory(announcement.category) ? announcement.category : "NEWS",
           featuredImage: announcement.featuredImage || "",
-          status: announcement.status,
+          status: isStatus(announcement.status) ? announcement.status : "DRAFT",
         }
       : {
           title: "",
@@ -244,8 +256,10 @@ export function AnnouncementForm({ announcement }: AnnouncementFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
                 <Select
-                  defaultValue={announcement?.status || "DRAFT"}
-                  onValueChange={(value) => setValue("status", value as any)}
+                  defaultValue={isStatus(announcement?.status) ? announcement.status : "DRAFT"}
+                  onValueChange={(value) => {
+                    if (isStatus(value)) setValue("status", value);
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
@@ -263,8 +277,10 @@ export function AnnouncementForm({ announcement }: AnnouncementFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
                 <Select
-                  defaultValue={announcement?.category || "NEWS"}
-                  onValueChange={(value) => setValue("category", value as any)}
+                  defaultValue={isCategory(announcement?.category) ? announcement.category : "NEWS"}
+                  onValueChange={(value) => {
+                    if (isCategory(value)) setValue("category", value);
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />

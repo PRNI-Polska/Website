@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { formatDate } from "@/lib/utils";
 import { DeleteButton } from "@/components/admin/delete-button";
-import type { AnnouncementCategory, ContentStatus } from "@prisma/client";
+import type { AnnouncementCategory, ContentStatus } from "@/lib/types";
 
 const categoryLabels: Record<AnnouncementCategory, string> = {
   NEWS: "News",

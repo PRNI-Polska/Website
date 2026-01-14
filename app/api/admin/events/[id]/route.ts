@@ -4,17 +4,17 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { updateEventSchema } from "@/lib/validations";
 
-interface RouteParams {
-  params: { id: string };
-}
-
 // GET - Get single event
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     await requireAdmin();
+    const { id } = await params;
 
     const event = await prisma.event.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         createdBy: {
           select: { name: true, email: true },
@@ -37,13 +37,17 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 // PATCH - Update event
-export async function PATCH(request: NextRequest, { params }: RouteParams) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const user = await requireAdmin();
+    const { id } = await params;
     const body = await request.json();
 
     // Validate input
-    const parsed = updateEventSchema.safeParse({ ...body, id: params.id });
+    const parsed = updateEventSchema.safeParse({ ...body, id });
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Validation failed", details: parsed.error.flatten() },
@@ -51,16 +55,16 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    const { id, ...data } = parsed.data;
+    const { id: parsedId, ...data } = parsed.data;
 
     // Check if event exists
-    const existing = await prisma.event.findUnique({ where: { id } });
+    const existing = await prisma.event.findUnique({ where: { id: parsedId } });
     if (!existing) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
     const event = await prisma.event.update({
-      where: { id },
+      where: { id: parsedId },
       data: {
         ...data,
         startDateTime: data.startDateTime ? new Date(data.startDateTime) : undefined,
@@ -97,23 +101,27 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 }
 
 // DELETE - Delete event
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const user = await requireAdmin();
+    const { id } = await params;
 
-    const event = await prisma.event.findUnique({ where: { id: params.id } });
+    const event = await prisma.event.findUnique({ where: { id } });
     if (!event) {
       return NextResponse.json({ error: "Event not found" }, { status: 404 });
     }
 
-    await prisma.event.delete({ where: { id: params.id } });
+    await prisma.event.delete({ where: { id } });
 
     // Log audit
     await prisma.auditLog.create({
       data: {
         action: "DELETE",
         entityType: "Event",
-        entityId: params.id,
+        entityId: id,
         userId: user.id,
         details: JSON.stringify({ title: event.title }),
       },

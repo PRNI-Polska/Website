@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { TeamForm } from "@/components/admin/team-form";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 async function getTeamMember(id: string) {
@@ -15,7 +15,8 @@ async function getTeamMember(id: string) {
 }
 
 export default async function EditTeamMemberPage({ params }: PageProps) {
-  const member = await getTeamMember(params.id);
+  const { id } = await params;
+  const member = await getTeamMember(id);
   if (!member) notFound();
 
   return (

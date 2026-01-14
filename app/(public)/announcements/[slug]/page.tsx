@@ -21,7 +21,7 @@ const categoryLabels: Record<AnnouncementCategory, string> = {
 };
 
 interface PageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 async function getAnnouncement(slug: string) {
@@ -60,7 +60,8 @@ async function getRelatedAnnouncements(category: AnnouncementCategory, excludeId
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const announcement = await getAnnouncement(params.slug);
+  const { slug } = await params;
+  const announcement = await getAnnouncement(slug);
   
   if (!announcement) {
     return { title: "Announcement Not Found" };
@@ -80,7 +81,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function AnnouncementPage({ params }: PageProps) {
-  const announcement = await getAnnouncement(params.slug);
+  const { slug } = await params;
+  const announcement = await getAnnouncement(slug);
 
   if (!announcement) {
     notFound();

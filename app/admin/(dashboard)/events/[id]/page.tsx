@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { EventForm } from "@/components/admin/event-form";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 async function getEvent(id: string) {
@@ -17,7 +17,8 @@ async function getEvent(id: string) {
 }
 
 export default async function EditEventPage({ params }: PageProps) {
-  const event = await getEvent(params.id);
+  const { id } = await params;
+  const event = await getEvent(id);
 
   if (!event) {
     notFound();

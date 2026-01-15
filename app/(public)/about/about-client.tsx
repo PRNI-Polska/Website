@@ -1,7 +1,7 @@
 // file: app/(public)/about/about-client.tsx
 "use client";
 
-import { Mail, Users, Shield, Flag, Scale, Building2 } from "lucide-react";
+import { Mail, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -21,25 +21,13 @@ interface AboutPageClientProps {
   teamMembers: TeamMember[];
 }
 
-const valueIcons = {
-  nationalism: Flag,
-  integralism: Building2,
-  sovereignty: Shield,
-  order: Scale,
-};
-
 export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
   const { t } = useI18n();
   
   const leadership = teamMembers.filter((m) => m.isLeadership);
   const team = teamMembers.filter((m) => !m.isLeadership);
 
-  const values = [
-    { key: "nationalism", icon: valueIcons.nationalism },
-    { key: "integralism", icon: valueIcons.integralism },
-    { key: "sovereignty", icon: valueIcons.sovereignty },
-    { key: "order", icon: valueIcons.order },
-  ];
+  const values = ["nationalism", "integralism", "sovereignty", "order"];
 
   return (
     <div className="container-custom py-12">
@@ -90,26 +78,20 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
           {t("about.values.title")}
         </h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {values.map((value) => {
-            const Icon = value.icon;
-            return (
-              <Card key={value.key} className="text-center">
-                <CardHeader>
-                  <div className="mx-auto mb-2 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle className="text-lg">
-                    {t(`about.value.${value.key}.title`)}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    {t(`about.value.${value.key}.text`)}
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
+          {values.map((key) => (
+            <Card key={key} className="text-center">
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  {t(`about.value.${key}.title`)}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  {t(`about.value.${key}.text`)}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </section>
 

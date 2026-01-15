@@ -639,7 +639,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Improve Typography (Size & Contrast) */
 p, li, .text-muted-foreground {
-  font-size: 17px !important;      /* Larger, legible size */
+  font-size: 23px !important;      /* Larger, legible size */
   line-height: 1.75 !important;    /* More breathing room between lines */
   color: #0d0d0d !important;       /* High contrast (almost black) text */
 }
@@ -667,7 +667,7 @@ p, li, .text-muted-foreground {
   
   /* Even larger text on mobile */
   p, li, .text-muted-foreground {
-    font-size: 18px !important;
+    font-size: 23px !important;
   }
   
   /* More breathing room for headings on mobile */

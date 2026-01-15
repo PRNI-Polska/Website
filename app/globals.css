@@ -623,9 +623,9 @@ html {
    ========================================= */
 
 /* Force left-alignment for body text on all screens (better readability) */
-main p, main div, main span, main li, 
-section p, section div, section span,
-.text-muted-foreground {
+/* Only apply to main content areas, not cards */
+main > p, main > div > p, 
+section > p, section > div > p {
   text-align: left !important;
   max-width: 800px;    /* Prevents lines from getting too long on desktop */
   margin-left: auto;   /* Centers the text block itself */

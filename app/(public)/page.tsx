@@ -10,7 +10,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/lib/i18n";
 import { AnimatedSection } from "@/components/ui/animated-section";
-import { FloatingActionButton } from "@/components/ui/floating-action-button";
 import { formatDate } from "@/lib/utils";
 
 const ideologyIcons = [Shield, Flag, Scale, Building, Landmark];
@@ -292,8 +291,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Floating Action Button */}
-      <FloatingActionButton />
     </div>
   );
 }

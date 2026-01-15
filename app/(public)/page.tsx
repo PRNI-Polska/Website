@@ -80,11 +80,7 @@ export default function HomePage() {
             {/* Party Name */}
             <div className="mb-6 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
               <h2 className="text-lg md:text-xl text-primary font-semibold tracking-widest uppercase mb-2">
-                {locale === "pl" 
-                  ? "Polski Ruch Narodowo-Integralistyczny" 
-                  : locale === "de"
-                  ? "Polnische National-Integralistische Bewegung"
-                  : "Polish National-Integralist Movement"}
+                {t("party.name.full")}
               </h2>
             </div>
             

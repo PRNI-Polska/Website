@@ -637,9 +637,9 @@ h1, h2, h3, h4, h5, h6 {
   text-align: center !important;
 }
 
-/* Improve Typography (Size & Contrast) */
+/* Improve Typography (Size & Contrast) - DESKTOP */
 p, li, .text-muted-foreground {
-  font-size: 23px !important;      /* Larger, legible size */
+  font-size: 17px !important;      /* Good size for desktop */
   line-height: 1.75 !important;    /* More breathing room between lines */
   color: #0d0d0d !important;       /* High contrast (almost black) text */
 }
@@ -648,7 +648,7 @@ p, li, .text-muted-foreground {
    END FIXES
    ========================================= */
 
-/* Larger base font on mobile for better readability */
+/* MOBILE SPECIFIC - larger text for phone screens */
 @media (max-width: 768px) {
   html {
     font-size: 18px;
@@ -656,26 +656,34 @@ p, li, .text-muted-foreground {
   
   /* Larger hero text on mobile for impact */
   .text-display-lg {
-    font-size: 2.5rem !important;
+    font-size: 2.25rem !important;
     line-height: 1.2 !important;
   }
   
   .text-display-xl {
-    font-size: 3rem !important;
+    font-size: 2.5rem !important;
     line-height: 1.15 !important;
   }
   
-  /* Even larger text on mobile */
+  /* Larger body text on mobile - easier to read on small screens */
   p, li, .text-muted-foreground {
-    font-size: 23px !important;
+    font-size: 19px !important;
+    line-height: 1.8 !important;
   }
   
   /* More breathing room for headings on mobile */
   h1 {
+    font-size: 1.75rem !important;
     line-height: 1.25;
   }
   
-  h2, h3 {
+  h2 {
+    font-size: 1.5rem !important;
+    line-height: 1.35;
+  }
+  
+  h3 {
+    font-size: 1.25rem !important;
     line-height: 1.35;
   }
 }

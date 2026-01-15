@@ -44,7 +44,7 @@ export function Header() {
             </span>
             <span className="text-xs text-muted-foreground leading-tight">
               {locale === "pl" 
-                ? "Polski Narodowy Ruch Integralistyczny" 
+                ? "Polski Ruch Narodowo-Integralistyczny" 
                 : "Polish National-Integralist Movement"}
             </span>
           </div>

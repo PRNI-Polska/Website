@@ -28,8 +28,8 @@ export const translations: Translations = {
     pl: "Polish National-Integralist Movement" 
   },
   "party.name.full.pl": { 
-    en: "Polski Narodowy Ruch Integralistyczny", 
-    pl: "Polski Narodowy Ruch Integralistyczny" 
+    en: "Polski Ruch Narodowo-Integralistyczny", 
+    pl: "Polski Ruch Narodowo-Integralistyczny" 
   },
   
   // Hero section
@@ -140,12 +140,53 @@ export const translations: Translations = {
   "contact.form.success": { en: "Message Sent!", pl: "Wiadomość Wysłana!" },
   
   // About
-  "about.title": { en: "About Our Movement", pl: "O Naszym Ruchu" },
+  "about.title": { 
+    en: "About National Integralism", 
+    pl: "O Narodowym Integralizmie" 
+  },
+  "about.subtitle": { 
+    en: "We are building a strong and sovereign future founded on responsibility, order, and loyalty to the national community.", 
+    pl: "Budujemy silną i suwerenną przyszłość opartą na odpowiedzialności, porządku oraz lojalności wobec wspólnoty narodowej." 
+  },
   "about.mission.title": { en: "Our Mission", pl: "Nasza Misja" },
+  "about.mission.text": { 
+    en: "Our mission is to rebuild the state on conservative principles, a stable social order, and decisive, radical solutions to problems that have been ignored for years.\nWe act in the interest of the Polish nation by strengthening its identity, security, and capacity for self-determination. The state must serve the nation, protect its interests, and ensure cultural and institutional continuity.", 
+    pl: "Naszą misją jest odbudowa państwa opartego na konserwatywnych zasadach, stabilnym porządku społecznym oraz zdecydowanych, radykalnych rozwiązaniach wobec problemów, które przez lata były ignorowane.\nDziałamy w interesie narodu polskiego, wzmacniając jego tożsamość, bezpieczeństwo oraz zdolność do samostanowienia. Państwo powinno służyć narodowi, chronić jego interesy i zapewniać ciągłość kulturową oraz instytucjonalną." 
+  },
   "about.vision.title": { en: "Our Vision", pl: "Nasza Wizja" },
-  "about.values.title": { en: "Our Core Values", pl: "Nasze Wartości" },
+  "about.vision.text": { 
+    en: "We see Poland as a state founded on morality, responsibility, and clearly defined social norms.\nOur vision is a country where the security of citizens is an absolute priority and public authority acts decisively and effectively.\nWe strive for a state free from excessive influence of international corporations that subordinate the economy and politics to external interests at the expense of national sovereignty.", 
+    pl: "Widzimy Polskę jako państwo oparte na moralności, odpowiedzialności i jasno określonych normach społecznych.\nNaszą wizją jest kraj, w którym bezpieczeństwo obywateli stanowi absolutny priorytet, a władza publiczna działa stanowczo i skutecznie.\nDążymy do państwa wolnego od nadmiernego wpływu międzynarodowych korporacji, które podporządkowują gospodarkę i politykę interesom zewnętrznym kosztem suwerenności narodowej." 
+  },
+  "about.values.title": { en: "Our Values", pl: "Nasze Wartości" },
+  
+  // Values
+  "about.value.nationalism.title": { en: "Nationalism", pl: "Nacjonalizm" },
+  "about.value.nationalism.text": { 
+    en: "The primacy of the national interest in all actions of the state. Protection of the identity, culture, language, and historical continuity of the Polish nation.", 
+    pl: "Prymat interesu narodowego we wszystkich działaniach państwa. Ochrona tożsamości, kultury, języka oraz ciągłości historycznej narodu polskiego." 
+  },
+  "about.value.integralism.title": { en: "Integralism", pl: "Integralizm" },
+  "about.value.integralism.text": { 
+    en: "The unity of nation and state, cohesion between the national community and public institutions, and the inseparability of social and state interests. Integralism means a strong, unified state free from internal divisions, particularism, and systemic chaos.", 
+    pl: "Jedność narodu i państwa, spójność wspólnoty narodowej z instytucjami publicznymi oraz nierozerwalność interesu społecznego i państwowego. Integralizm oznacza silne, jednolite państwo wolne od wewnętrznych podziałów, partykularyzmu i chaosu ustrojowego." 
+  },
+  "about.value.sovereignty.title": { en: "Sovereignty", pl: "Suwerenność" },
+  "about.value.sovereignty.text": { 
+    en: "Full political, economic, and legal independence enabling independent decision-making in accordance with the national interest.", 
+    pl: "Pełna niezależność polityczna, gospodarcza i prawna, umożliwiająca samodzielne podejmowanie decyzji zgodnych z interesem narodu." 
+  },
+  "about.value.order.title": { en: "Order and Authority", pl: "Porządek i Autorytet" },
+  "about.value.order.text": { 
+    en: "Effective law, stable institutions, and a clear hierarchy of responsibility ensuring security and social order.", 
+    pl: "Skuteczne prawo, stabilne instytucje oraz jasna hierarchia odpowiedzialności, gwarantujące bezpieczeństwo i ład społeczny." 
+  },
+  
   "about.leadership": { en: "Our Leadership", pl: "Nasze Kierownictwo" },
+  "about.leadership.subtitle": { en: "Meet the dedicated individuals leading our movement forward.", pl: "Poznaj oddanych liderów naszego ruchu." },
   "about.team": { en: "Our Team", pl: "Nasz Zespół" },
+  "about.team.subtitle": { en: "The dedicated people working to make our vision a reality.", pl: "Oddani ludzie pracujący nad realizacją naszej wizji." },
+  "about.team.coming": { en: "Team information coming soon.", pl: "Informacje o zespole wkrótce." },
 };
 
 interface I18nContextType {

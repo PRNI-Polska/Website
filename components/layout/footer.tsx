@@ -40,7 +40,7 @@ export function Footer() {
                 </span>
                 <span className="text-xs text-muted-foreground">
                   {locale === "pl" 
-                    ? "Polski Narodowy Ruch Integralistyczny" 
+                    ? "Polski Ruch Narodowo-Integralistyczny" 
                     : "Polish National-Integralist Movement"}
                 </span>
               </div>
@@ -92,7 +92,7 @@ export function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">
             &copy; {currentYear} PRNI - {locale === "pl" 
-              ? "Polski Narodowy Ruch Integralistyczny" 
+              ? "Polski Ruch Narodowo-Integralistyczny" 
               : "Polish National-Integralist Movement"}. {t("footer.rights")}
           </p>
         </div>

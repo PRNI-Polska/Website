@@ -46,11 +46,11 @@
     
     /* Background & Foreground */
     --background: 45 20% 97%;
-    --foreground: 220 30% 15%;
+    --foreground: 220 40% 10%;
     
     /* Card */
     --card: 0 0% 100%;
-    --card-foreground: 220 30% 15%;
+    --card-foreground: 220 40% 10%;
     
     /* Popover */
     --popover: 0 0% 100%;
@@ -58,7 +58,7 @@
     
     /* Muted */
     --muted: 45 15% 92%;
-    --muted-foreground: 220 20% 25%;
+    --muted-foreground: 220 25% 15%;
     
     /* Accent */
     --accent: 45 60% 90%;
@@ -615,13 +615,22 @@
 
 /* Desktop base font size */
 html {
-  font-size: 16px;
+  font-size: 17px;
+}
+
+/* Body text - larger and darker */
+body {
+  font-size: 1.125rem;
+}
+
+p, li, span {
+  font-size: 1.125rem;
 }
 
 /* Larger base font on mobile for better readability */
 @media (max-width: 768px) {
   html {
-    font-size: 17px;
+    font-size: 18px;
   }
   
   /* Larger hero text on mobile for impact */
@@ -637,12 +646,17 @@ html {
   
   /* Better text sizing on mobile */
   body {
-    font-size: 1.0625rem;
+    font-size: 1.1875rem;
   }
   
-  p {
-    font-size: 1.0625rem;
+  p, li {
+    font-size: 1.1875rem;
     line-height: 1.85;
+  }
+  
+  /* Card content larger on mobile */
+  .text-muted-foreground {
+    font-size: 1.125rem;
   }
   
   /* More breathing room for headings on mobile */

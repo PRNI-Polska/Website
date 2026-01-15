@@ -78,13 +78,13 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
       </section>
 
       {/* Core Values */}
-      <section className="max-w-4xl mx-auto mb-16">
+      <section className="max-w-7xl mx-auto mb-16 px-4">
         <AnimatedSection className="text-center mb-8">
           <h2 className="text-2xl md:text-3xl font-heading font-semibold">
             {t("about.values.title")}
           </h2>
         </AnimatedSection>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {values.map((key, index) => (
             <AnimatedSection key={key} delay={index * 100} animation="scale">
               <Card className="text-center h-full hover-lift">

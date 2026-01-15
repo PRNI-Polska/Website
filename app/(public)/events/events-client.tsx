@@ -377,7 +377,7 @@ function EventCard({
 }) {
   return (
     <Card
-      className={cn("cursor-pointer transition-colors hover:border-primary", isPast && "opacity-75")}
+      className={cn("cursor-pointer transition-all hover:border-primary hover-lift", isPast && "opacity-75")}
       onClick={onClick}
     >
       <CardContent className="p-6">

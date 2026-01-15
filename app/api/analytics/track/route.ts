@@ -31,7 +31,6 @@ export async function POST(request: NextRequest) {
         browser,
         os,
         referrer: referrer || null,
-        userAgent,
         sessionId: sessionId || null,
       },
     });

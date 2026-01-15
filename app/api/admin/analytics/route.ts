@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const period = searchParams.get("period") || "7d"; // 24h, 7d, 30d, all
+    const filterCountry = searchParams.get("country"); // Optional country filter
 
     // Calculate date range
     let startDate: Date;
@@ -30,7 +31,13 @@ export async function GET(request: NextRequest) {
         startDate = new Date(0); // All time
     }
 
-    const whereClause = period === "all" ? {} : { createdAt: { gte: startDate } };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const whereClause: any = period === "all" ? {} : { createdAt: { gte: startDate } };
+    
+    // Apply country filter if provided
+    if (filterCountry) {
+      whereClause.country = filterCountry;
+    }
 
     // Get total page views
     const totalViews = await prisma.pageView.count({
@@ -46,12 +53,31 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Get views by country
+    // Get views by country (always get all countries for the selector)
+    const baseWhereClause = period === "all" ? {} : { createdAt: { gte: startDate } };
     const viewsByCountry = await prisma.pageView.groupBy({
       by: ["country"],
-      where: whereClause,
+      where: baseWhereClause,
       _count: { country: true },
       orderBy: { _count: { country: "desc" } },
+      take: 20,
+    });
+
+    // Get views by city (filtered by country if selected)
+    const viewsByCity = await prisma.pageView.groupBy({
+      by: ["city", "country"],
+      where: whereClause,
+      _count: { city: true },
+      orderBy: { _count: { city: "desc" } },
+      take: 15,
+    });
+
+    // Get views by region (filtered by country if selected)
+    const viewsByRegion = await prisma.pageView.groupBy({
+      by: ["region"],
+      where: whereClause,
+      _count: { region: true },
+      orderBy: { _count: { region: "desc" } },
       take: 10,
     });
 
@@ -89,7 +115,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Get views over time (daily for last 30 days, hourly for 24h)
-    const viewsOverTime = await getViewsOverTime(period, startDate);
+    const viewsOverTime = await getViewsOverTime(period, startDate, filterCountry);
 
     // Get recent views
     const recentViews = await prisma.pageView.findMany({
@@ -101,6 +127,7 @@ export async function GET(request: NextRequest) {
         path: true,
         country: true,
         city: true,
+        region: true,
         device: true,
         browser: true,
         createdAt: true,
@@ -113,6 +140,15 @@ export async function GET(request: NextRequest) {
       viewsByCountry: viewsByCountry.map((v) => ({
         country: v.country || "Unknown",
         count: v._count.country,
+      })),
+      viewsByCity: viewsByCity.map((v) => ({
+        city: v.city || "Unknown",
+        country: v.country || "Unknown",
+        count: v._count.city,
+      })),
+      viewsByRegion: viewsByRegion.map((v) => ({
+        region: v.region || "Unknown",
+        count: v._count.region,
       })),
       viewsByPage: viewsByPage.map((v) => ({
         path: v.path,
@@ -142,9 +178,15 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function getViewsOverTime(period: string, startDate: Date) {
+async function getViewsOverTime(period: string, startDate: Date, filterCountry?: string | null) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const whereClause: any = period === "all" ? {} : { createdAt: { gte: startDate } };
+  if (filterCountry) {
+    whereClause.country = filterCountry;
+  }
+
   const views = await prisma.pageView.findMany({
-    where: period === "all" ? {} : { createdAt: { gte: startDate } },
+    where: whereClause,
     select: { createdAt: true },
     orderBy: { createdAt: "asc" },
   });

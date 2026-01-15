@@ -4,7 +4,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { ArrowRight, Calendar, FileText, Users, Shield, Flag, Scale, Building, Landmark, TrendingUp, Megaphone } from "lucide-react";
+import { ArrowRight, Users, Shield, Flag, Scale, Building, Landmark, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,47 +23,6 @@ interface Announcement {
   excerpt: string;
   category: string;
   publishedAt: string;
-}
-
-// Animated counter component
-function AnimatedCounter({ end, duration = 2000, suffix = "" }: { end: number; duration?: number; suffix?: string }) {
-  const [count, setCount] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
-
-  useEffect(() => {
-    if (hasAnimated) return;
-    
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setHasAnimated(true);
-          let start = 0;
-          const increment = end / (duration / 16);
-          const timer = setInterval(() => {
-            start += increment;
-            if (start >= end) {
-              setCount(end);
-              clearInterval(timer);
-            } else {
-              setCount(Math.floor(start));
-            }
-          }, 16);
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    const element = document.getElementById("stats-section");
-    if (element) observer.observe(element);
-
-    return () => observer.disconnect();
-  }, [end, duration, hasAnimated]);
-
-  return (
-    <span className="stat-number">
-      {count.toLocaleString()}{suffix}
-    </span>
-  );
 }
 
 export default function HomePage() {
@@ -89,24 +48,6 @@ export default function HomePage() {
     { titleKey: "ideology.s3.title", textKey: "ideology.s3.text" },
     { titleKey: "ideology.s4.title", textKey: "ideology.s4.text" },
     { titleKey: "ideology.s5.title", textKey: "ideology.s5.text" },
-  ];
-
-  const stats = [
-    { 
-      value: 500, 
-      suffix: "+",
-      label: { pl: "Sympatyków", en: "Supporters", de: "Unterstützer" }
-    },
-    { 
-      value: 15, 
-      suffix: "",
-      label: { pl: "Wydarzeń", en: "Events", de: "Veranstaltungen" }
-    },
-    { 
-      value: 5, 
-      suffix: "",
-      label: { pl: "Wartości", en: "Core Values", de: "Kernwerte" }
-    },
   ];
 
   const categoryLabels: Record<string, { pl: string; en: string; de: string }> = {
@@ -189,23 +130,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats / Social Proof Section */}
-      <section id="stats-section" className="py-12 bg-primary/5 border-y border-primary/10">
-        <div className="container-custom">
-          <div className="grid grid-cols-3 gap-8 max-w-3xl mx-auto text-center">
-            {stats.map((stat, index) => (
-              <AnimatedSection key={index} delay={index * 100} animation="scale">
-                <div className="space-y-1">
-                  <AnimatedCounter end={stat.value} suffix={stat.suffix} />
-                  <p className="text-sm text-muted-foreground font-medium">
-                    {stat.label[locale]}
-                  </p>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Mission Statement */}
       <section className="py-16 bg-muted/30">

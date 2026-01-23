@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
-import { GlobalBackdrop, GlobeDecoration } from "@/components/global-backdrop";
+import { GlobalBackdrop } from "@/components/global-backdrop";
 import { useRevealOnScroll, useStaggeredReveal } from "@/hooks/use-reveal-on-scroll";
 import { InternationalJoinForm } from "./international-join-form";
 import { cn } from "@/lib/utils";
@@ -104,15 +104,9 @@ export default function InternationalWingPage() {
           </Link>
 
           <div className="max-w-4xl">
-            {/* Globe decoration + Title */}
-            <div className="flex items-start gap-6 mb-6">
-              <GlobeDecoration className="hidden md:block flex-shrink-0 -mt-2" />
-              <div>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight text-foreground">
-                  {t("wings.international.title")}
-                </h1>
-              </div>
-            </div>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight text-foreground mb-6">
+              {t("wings.international.title")}
+            </h1>
             
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-10 max-w-2xl">
               {t("wings.international.hero.subtitle")}

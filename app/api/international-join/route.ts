@@ -1,9 +1,6 @@
 // file: app/api/international-join/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
 import { checkRateLimit } from "@/lib/utils";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 interface InternationalJoinData {
   name: string;
@@ -28,7 +25,7 @@ async function sendNotificationEmail(data: InternationalJoinData) {
   
   // If no API key configured, just log
   if (!process.env.RESEND_API_KEY) {
-    console.log("=== International Wing Registration ===");
+    console.log("=== International Wing Registration (no email configured) ===");
     console.log("Name:", data.name);
     console.log("Email:", data.email);
     console.log("Country:", data.country);
@@ -36,16 +33,20 @@ async function sendNotificationEmail(data: InternationalJoinData) {
     console.log("Interest:", interestLabel);
     console.log("Message:", data.message || "No message");
     console.log("Timestamp:", new Date().toISOString());
-    console.log("========================================");
-    return { success: true };
+    console.log("==============================================================");
+    return { success: true, emailSent: false };
   }
 
-  // Send email to admin via Resend
-  const { error } = await resend.emails.send({
-    from: "PRNI Website <onboarding@resend.dev>",
-    to: process.env.CONTACT_EMAIL || "prni.official@gmail.com",
-    subject: `[PRNI International Wing] New Affiliate Registration: ${data.name} (${data.email})`,
-    text: `New International Wing Registration
+  try {
+    // Dynamic import to avoid issues if resend isn't installed
+    const { Resend } = await import("resend");
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    const { error } = await resend.emails.send({
+      from: "PRNI Website <onboarding@resend.dev>",
+      to: process.env.CONTACT_EMAIL || "prni.official@gmail.com",
+      subject: `[PRNI International Wing] New Registration: ${data.name} (${data.email})`,
+      text: `New International Wing Registration
 
 Name: ${data.name}
 Email: ${data.email}
@@ -59,50 +60,67 @@ ${data.message || "No message provided"}
 ---
 Submitted: ${new Date().toISOString()}
 Note: This person has acknowledged that participation does not constitute party membership.`,
-    html: `
-      <h2>New International Wing Registration</h2>
-      <table style="border-collapse: collapse; width: 100%; max-width: 600px;">
-        <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold; width: 140px;">Name:</td>
-          <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.name}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Email:</td>
-          <td style="padding: 8px; border-bottom: 1px solid #eee;"><a href="mailto:${data.email}">${data.email}</a></td>
-        </tr>
-        <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Country:</td>
-          <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.country}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Languages:</td>
-          <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.languages || "<em>Not specified</em>"}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Interest Area:</td>
-          <td style="padding: 8px; border-bottom: 1px solid #eee;">${interestLabel}</td>
-        </tr>
-      </table>
-      
-      ${data.message ? `
-        <h3 style="margin-top: 20px;">Message:</h3>
-        <p style="background: #f5f5f5; padding: 15px; border-radius: 5px;">${data.message.replace(/\n/g, "<br>")}</p>
-      ` : ""}
-      
-      <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
-      <p style="color: #666; font-size: 12px;">
-        Submitted: ${new Date().toISOString()}<br>
-        <em>This person has acknowledged that participation does not constitute party membership.</em>
-      </p>
-    `,
-  });
+      html: `
+        <h2>New International Wing Registration</h2>
+        <table style="border-collapse: collapse; width: 100%; max-width: 600px;">
+          <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold; width: 140px;">Name:</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.name}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Email:</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;"><a href="mailto:${data.email}">${data.email}</a></td>
+          </tr>
+          <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Country:</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.country}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Languages:</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.languages || "<em>Not specified</em>"}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Interest Area:</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${interestLabel}</td>
+          </tr>
+        </table>
+        
+        ${data.message ? `
+          <h3 style="margin-top: 20px;">Message:</h3>
+          <p style="background: #f5f5f5; padding: 15px; border-radius: 5px;">${data.message.replace(/\n/g, "<br>")}</p>
+        ` : ""}
+        
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+        <p style="color: #666; font-size: 12px;">
+          Submitted: ${new Date().toISOString()}<br>
+          <em>This person has acknowledged that participation does not constitute party membership.</em>
+        </p>
+      `,
+    });
 
-  if (error) {
-    console.error("Failed to send notification email:", error);
-    throw new Error("Failed to send notification email");
+    if (error) {
+      console.error("Resend email error:", error);
+      // Don't throw - still log the registration
+      console.log("=== International Wing Registration (email failed) ===");
+      console.log("Name:", data.name);
+      console.log("Email:", data.email);
+      console.log("Country:", data.country);
+      console.log("=======================================================");
+      return { success: true, emailSent: false };
+    }
+
+    return { success: true, emailSent: true };
+  } catch (emailError) {
+    console.error("Email sending failed:", emailError);
+    // Log registration even if email fails
+    console.log("=== International Wing Registration (email exception) ===");
+    console.log("Name:", data.name);
+    console.log("Email:", data.email);
+    console.log("Country:", data.country);
+    console.log("Interest:", interestLabel);
+    console.log("=========================================================");
+    return { success: true, emailSent: false };
   }
-
-  return { success: true };
 }
 
 export async function POST(request: NextRequest) {
@@ -112,8 +130,8 @@ export async function POST(request: NextRequest) {
                request.headers.get("x-real-ip") || 
                "unknown";
 
-    // Rate limiting: 3 requests per 30 minutes per IP
-    const rateLimit = checkRateLimit(`intl-join:${ip}`, 3, 30 * 60 * 1000);
+    // Rate limiting: 5 requests per 30 minutes per IP
+    const rateLimit = checkRateLimit(`intl-join:${ip}`, 5, 30 * 60 * 1000);
     
     if (!rateLimit.allowed) {
       return NextResponse.json(
@@ -175,8 +193,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send notification email
-    await sendNotificationEmail(data);
+    // Send notification email (won't fail even if email fails)
+    const result = await sendNotificationEmail(data);
+    
+    console.log("Registration processed:", {
+      name: data.name,
+      email: data.email,
+      country: data.country,
+      emailSent: result.emailSent,
+    });
 
     return NextResponse.json({
       success: true,

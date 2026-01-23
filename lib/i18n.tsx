@@ -301,6 +301,16 @@ export const translations: Translations = {
   "wings.international.form.required": { en: "This field is required", pl: "To pole jest wymagane", de: "Dieses Feld ist erforderlich" },
   "wings.international.form.invalidEmail": { en: "Please enter a valid email address", pl: "Wprowadź prawidłowy adres e-mail", de: "Bitte geben Sie eine gültige E-Mail-Adresse ein" },
   "wings.international.form.consentRequired": { en: "You must accept the terms to continue", pl: "Musisz zaakceptować warunki, aby kontynuować", de: "Sie müssen die Bedingungen akzeptieren, um fortzufahren" },
+  "wings.international.form.privacyHint": { 
+    en: "Your data is handled securely and will only be used to process your registration.", 
+    pl: "Twoje dane są bezpiecznie przetwarzane i będą wykorzystywane wyłącznie do obsługi Twojej rejestracji.", 
+    de: "Ihre Daten werden sicher verarbeitet und nur zur Bearbeitung Ihrer Registrierung verwendet." 
+  },
+  "wings.international.boundaries.subtitle": { 
+    en: "Understanding the scope of participation", 
+    pl: "Zrozumienie zakresu uczestnictwa", 
+    de: "Den Umfang der Teilnahme verstehen" 
+  },
 
   // Announcements
   "announcements.title": { en: "Announcements", pl: "Komunikaty", de: "Mitteilungen" },

@@ -4,173 +4,79 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useI18n, LanguageSwitcher } from "@/lib/i18n";
 
-const navigationItems = [
+const navigationKeys = [
+  { key: "nav.home", href: "/" },
+  { key: "nav.wings", href: "/wings" },
+  { key: "nav.announcements", href: "/announcements" },
+  { key: "nav.events", href: "/events" },
   { key: "nav.manifesto", href: "/manifesto" },
   { key: "nav.about", href: "/about" },
-  { 
-    key: "nav.wings", 
-    href: "#",
-    children: [
-      { key: "wings.main.title", href: "/wings/main" },
-      { key: "wings.international.title", href: "/wings/international" },
-      { key: "wings.female.title", href: "/wings/female" },
-    ]
-  },
-  { key: "nav.announcements", href: "/announcements" },
   { key: "nav.contact", href: "/contact" },
 ];
 
 export function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [wingsDropdownOpen, setWingsDropdownOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const { t, locale } = useI18n();
 
-  const isHomepage = pathname === "/";
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    setMobileMenuOpen(false);
-    setWingsDropdownOpen(false);
-  }, [pathname]);
-
-  const isActive = (href: string) => {
-    if (href === "#") return false;
-    return pathname === href || (href !== "/" && pathname.startsWith(href));
-  };
-
-  // Dynamic header styles - always has hairline border
-  const headerBg = isHomepage && !isScrolled && !mobileMenuOpen
-    ? "bg-transparent"
-    : "bg-[#faf9f7]/95 backdrop-blur-sm";
-
   return (
-    <header 
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 border-b",
-        headerBg,
-        isHomepage && !isScrolled && !mobileMenuOpen 
-          ? "border-foreground/[0.06]" 
-          : "border-foreground/[0.08]"
-      )}
-      style={{ 
-        transition: 'background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), backdrop-filter var(--dur-2) var(--ease-out)' 
-      }}
-    >
-      <nav className="container-custom flex h-14 md:h-16 items-center justify-between" aria-label="Main navigation">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="relative h-8 w-8 md:h-9 md:w-9 flex-shrink-0">
+    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur-sm">
+      <nav className="container-custom flex h-20 items-center justify-between" aria-label="Main navigation">
+        {/* Logo and Party Name */}
+        <Link href="/" className="flex items-center gap-3">
+          <div className="relative h-14 w-14 flex-shrink-0">
             <Image
               src="/logo.png"
-              alt="PRNI"
+              alt="PRNI Logo"
               fill
               className="object-contain"
-              style={{ transition: 'transform var(--dur-2) var(--ease-out)' }}
               priority
             />
           </div>
-          <span className={cn(
-            "hidden sm:block font-heading text-sm md:text-base font-semibold tracking-tight",
-            isHomepage && !isScrolled ? "text-foreground" : "text-foreground"
-          )}>
-            PRNI
-          </span>
+          <div className="hidden sm:flex flex-col">
+            <span className="font-heading text-lg font-bold tracking-tight text-primary">
+              PRNI
+            </span>
+            <span className="text-xs text-muted-foreground leading-tight">
+              {locale === "pl" 
+                ? "Polski Ruch Narodowo-Integralistyczny" 
+                : "Polish National-Integralist Movement"}
+            </span>
+          </div>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden lg:flex lg:items-center lg:gap-x-1">
-          {navigationItems.map((item) => {
-            if (item.children) {
-              return (
-                <div key={item.key} className="relative">
-                  <button
-                    onClick={() => setWingsDropdownOpen(!wingsDropdownOpen)}
-                    onBlur={() => setTimeout(() => setWingsDropdownOpen(false), 150)}
-                    className={cn(
-                      "relative flex items-center gap-1 px-3 py-1.5 text-sm",
-                      "transition-colors",
-                      "after:absolute after:bottom-0 after:left-3 after:right-3 after:h-px after:bg-foreground/30",
-                      "after:scale-x-0 after:transition-transform hover:after:scale-x-100",
-                      pathname.startsWith("/wings") 
-                        ? "text-foreground after:scale-x-100" 
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                    style={{ transitionDuration: 'var(--dur-1)', transitionTimingFunction: 'var(--ease-out)' }}
-                    aria-expanded={wingsDropdownOpen}
-                    aria-haspopup="true"
-                  >
-                    {t(item.key)}
-                    <ChevronDown 
-                      className={cn("w-3.5 h-3.5 transition-transform", wingsDropdownOpen && "rotate-180")}
-                      style={{ transitionDuration: 'var(--dur-2)', transitionTimingFunction: 'var(--ease-out)' }}
-                    />
-                  </button>
-                  
-                  {wingsDropdownOpen && (
-                    <div 
-                      className="absolute top-full left-0 mt-1 w-48 bg-card rounded border border-border py-1 shadow-elevated animate-fade-in"
-                    >
-                      {item.children.map((child) => (
-                        <Link
-                          key={child.key}
-                          href={child.href}
-                          className={cn(
-                            "block px-3 py-2 text-sm transition-colors",
-                            isActive(child.href) ? "text-foreground bg-muted" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                          )}
-                          style={{ transitionDuration: 'var(--dur-1)', transitionTimingFunction: 'var(--ease-out)' }}
-                        >
-                          {t(child.key)}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            }
-
+        <div className="hidden lg:flex lg:items-center lg:gap-x-6">
+          {navigationKeys.map((item) => {
+            const isActive = pathname === item.href || 
+              (item.href !== "/" && pathname.startsWith(item.href));
+            
             return (
               <Link
                 key={item.key}
                 href={item.href}
                 className={cn(
-                  "relative px-3 py-1.5 text-sm transition-colors",
-                  "after:absolute after:bottom-0 after:left-3 after:right-3 after:h-px after:bg-foreground/30",
-                  "after:scale-x-0 after:transition-transform hover:after:scale-x-100",
-                  isActive(item.href) 
-                    ? "text-foreground after:scale-x-100" 
-                    : "text-muted-foreground hover:text-foreground"
+                  "text-sm font-medium transition-colors hover:text-primary",
+                  isActive ? "text-primary" : "text-muted-foreground"
                 )}
-                style={{ transitionDuration: 'var(--dur-1)', transitionTimingFunction: 'var(--ease-out)' }}
               >
                 {t(item.key)}
               </Link>
             );
           })}
-          
-          <div className="ml-3 pl-3 border-l border-border">
+          <div className="ml-4 pl-4 border-l">
             <LanguageSwitcher />
           </div>
         </div>
 
-        {/* Mobile */}
-        <div className="flex items-center gap-3 lg:hidden">
+        {/* Mobile: Language + Menu Button */}
+        <div className="flex items-center gap-4 lg:hidden">
           <LanguageSwitcher />
           <Button
             variant="ghost"
@@ -179,68 +85,48 @@ export function Header() {
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-menu"
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-            className="h-8 w-8"
           >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {mobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
           </Button>
         </div>
       </nav>
 
       {/* Mobile Navigation */}
-      <div 
-        id="mobile-menu" 
-        className={cn(
-          "lg:hidden overflow-hidden bg-background border-t border-border",
-          mobileMenuOpen ? "block" : "hidden"
-        )}
-        role="navigation"
-        aria-label="Mobile navigation"
-      >
-        <div className="container-custom py-3 space-y-1">
-          {navigationItems.map((item) => {
-            if (item.children) {
+      {mobileMenuOpen && (
+        <div 
+          id="mobile-menu" 
+          className="lg:hidden border-t"
+          role="navigation"
+          aria-label="Mobile navigation"
+        >
+          <div className="container-custom py-4 space-y-2">
+            {navigationKeys.map((item) => {
+              const isActive = pathname === item.href || 
+                (item.href !== "/" && pathname.startsWith(item.href));
+              
               return (
-                <div key={item.key} className="space-y-1">
-                  <span className="block px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                    {t(item.key)}
-                  </span>
-                  {item.children.map((child) => (
-                    <Link
-                      key={child.key}
-                      href={child.href}
-                      className={cn(
-                        "block px-3 py-2 pl-6 rounded text-sm transition-colors",
-                        isActive(child.href) 
-                          ? "bg-muted text-foreground" 
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                      )}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {t(child.key)}
-                    </Link>
-                  ))}
-                </div>
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  className={cn(
+                    "block px-3 py-2 rounded-md text-base font-medium transition-colors",
+                    isActive 
+                      ? "bg-primary text-primary-foreground" 
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  )}
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {t(item.key)}
+                </Link>
               );
-            }
-
-            return (
-              <Link
-                key={item.key}
-                href={item.href}
-                className={cn(
-                  "block px-3 py-2 rounded text-sm transition-colors",
-                  isActive(item.href) 
-                    ? "bg-muted text-foreground" 
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                )}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {t(item.key)}
-              </Link>
-            );
-          })}
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </header>
   );
 }

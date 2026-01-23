@@ -54,16 +54,19 @@ export function Header() {
     return pathname === href || (href !== "/" && pathname.startsWith(href));
   };
 
-  // Dynamic header styles based on scroll and location
+  // Dynamic header styles - always has hairline border
   const headerBg = isHomepage && !isScrolled && !mobileMenuOpen
-    ? "bg-transparent border-b border-transparent"
-    : "bg-background/95 backdrop-blur-sm border-b border-border/50";
+    ? "bg-transparent"
+    : "bg-[#faf9f7]/95 backdrop-blur-sm";
 
   return (
     <header 
       className={cn(
-        "fixed top-0 left-0 right-0 z-50",
-        headerBg
+        "fixed top-0 left-0 right-0 z-50 border-b",
+        headerBg,
+        isHomepage && !isScrolled && !mobileMenuOpen 
+          ? "border-foreground/[0.06]" 
+          : "border-foreground/[0.08]"
       )}
       style={{ 
         transition: 'background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), backdrop-filter var(--dur-2) var(--ease-out)' 

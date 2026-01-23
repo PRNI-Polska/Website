@@ -130,6 +130,10 @@ export default function HomePage() {
                     "wing-panel text-left flex flex-col",
                     `panel-entrance panel-entrance-${index + 1}`,
                     isMainPanel ? "md:col-span-6 wing-panel-main" : "md:col-span-3 wing-panel-side",
+                    // Wing-specific backgrounds
+                    wing.id === "international" && "wing-panel-international",
+                    wing.id === "main" && "wing-panel-poland",
+                    wing.id === "female" && "wing-panel-female",
                     isDisabledPanel && "wing-panel-disabled",
                     isSelected && "is-selected",
                     isFading && (index === 0 ? "is-fading-left" : "is-fading-right")

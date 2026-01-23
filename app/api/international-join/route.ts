@@ -44,8 +44,7 @@ async function sendNotificationEmail(data: InternationalJoinData) {
   const { error } = await resend.emails.send({
     from: "PRNI Website <onboarding@resend.dev>",
     to: process.env.CONTACT_EMAIL || "prni.official@gmail.com",
-    replyTo: data.email,
-    subject: `[PRNI International Wing] New Affiliate Registration: ${data.name}`,
+    subject: `[PRNI International Wing] New Affiliate Registration: ${data.name} (${data.email})`,
     text: `New International Wing Registration
 
 Name: ${data.name}

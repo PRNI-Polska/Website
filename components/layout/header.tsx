@@ -56,8 +56,8 @@ export function Header() {
 
   // Dynamic header styles based on scroll and location
   const headerBg = isHomepage && !isScrolled && !mobileMenuOpen
-    ? "bg-transparent"
-    : "bg-background/95 backdrop-blur-sm border-b border-border";
+    ? "bg-transparent border-b border-transparent"
+    : "bg-background/95 backdrop-blur-sm border-b border-border/50";
 
   return (
     <header 
@@ -66,7 +66,7 @@ export function Header() {
         headerBg
       )}
       style={{ 
-        transition: 'background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out)' 
+        transition: 'background-color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), backdrop-filter var(--dur-2) var(--ease-out)' 
       }}
     >
       <nav className="container-custom flex h-14 md:h-16 items-center justify-between" aria-label="Main navigation">
@@ -100,10 +100,12 @@ export function Header() {
                     onClick={() => setWingsDropdownOpen(!wingsDropdownOpen)}
                     onBlur={() => setTimeout(() => setWingsDropdownOpen(false), 150)}
                     className={cn(
-                      "flex items-center gap-1 px-3 py-1.5 text-sm rounded",
+                      "relative flex items-center gap-1 px-3 py-1.5 text-sm",
                       "transition-colors",
+                      "after:absolute after:bottom-0 after:left-3 after:right-3 after:h-px after:bg-foreground/30",
+                      "after:scale-x-0 after:transition-transform hover:after:scale-x-100",
                       pathname.startsWith("/wings") 
-                        ? "text-foreground" 
+                        ? "text-foreground after:scale-x-100" 
                         : "text-muted-foreground hover:text-foreground"
                     )}
                     style={{ transitionDuration: 'var(--dur-1)', transitionTimingFunction: 'var(--ease-out)' }}
@@ -145,9 +147,11 @@ export function Header() {
                 key={item.key}
                 href={item.href}
                 className={cn(
-                  "px-3 py-1.5 text-sm rounded transition-colors",
+                  "relative px-3 py-1.5 text-sm transition-colors",
+                  "after:absolute after:bottom-0 after:left-3 after:right-3 after:h-px after:bg-foreground/30",
+                  "after:scale-x-0 after:transition-transform hover:after:scale-x-100",
                   isActive(item.href) 
-                    ? "text-foreground" 
+                    ? "text-foreground after:scale-x-100" 
                     : "text-muted-foreground hover:text-foreground"
                 )}
                 style={{ transitionDuration: 'var(--dur-1)', transitionTimingFunction: 'var(--ease-out)' }}

@@ -399,15 +399,15 @@
   /* Female Wing - roses background with pink overlay */
   .wing-panel-female {
     background: 
-      linear-gradient(145deg, rgba(253, 244, 247, 0.92) 0%, rgba(252, 231, 240, 0.88) 50%, rgba(251, 207, 232, 0.85) 100%),
+      linear-gradient(145deg, rgba(253, 244, 247, 0.65) 0%, rgba(252, 231, 240, 0.55) 50%, rgba(251, 207, 232, 0.45) 100%),
       url('/women_wing.png') center/cover no-repeat;
-    border-color: rgba(219, 39, 119, 0.1);
+    border-color: rgba(219, 39, 119, 0.12);
   }
   
   .wing-panel-female:hover {
-    border-color: rgba(219, 39, 119, 0.16);
+    border-color: rgba(219, 39, 119, 0.18);
     background: 
-      linear-gradient(145deg, rgba(253, 244, 247, 0.88) 0%, rgba(252, 228, 237, 0.82) 50%, rgba(249, 168, 212, 0.78) 100%),
+      linear-gradient(145deg, rgba(253, 244, 247, 0.55) 0%, rgba(252, 228, 237, 0.45) 50%, rgba(249, 168, 212, 0.35) 100%),
       url('/women_wing.png') center/cover no-repeat;
   }
   

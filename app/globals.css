@@ -462,6 +462,24 @@
     transform: translateX(2px);
   }
   
+  /* Main panel (center, larger) */
+  .wing-panel-main {
+    padding: 3rem;
+    @apply border-primary/20;
+  }
+  
+  .wing-panel-main:hover {
+    transform: translateY(-8px) scale(1.015);
+    box-shadow: 0 12px 32px -6px rgb(0 0 0 / 0.12);
+    @apply border-primary/40;
+  }
+  
+  @media (min-width: 768px) {
+    .wing-panel-main {
+      padding: 3.5rem;
+    }
+  }
+  
   /* Disabled panel (Female Wing) */
   .wing-panel-disabled {
     @apply cursor-default;

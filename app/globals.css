@@ -396,15 +396,19 @@
     background: linear-gradient(180deg, #ffffff 0%, #ffffff 40%, #fef2f2 50%, #fecaca 70%, #fca5a5 100%);
   }
   
-  /* Female Wing - soft rose/pink */
+  /* Female Wing - roses background with pink overlay */
   .wing-panel-female {
-    background: linear-gradient(145deg, #fdf4f7 0%, #fce7f0 50%, #fbcfe8 100%);
+    background: 
+      linear-gradient(145deg, rgba(253, 244, 247, 0.92) 0%, rgba(252, 231, 240, 0.88) 50%, rgba(251, 207, 232, 0.85) 100%),
+      url('/women_wing.png') center/cover no-repeat;
     border-color: rgba(219, 39, 119, 0.1);
   }
   
   .wing-panel-female:hover {
     border-color: rgba(219, 39, 119, 0.16);
-    background: linear-gradient(145deg, #fdf4f7 0%, #fce4ed 50%, #f9a8d4 100%);
+    background: 
+      linear-gradient(145deg, rgba(253, 244, 247, 0.88) 0%, rgba(252, 228, 237, 0.82) 50%, rgba(249, 168, 212, 0.78) 100%),
+      url('/women_wing.png') center/cover no-repeat;
   }
   
   /* Panel title */

@@ -5,26 +5,30 @@
 
 /*
  * ============================================================================
- * THEME TOKENS - Designer-Friendly CSS Variables
- * ============================================================================
- * 
- * To customize the site's look and feel, modify these CSS variables.
- * All colors use HSL format: "hue saturation lightness" (without commas)
- * 
- * Two themes are provided:
- * 1. "classic" (default) - Traditional, trustworthy political aesthetic
- * 2. "modern" - Bold, contemporary design
- * 
- * To switch themes, change the data-theme attribute on <html> in layout.tsx
- * or set NEXT_PUBLIC_THEME environment variable.
+ * MOTION SYSTEM - Premium Smooth Tokens (Non-negotiable)
  * ============================================================================
  */
+:root {
+  /* Durations */
+  --dur-1: 220ms;   /* micro hover */
+  --dur-2: 320ms;   /* hover/press */
+  --dur-3: 700ms;   /* page/panel transitions */
+  --dur-4: 1000ms;  /* hero entrance */
+  
+  /* Easings */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+}
 
+/*
+ * ============================================================================
+ * THEME TOKENS
+ * ============================================================================
+ */
 @layer base {
-  /* ========== CLASSIC THEME (Default) - PRNI Colors ========== */
   :root,
   [data-theme="classic"] {
-    /* === TYPOGRAPHY === */
+    /* Typography */
     --font-sans: "Crimson Pro", Georgia, serif;
     --font-heading: "Playfair Display", Georgia, serif;
     --font-mono: "JetBrains Mono", monospace;
@@ -35,164 +39,76 @@
     --text-display: 2.5rem;
     --leading-display: 1.1;
     
-    /* === COLORS === */
-    /* Primary - Deep Maroon/Crimson (from logo) */
+    /* Colors - Minimal Political Palette */
     --primary: 0 45% 35%;
     --primary-foreground: 0 0% 98%;
-    
-    /* Secondary - Gold (from logo wreath) */
     --secondary: 38 70% 50%;
     --secondary-foreground: 0 0% 10%;
     
-    /* Background & Foreground */
-    --background: 45 20% 97%;
+    /* Off-white background */
+    --background: 40 20% 98%;
     --foreground: 220 40% 10%;
     
-    /* Card */
     --card: 0 0% 100%;
     --card-foreground: 220 40% 10%;
     
-    /* Popover */
     --popover: 0 0% 100%;
     --popover-foreground: 220 30% 15%;
     
-    /* Muted */
-    --muted: 45 15% 92%;
-    --muted-foreground: 220 25% 15%;
+    --muted: 40 10% 94%;
+    --muted-foreground: 220 15% 40%;
     
-    /* Accent */
-    --accent: 45 60% 90%;
-    --accent-foreground: 220 60% 20%;
+    --accent: 40 20% 96%;
+    --accent-foreground: 220 40% 15%;
     
-    /* Destructive */
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
     
-    /* Success */
     --success: 142 72% 29%;
     --success-foreground: 0 0% 98%;
     
-    /* Warning */
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 10%;
     
-    /* Border & Input */
-    --border: 45 20% 82%;
-    --input: 45 20% 82%;
-    --ring: 220 60% 25%;
+    --border: 40 15% 88%;
+    --input: 40 15% 88%;
+    --ring: 0 45% 35%;
     
-    /* === SPACING === */
+    /* Spacing */
     --section-spacing: 6rem;
     --container-padding: 1.5rem;
     
-    /* === BORDER RADIUS === */
-    --radius: 0.375rem;
+    /* Border Radius */
+    --radius: 0.25rem;
     
-    /* === SHADOWS === */
-    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --shadow-elevated: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-dropdown: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    /* Shadows - Very subtle */
+    --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+    --shadow-elevated: 0 4px 12px -2px rgb(0 0 0 / 0.08);
+    --shadow-panel-hover: 0 8px 24px -4px rgb(0 0 0 / 0.1);
   }
 
-  /* ========== MODERN THEME ========== */
-  [data-theme="modern"] {
-    /* === TYPOGRAPHY === */
-    --font-sans: "DM Sans", system-ui, sans-serif;
-    --font-heading: "Syne", "DM Sans", sans-serif;
-    --font-mono: "Fira Code", monospace;
-    
-    /* Font Sizes - Larger for modern feel */
-    --text-display-xl: 5rem;
-    --text-display-lg: 4rem;
-    --text-display: 3rem;
-    --leading-display: 1.05;
-    
-    /* === COLORS === */
-    /* Primary - Vibrant Emerald */
-    --primary: 160 84% 39%;
-    --primary-foreground: 0 0% 100%;
-    
-    /* Secondary - Electric Purple */
-    --secondary: 280 80% 55%;
-    --secondary-foreground: 0 0% 100%;
-    
-    /* Background & Foreground */
-    --background: 0 0% 100%;
-    --foreground: 240 10% 10%;
-    
-    /* Card */
-    --card: 240 5% 98%;
-    --card-foreground: 240 10% 10%;
-    
-    /* Popover */
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 10%;
-    
-    /* Muted */
-    --muted: 240 5% 93%;
-    --muted-foreground: 240 5% 45%;
-    
-    /* Accent */
-    --accent: 160 70% 92%;
-    --accent-foreground: 160 84% 25%;
-    
-    /* Destructive */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-    
-    /* Success */
-    --success: 160 84% 39%;
-    --success-foreground: 0 0% 100%;
-    
-    /* Warning */
-    --warning: 43 96% 56%;
-    --warning-foreground: 0 0% 10%;
-    
-    /* Border & Input */
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 160 84% 39%;
-    
-    /* === SPACING === */
-    --section-spacing: 8rem;
-    --container-padding: 2rem;
-    
-    /* === BORDER RADIUS - More rounded for modern === */
-    --radius: 0.75rem;
-    
-    /* === SHADOWS - Softer for modern === */
-    --shadow-card: 0 2px 8px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.06);
-    --shadow-elevated: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.04);
-    --shadow-dropdown: 0 8px 16px -4px rgb(0 0 0 / 0.08), 0 4px 6px -2px rgb(0 0 0 / 0.04);
-  }
-
-  /* ========== DARK MODE (applies to both themes) ========== */
-  .dark,
-  [data-theme="classic"].dark,
-  [data-theme="modern"].dark {
-    --background: 240 10% 8%;
+  /* Dark mode */
+  .dark {
+    --background: 220 15% 8%;
     --foreground: 0 0% 95%;
-    
-    --card: 240 10% 12%;
+    --card: 220 15% 11%;
     --card-foreground: 0 0% 95%;
-    
-    --popover: 240 10% 12%;
+    --popover: 220 15% 11%;
     --popover-foreground: 0 0% 95%;
-    
-    --muted: 240 6% 18%;
-    --muted-foreground: 240 5% 65%;
-    
-    --accent: 240 6% 20%;
+    --muted: 220 10% 16%;
+    --muted-foreground: 220 10% 60%;
+    --accent: 220 10% 18%;
     --accent-foreground: 0 0% 95%;
-    
-    --border: 240 6% 22%;
-    --input: 240 6% 22%;
+    --border: 220 10% 20%;
+    --input: 220 10% 20%;
   }
 }
 
-/* ============================================================================
+/*
+ * ============================================================================
  * BASE STYLES
- * ============================================================================ */
+ * ============================================================================
+ */
 @layer base {
   * {
     @apply border-border;
@@ -200,100 +116,98 @@
   
   html {
     scroll-behavior: smooth;
+    font-size: 16px;
   }
   
   body {
-    @apply text-foreground antialiased;
+    @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
-    /* Polish flag: white top, red bottom */
-    background: linear-gradient(to bottom, #ffffff 0%, #ffffff 50%, #dc143c 50%, #dc143c 100%);
-    background-attachment: fixed;
-    min-height: 100vh;
-    /* Better line-height for Polish text readability */
-    line-height: 1.75;
+    line-height: 1.7;
   }
   
-  /* Light overlay for text readability */
+  /* Subtle vignette effect */
   body::before {
     content: '';
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.75);
-    z-index: -1;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 0%, hsl(var(--background)) 100%);
+    opacity: 0.4;
     pointer-events: none;
+    z-index: -2;
   }
   
-  /* Paragraph text - optimal line-height for Polish */
+  /* Very subtle noise texture */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.02;
+    pointer-events: none;
+    z-index: -1;
+  }
+  
   p {
-    line-height: 1.8;
+    line-height: 1.75;
   }
   
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
     @apply font-semibold tracking-tight;
-    line-height: 1.3;
+    line-height: 1.2;
   }
   
-  /* Enhanced focus styles for accessibility - highly visible */
+  /* Focus states - match hover intent */
   :focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
-    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.4);
+    @apply outline-none;
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary));
   }
   
-  /* Button and interactive focus states */
   button:focus-visible,
   a:focus-visible,
   [role="button"]:focus-visible {
-    @apply outline-none ring-2 ring-primary ring-offset-2;
-    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.3);
+    @apply outline-none;
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary));
   }
   
-  /* Input focus states */
   input:focus-visible,
   textarea:focus-visible,
   select:focus-visible {
-    @apply outline-none ring-2 ring-primary ring-offset-1;
-    border-color: hsl(var(--primary));
+    @apply outline-none;
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary));
   }
   
-  /* Skip link for accessibility */
   .skip-link {
-    @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md;
+    @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50;
+    @apply focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded;
     font-weight: 600;
   }
 }
 
-/* ============================================================================
+/*
+ * ============================================================================
  * COMPONENT STYLES
- * ============================================================================ */
+ * ============================================================================
+ */
 @layer components {
-  /* Container with theme-aware padding */
   .container-custom {
     @apply mx-auto w-full max-w-7xl;
     padding-left: var(--container-padding);
     padding-right: var(--container-padding);
   }
   
-  /* Section spacing */
   .section-spacing {
     padding-top: var(--section-spacing);
     padding-bottom: var(--section-spacing);
   }
   
-  /* Prose styles for Markdown content */
+  /* Prose */
   .prose-custom {
     @apply max-w-none text-foreground;
   }
   
-  .prose-custom h1,
-  .prose-custom h2,
-  .prose-custom h3,
-  .prose-custom h4,
-  .prose-custom h5,
-  .prose-custom h6 {
+  .prose-custom h1, .prose-custom h2, .prose-custom h3,
+  .prose-custom h4, .prose-custom h5, .prose-custom h6 {
     font-family: var(--font-heading);
     @apply text-foreground font-semibold;
   }
@@ -311,334 +225,362 @@
   }
   
   .prose-custom pre {
-    @apply bg-muted border border-border rounded-lg p-4 overflow-x-auto;
+    @apply bg-muted border border-border rounded p-4 overflow-x-auto;
   }
   
   .prose-custom blockquote {
-    @apply border-l-4 border-primary pl-4 italic text-muted-foreground;
-  }
-  
-  .prose-custom ul,
-  .prose-custom ol {
-    @apply text-foreground;
-  }
-  
-  /* Card hover effect */
-  .card-hover {
-    @apply transition-all duration-200 hover:shadow-elevated hover:-translate-y-0.5;
-  }
-  
-  /* Gradient text for hero sections */
-  .gradient-text {
-    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
-  }
-  
-  /* Hero pattern background */
-  .hero-pattern {
-    background-image: 
-      radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.05) 0%, transparent 50%),
-      radial-gradient(circle at 75% 75%, hsl(var(--secondary) / 0.05) 0%, transparent 50%);
+    @apply border-l-2 border-primary pl-4 italic text-muted-foreground;
   }
 }
 
-/* ============================================================================
- * ANIMATIONS & KEYFRAMES - Premium Motion System
- * ============================================================================ */
+/*
+ * ============================================================================
+ * KEYFRAMES - Premium Smooth Animations
+ * ============================================================================
+ */
 
-/* Premium easing curves */
-:root {
-  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
-  --ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
-  --duration-fast: 200ms;
-  --duration-normal: 400ms;
-  --duration-slow: 600ms;
-  --duration-slower: 800ms;
-}
-
-@keyframes fadeInUp {
-  from {
+/* Hero entrance - smooth blur reveal */
+@keyframes heroReveal {
+  0% {
     opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px 0 rgba(139, 69, 69, 0.3),
-                0 0 40px 0 rgba(139, 69, 69, 0.2),
-                0 0 60px 0 rgba(139, 69, 69, 0.1);
-  }
-  50% {
-    box-shadow: 0 0 30px 5px rgba(139, 69, 69, 0.4),
-                0 0 60px 10px rgba(139, 69, 69, 0.3),
-                0 0 90px 15px rgba(139, 69, 69, 0.2);
-  }
-}
-
-@keyframes radial-pulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.3;
-  }
-  50% {
-    transform: scale(1.15);
-    opacity: 0.15;
-  }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes grain {
-  0%, 100% { transform: translate(0, 0); }
-  10% { transform: translate(-5%, -10%); }
-  20% { transform: translate(-15%, 5%); }
-  30% { transform: translate(7%, -25%); }
-  40% { transform: translate(-5%, 25%); }
-  50% { transform: translate(-15%, 10%); }
-  60% { transform: translate(15%, 0%); }
-  70% { transform: translate(0%, 15%); }
-  80% { transform: translate(3%, 35%); }
-  90% { transform: translate(-10%, 10%); }
-}
-
-/* Premium panel reveal animation */
-@keyframes panelReveal {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
+    transform: translateY(12px);
     filter: blur(8px);
   }
-  to {
+  100% {
     opacity: 1;
     transform: translateY(0);
     filter: blur(0);
   }
 }
 
-/* Panel takeover animation */
+/* Panel entrance - staggered */
+@keyframes panelEntrance {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Panel takeover - selected panel */
 @keyframes panelTakeover {
   0% {
-    transform: scale(1);
+    opacity: 1;
   }
   100% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+/* Panel fade away */
+@keyframes panelFadeOut {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+@keyframes panelFadeOutRight {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}
+
+/* Scroll indicator pulse */
+@keyframes scrollPulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(4px);
+  }
+}
+
+/* Tooltip fade */
+@keyframes tooltipFade {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Simple fade */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/*
+ * ============================================================================
+ * WINGS GATEWAY - Premium Layout & Motion
+ * ============================================================================
+ */
+@layer utilities {
+  /* Gateway layout */
+  .wings-gateway {
+    @apply min-h-screen flex flex-col;
+  }
+  
+  .wings-gateway-hero {
+    @apply flex-1 flex items-center justify-center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 6rem 1.5rem 4rem;
+  }
+  
+  /* Hero content entrance */
+  .hero-reveal {
+    opacity: 0;
+    animation: heroReveal var(--dur-4) var(--ease-enter) forwards;
+  }
+  
+  .hero-reveal-1 { animation-delay: 0ms; }
+  .hero-reveal-2 { animation-delay: 100ms; }
+  .hero-reveal-3 { animation-delay: 200ms; }
+  
+  /* Panel entrance animations */
+  .panel-entrance {
+    opacity: 0;
+    animation: panelEntrance var(--dur-4) var(--ease-enter) forwards;
+  }
+  
+  .panel-entrance-1 { animation-delay: 300ms; }
+  .panel-entrance-2 { animation-delay: 380ms; }
+  .panel-entrance-3 { animation-delay: 460ms; }
+  
+  /* Wing panel - disciplined minimal design */
+  .wing-panel {
+    @apply relative;
+    @apply bg-card;
+    @apply border border-border;
+    @apply rounded;
+    padding: 2.5rem;
+    /* Only transform/opacity for performance */
+    transition: 
+      transform var(--dur-2) var(--ease-out),
+      box-shadow var(--dur-2) var(--ease-out),
+      border-color var(--dur-2) var(--ease-out);
+    will-change: transform;
+  }
+  
+  .wing-panel:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: var(--shadow-panel-hover);
+    border-color: hsl(var(--border));
+  }
+  
+  .wing-panel:focus-visible {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--primary));
+  }
+  
+  /* Panel icon */
+  .wing-panel-icon {
+    @apply w-10 h-10 mb-6;
+    @apply text-foreground;
+    stroke-width: 1.5;
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+  
+  .wing-panel:hover .wing-panel-icon {
     transform: scale(1.05);
   }
-}
-
-@keyframes panelFadeAway {
-  0% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
+  
+  /* Panel title */
+  .wing-panel-title {
+    @apply text-xl font-heading font-semibold mb-2;
+    @apply text-foreground;
+    letter-spacing: -0.01em;
+    transition: letter-spacing var(--dur-2) var(--ease-out);
   }
-  100% {
-    opacity: 0;
-    transform: translateX(-30px) scale(0.95);
+  
+  .wing-panel:hover .wing-panel-title {
+    letter-spacing: 0.01em;
   }
-}
-
-@keyframes panelFadeAwayRight {
-  0% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
+  
+  /* Panel description */
+  .wing-panel-desc {
+    @apply text-sm text-muted-foreground mb-6;
+    line-height: 1.6;
+    opacity: 0.85;
+    transition: opacity var(--dur-2) var(--ease-out);
   }
-  100% {
-    opacity: 0;
-    transform: translateX(30px) scale(0.95);
-  }
-}
-
-/* Subtle tracking animation for headings */
-@keyframes trackingIn {
-  from {
-    letter-spacing: 0.3em;
-    opacity: 0;
-  }
-  to {
-    letter-spacing: normal;
+  
+  .wing-panel:hover .wing-panel-desc {
     opacity: 1;
   }
+  
+  /* Panel CTA */
+  .wing-panel-cta {
+    @apply text-sm font-medium text-foreground;
+    @apply inline-flex items-center gap-2;
+    transition: gap var(--dur-2) var(--ease-out);
+  }
+  
+  .wing-panel:hover .wing-panel-cta {
+    gap: 0.75rem;
+  }
+  
+  .wing-panel-cta svg {
+    @apply w-4 h-4;
+    transition: transform var(--dur-2) var(--ease-out);
+  }
+  
+  .wing-panel:hover .wing-panel-cta svg {
+    transform: translateX(2px);
+  }
+  
+  /* Disabled panel (Female Wing) */
+  .wing-panel-disabled {
+    @apply cursor-default;
+  }
+  
+  .wing-panel-disabled:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevated);
+  }
+  
+  .wing-panel-disabled .wing-panel-icon,
+  .wing-panel-disabled .wing-panel-title,
+  .wing-panel-disabled .wing-panel-cta {
+    @apply text-muted-foreground;
+  }
+  
+  .wing-panel-disabled .wing-panel-desc {
+    opacity: 0.6;
+  }
+  
+  /* Tooltip for "Coming soon" */
+  .wing-tooltip {
+    @apply absolute;
+    @apply px-3 py-1.5 rounded;
+    @apply bg-foreground text-background;
+    @apply text-xs font-medium;
+    @apply pointer-events-none;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    animation: tooltipFade var(--dur-2) var(--ease-out) forwards;
+    white-space: nowrap;
+  }
+  
+  .wing-tooltip::after {
+    content: '';
+    @apply absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: hsl(var(--foreground));
+  }
+  
+  /* Panel takeover states */
+  .wing-panel.is-selected {
+    animation: panelTakeover var(--dur-3) var(--ease-enter) forwards;
+    z-index: 10;
+  }
+  
+  .wing-panel.is-fading-left {
+    animation: panelFadeOut var(--dur-3) var(--ease-enter) forwards;
+  }
+  
+  .wing-panel.is-fading-right {
+    animation: panelFadeOutRight var(--dur-3) var(--ease-enter) forwards;
+  }
+  
+  /* Scroll indicator */
+  .scroll-indicator {
+    @apply absolute bottom-8 left-1/2 -translate-x-1/2;
+    @apply flex flex-col items-center gap-2;
+    @apply text-muted-foreground;
+    animation: scrollPulse 2s var(--ease-out) infinite;
+  }
+  
+  .scroll-indicator svg {
+    @apply w-5 h-5;
+  }
+  
+  /* Staggered section reveals */
+  .reveal-section {
+    opacity: 0;
+    animation: fadeInUp var(--dur-3) var(--ease-enter) forwards;
+  }
+  
+  .reveal-delay-1 { animation-delay: 0ms; }
+  .reveal-delay-2 { animation-delay: 100ms; }
+  .reveal-delay-3 { animation-delay: 200ms; }
+  .reveal-delay-4 { animation-delay: 300ms; }
+  
+  /* Reduced motion - accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-reveal,
+    .panel-entrance,
+    .wing-panel,
+    .wing-panel-icon,
+    .wing-panel-title,
+    .wing-panel-desc,
+    .wing-panel-cta,
+    .wing-panel-cta svg,
+    .scroll-indicator,
+    .reveal-section,
+    .wing-tooltip {
+      animation: none !important;
+      transition: opacity var(--dur-1) ease !important;
+      transform: none !important;
+      filter: none !important;
+      opacity: 1 !important;
+    }
+    
+    .wing-panel:hover,
+    .wing-panel:focus-visible {
+      transform: none !important;
+    }
+  }
 }
 
-/* Line reveal animation */
-@keyframes lineReveal {
-  from {
-    transform: scaleX(0);
-    transform-origin: left;
-  }
-  to {
-    transform: scaleX(1);
-    transform-origin: left;
-  }
-}
-
-/* ============================================================================
- * UTILITY CLASSES
- * ============================================================================ */
+/*
+ * ============================================================================
+ * GENERAL UTILITIES
+ * ============================================================================
+ */
 @layer utilities {
-  /* Smooth scrolling anchor offset for fixed header */
   .scroll-mt-header {
     scroll-margin-top: 5rem;
   }
   
-  /* Animation delays for staggered reveals */
-  .animation-delay-100 { animation-delay: 100ms; }
-  .animation-delay-200 { animation-delay: 200ms; }
-  .animation-delay-300 { animation-delay: 300ms; }
-  .animation-delay-400 { animation-delay: 400ms; }
-  .animation-delay-500 { animation-delay: 500ms; }
-  .animation-delay-600 { animation-delay: 600ms; }
-  .animation-delay-700 { animation-delay: 700ms; }
-  .animation-delay-800 { animation-delay: 800ms; }
-  
-  /* Scroll-triggered animations */
-  .animate-on-scroll {
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-  }
-  
-  .animate-on-scroll.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  
-  .animate-fade-in-up {
-    animation: fadeInUp 0.7s ease-out forwards;
-    opacity: 0;
-  }
-  
-  .animate-fade-in {
-    animation: fadeIn 0.6s ease-out forwards;
-    opacity: 0;
-  }
-  
-  .animate-scale-in {
-    animation: scaleIn 0.5s ease-out forwards;
-    opacity: 0;
-  }
-  
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-  
-  /* Hero logo glow effect */
-  .logo-glow {
-    filter: drop-shadow(0 0 20px rgba(139, 69, 69, 0.4))
-            drop-shadow(0 0 40px rgba(139, 69, 69, 0.2));
-    transition: filter 0.3s ease;
-  }
-  
-  .logo-glow:hover {
-    filter: drop-shadow(0 0 30px rgba(139, 69, 69, 0.6))
-            drop-shadow(0 0 60px rgba(139, 69, 69, 0.3));
-  }
-  
-  /* Radial pulse behind logo */
-  .radial-pulse {
-    position: absolute;
-    inset: -50%;
-    background: radial-gradient(circle, rgba(139, 69, 69, 0.3) 0%, transparent 70%);
-    animation: radial-pulse 4s ease-in-out infinite;
-    border-radius: 50%;
-    z-index: -1;
-  }
-  
-  /* Grain texture overlay */
-  .grain-overlay::before {
-    content: '';
-    position: absolute;
-    top: -100%;
-    left: -100%;
-    right: -100%;
-    bottom: -100%;
-    width: 300%;
-    height: 300%;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
-    opacity: 0.035;
-    pointer-events: none;
-    animation: grain 8s steps(10) infinite;
-    z-index: -1;
-  }
-  
-  /* Button hover glow */
-  .btn-glow {
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .btn-glow::before {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-    transform: translateX(-100%);
-    transition: transform 0.5s;
-  }
-  
-  .btn-glow:hover::before {
-    transform: translateX(100%);
-  }
-  
-  /* Card scale on scroll */
-  .card-reveal {
-    opacity: 0;
-    transform: translateY(40px) scale(0.95);
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .card-reveal.is-visible {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  
-  /* Parallax effect helper */
-  .parallax-slow {
-    will-change: transform;
-    transition: transform 0.1s linear;
-  }
-  
-  /* Shimmer loading effect */
-  .shimmer {
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(255,255,255,0.3) 50%,
-      transparent 100%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
-  }
-  
-  /* Line clamp utilities */
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -653,265 +595,47 @@
     overflow: hidden;
   }
   
-  /* Hover lift effect */
+  /* Simple hover lift for other components */
   .hover-lift {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
   }
   
   .hover-lift:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.15);
-  }
-  
-  /* Floating Action Button */
-  .fab {
-    @apply fixed bottom-6 right-6 z-50;
-    @apply w-14 h-14 rounded-full;
-    @apply bg-primary text-primary-foreground;
-    @apply shadow-lg hover:shadow-xl;
-    @apply flex items-center justify-center;
-    @apply transition-all duration-300;
-    @apply hover:scale-110;
-    animation: fab-bounce 2s ease-in-out infinite;
-  }
-  
-  .fab:hover {
-    animation: none;
-  }
-  
-  @keyframes fab-bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
-  }
-  
-  /* Stats counter animation */
-  .stat-number {
-    @apply text-3xl md:text-4xl font-bold text-primary;
-    font-variant-numeric: tabular-nums;
-  }
-  
-  /* ============================================================================
-   * WINGS GATEWAY - Premium Motion Utilities
-   * ============================================================================ */
-  
-  /* Panel reveal with stagger */
-  .panel-reveal {
-    opacity: 0;
-    animation: panelReveal var(--duration-slow) var(--ease-out-expo) forwards;
-  }
-  
-  .panel-reveal-1 { animation-delay: 0ms; }
-  .panel-reveal-2 { animation-delay: 150ms; }
-  .panel-reveal-3 { animation-delay: 300ms; }
-  
-  /* Wing panel base styles */
-  .wing-panel {
-    @apply relative overflow-hidden;
-    @apply bg-card border border-border/50;
-    @apply transition-all duration-500;
-    transition-timing-function: var(--ease-out-expo);
-    will-change: transform, box-shadow;
-  }
-  
-  .wing-panel:hover {
-    @apply border-primary/30;
-    transform: translateY(-8px);
-    box-shadow: 
-      0 25px 50px -12px rgba(0, 0, 0, 0.15),
-      0 0 0 1px hsl(var(--primary) / 0.1);
-  }
-  
-  .wing-panel:focus-visible {
-    @apply outline-none ring-2 ring-primary ring-offset-4;
-  }
-  
-  /* Panel content transitions */
-  .wing-panel .panel-title {
-    @apply transition-all duration-300;
-    transition-timing-function: var(--ease-out-quart);
-  }
-  
-  .wing-panel:hover .panel-title {
-    letter-spacing: 0.02em;
-  }
-  
-  .wing-panel .panel-description {
-    @apply transition-opacity duration-300;
-    opacity: 0.7;
-  }
-  
-  .wing-panel:hover .panel-description {
-    opacity: 1;
-  }
-  
-  /* Panel accent line */
-  .wing-panel::after {
-    content: '';
-    @apply absolute bottom-0 left-0 right-0 h-1 bg-primary;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.5s var(--ease-out-expo);
-  }
-  
-  .wing-panel:hover::after {
-    transform: scaleX(1);
-  }
-  
-  /* Disabled panel (Female Wing coming soon) */
-  .wing-panel-disabled {
-    @apply cursor-default;
-    opacity: 0.6;
-  }
-  
-  .wing-panel-disabled:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px -10px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-elevated);
   }
   
-  .wing-panel-disabled::after {
-    @apply bg-muted-foreground;
+  /* Fade animations */
+  .animate-fade-in {
+    animation: fadeIn var(--dur-3) var(--ease-enter) forwards;
   }
   
-  /* Panel takeover state (for navigation animation) */
-  .wing-panel.is-selected {
-    animation: panelTakeover 0.4s var(--ease-out-expo) forwards;
-    z-index: 50;
+  .animate-fade-in-up {
+    animation: fadeInUp var(--dur-3) var(--ease-enter) forwards;
   }
-  
-  .wing-panel.is-fading-left {
-    animation: panelFadeAway 0.4s var(--ease-out-expo) forwards;
-  }
-  
-  .wing-panel.is-fading-right {
-    animation: panelFadeAwayRight 0.4s var(--ease-out-expo) forwards;
-  }
-  
-  /* Tracking reveal for headings */
-  .tracking-reveal {
-    animation: trackingIn 0.8s var(--ease-out-expo) forwards;
-    opacity: 0;
-  }
-  
-  /* Line reveal accent */
-  .line-reveal {
-    @apply h-px bg-primary;
-    animation: lineReveal 0.6s var(--ease-out-expo) forwards;
-    animation-delay: 0.4s;
-    transform: scaleX(0);
-  }
-  
-  /* Gateway container */
-  .wings-gateway {
-    @apply min-h-screen flex flex-col;
+}
+
+/*
+ * ============================================================================
+ * RESPONSIVE
+ * ============================================================================
+ */
+@media (max-width: 768px) {
+  html {
+    font-size: 15px;
   }
   
   .wings-gateway-hero {
-    @apply flex-1 flex items-center justify-center;
-    @apply py-20 px-4;
+    padding: 5rem 1rem 3rem;
   }
   
-  /* Transparent header (for gateway) */
-  .header-transparent {
-    @apply bg-transparent border-transparent;
-    transition: background-color 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s ease;
-  }
-  
-  .header-solid {
-    @apply bg-white/95 border-border backdrop-blur-sm;
-  }
-  
-  /* Reduced motion support */
-  @media (prefers-reduced-motion: reduce) {
-    .panel-reveal,
-    .wing-panel,
-    .wing-panel::after,
-    .wing-panel .panel-title,
-    .wing-panel .panel-description,
-    .tracking-reveal,
-    .line-reveal {
-      animation: none !important;
-      transition: none !important;
-      opacity: 1 !important;
-      transform: none !important;
-    }
+  .wing-panel {
+    padding: 2rem;
   }
 }
 
-/* ============================================================================
- * RESPONSIVE TYPOGRAPHY
- * ============================================================================ */
-
-/* Desktop base font size */
-html {
-  font-size: 17px;
-}
-
-/* =========================================
-   MOBILE READABILITY FIXES
-   ========================================= */
-
-/* Force left-alignment for body text on all screens (better readability) */
-/* Only apply to main content areas, not cards */
-main > p, main > div > p, 
-section > p, section > div > p {
-  text-align: left !important;
-  max-width: 800px;    /* Prevents lines from getting too long on desktop */
-  margin-left: auto;   /* Centers the text block itself */
-  margin-right: auto;
-}
-
-/* Ensure headings remain centered for design balance */
-h1, h2, h3, h4, h5, h6 {
-  text-align: center !important;
-}
-
-/* Improve Typography (Size & Contrast) - DESKTOP */
-p, li, .text-muted-foreground {
-  font-size: 16px !important;      /* Normal size for desktop */
-  line-height: 1.65 !important;    /* Good line spacing */
-  color: #0d0d0d !important;       /* High contrast (almost black) text */
-}
-
-/* =========================================
-   END FIXES
-   ========================================= */
-
-/* MOBILE SPECIFIC - larger text for phone screens */
-@media (max-width: 768px) {
+@media (min-width: 769px) {
   html {
-    font-size: 18px;
-  }
-  
-  /* Larger hero text on mobile for impact */
-  .text-display-lg {
-    font-size: 2.25rem !important;
-    line-height: 1.2 !important;
-  }
-  
-  .text-display-xl {
-    font-size: 2.5rem !important;
-    line-height: 1.15 !important;
-  }
-  
-  /* 23px body text on mobile - perfect for phones */
-  p, li, .text-muted-foreground {
-    font-size: 23px !important;
-    line-height: 1.75 !important;
-  }
-  
-  /* More breathing room for headings on mobile */
-  h1 {
-    font-size: 1.75rem !important;
-    line-height: 1.25;
-  }
-  
-  h2 {
-    font-size: 1.5rem !important;
-    line-height: 1.35;
-  }
-  
-  h3 {
-    font-size: 1.25rem !important;
-    line-height: 1.35;
+    font-size: 16px;
   }
 }

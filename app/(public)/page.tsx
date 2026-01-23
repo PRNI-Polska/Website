@@ -4,11 +4,35 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState, useCallback } from "react";
-import { ArrowRight, Shield, Globe, Heart, ChevronDown } from "lucide-react";
+import { useState, useCallback, useRef } from "react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+
+// Minimal monochrome SVG icons with consistent stroke weight
+const ShieldIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+  </svg>
+);
+
+const GlobeIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="2" y1="12" x2="22" y2="12" />
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+  </svg>
+);
+
+const UsersIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+  </svg>
+);
 
 // Wing panel data
 const wings = [
@@ -17,222 +41,201 @@ const wings = [
     href: "/wings/main",
     titleKey: "wings.main.title",
     taglineKey: "wings.main.tagline",
-    ctaKey: "wings.main.cta",
-    icon: Shield,
+    Icon: ShieldIcon,
     disabled: false,
-    accent: "from-primary/20 to-primary/5",
   },
   {
     id: "international",
     href: "/wings/international",
     titleKey: "wings.international.title",
     taglineKey: "wings.international.tagline",
-    ctaKey: "wings.international.cta",
-    icon: Globe,
+    Icon: GlobeIcon,
     disabled: false,
-    accent: "from-secondary/20 to-secondary/5",
   },
   {
     id: "female",
     href: "/wings/female",
     titleKey: "wings.female.title",
     taglineKey: "wings.female.tagline",
-    ctaKey: "wings.female.cta",
-    icon: Heart,
+    Icon: UsersIcon,
     disabled: true,
-    accent: "from-muted to-muted/50",
   },
 ];
 
 export default function HomePage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const router = useRouter();
   const [selectedPanel, setSelectedPanel] = useState<string | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const panelRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   // Handle panel click with takeover animation
-  const handlePanelClick = useCallback((wing: typeof wings[0]) => {
-    if (wing.disabled || isNavigating) return;
+  const handlePanelClick = useCallback((wing: typeof wings[0], index: number) => {
+    if (isNavigating) return;
+    
+    if (wing.disabled) {
+      // Show tooltip for disabled panel
+      setShowTooltip(true);
+      setTimeout(() => setShowTooltip(false), 2000);
+      return;
+    }
     
     setSelectedPanel(wing.id);
     setIsNavigating(true);
     
-    // Navigate after animation completes
+    // Navigate after transition completes
     setTimeout(() => {
       router.push(wing.href);
-    }, 450);
+    }, 700); // matches --dur-3
   }, [router, isNavigating]);
 
-  // Smooth scroll to content section
+  // Scroll to content below fold
   const scrollToContent = () => {
-    document.getElementById("content-section")?.scrollIntoView({ 
+    document.getElementById("mission-section")?.scrollIntoView({ 
       behavior: "smooth" 
     });
   };
 
+  // i18n for gateway text
+  const gatewayText = {
+    eyebrow: t("party.name.full"),
+    title: locale === "pl" ? "Skrzydła" : locale === "de" ? "Flügel" : "Wings",
+    subtitle: locale === "pl" 
+      ? "Trzy ramiona. Jeden ruch." 
+      : locale === "de" 
+      ? "Drei Arme. Eine Bewegung." 
+      : "Three branches. One movement.",
+    enter: locale === "pl" ? "Wejdź" : locale === "de" ? "Eintreten" : "Enter",
+    comingSoon: locale === "pl" ? "Wkrótce" : locale === "de" ? "Demnächst" : "Coming soon",
+  };
+
   return (
     <div className="wings-gateway">
-      {/* Hero Gateway Section - Full Viewport */}
+      {/* Hero Gateway Section */}
       <section className="wings-gateway-hero relative">
-        {/* Subtle background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-muted/20 pointer-events-none" />
-        
-        <div className="container-custom relative z-10 w-full max-w-6xl">
-          {/* Logo + Party Name */}
-          <div className="text-center mb-16 panel-reveal panel-reveal-1">
-            <div className="relative w-24 h-24 md:w-28 md:h-28 mx-auto mb-6">
-              <Image
-                src="/logo.png"
-                alt="PRNI"
-                fill
-                className="object-contain"
-                priority
-              />
+        <div className="w-full max-w-5xl mx-auto">
+          {/* Hero Header */}
+          <header className="text-center mb-16">
+            {/* Logo */}
+            <div className="hero-reveal hero-reveal-1 mb-8">
+              <div className="relative w-16 h-16 md:w-20 md:h-20 mx-auto">
+                <Image
+                  src="/logo.png"
+                  alt="PRNI"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
             </div>
-            <h2 className="text-sm md:text-base font-medium tracking-[0.2em] uppercase text-primary mb-2">
-              {t("party.name.full")}
-            </h2>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold tracking-tight">
-              {t("wings.gateway.title")}
-            </h1>
-            <p className="text-muted-foreground mt-3 text-lg">
-              {t("wings.gateway.subtitle")}
+            
+            {/* Eyebrow */}
+            <p className="hero-reveal hero-reveal-2 text-[10px] md:text-xs font-medium tracking-[0.25em] uppercase text-muted-foreground mb-4">
+              {gatewayText.eyebrow}
             </p>
-          </div>
+            
+            {/* H1: Wings */}
+            <h1 className="hero-reveal hero-reveal-2 text-5xl md:text-6xl lg:text-7xl font-heading font-bold tracking-tight text-foreground mb-4">
+              {gatewayText.title}
+            </h1>
+            
+            {/* Subtitle */}
+            <p className="hero-reveal hero-reveal-3 text-base md:text-lg text-muted-foreground">
+              {gatewayText.subtitle}
+            </p>
+          </header>
 
-          {/* Wings Panels */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          {/* Wing Panels */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
             {wings.map((wing, index) => {
-              const Icon = wing.icon;
               const isSelected = selectedPanel === wing.id;
               const isFading = selectedPanel && selectedPanel !== wing.id;
+              const isDisabledPanel = wing.disabled;
               
               return (
                 <button
                   key={wing.id}
-                  onClick={() => handlePanelClick(wing)}
-                  disabled={wing.disabled || isNavigating}
+                  ref={(el) => { panelRefs.current[index] = el; }}
+                  onClick={() => handlePanelClick(wing, index)}
+                  disabled={isNavigating && !isSelected}
                   className={cn(
-                    "wing-panel rounded-2xl p-8 md:p-10 text-left",
-                    "panel-reveal",
-                    `panel-reveal-${index + 1}`,
-                    wing.disabled && "wing-panel-disabled",
+                    "wing-panel text-left",
+                    `panel-entrance panel-entrance-${index + 1}`,
+                    isDisabledPanel && "wing-panel-disabled",
                     isSelected && "is-selected",
-                    isFading && (index === 0 ? "is-fading-left" : index === 2 ? "is-fading-right" : "is-fading-left")
+                    isFading && (index === 0 ? "is-fading-left" : "is-fading-right")
                   )}
                   aria-label={t(wing.titleKey)}
+                  aria-disabled={isDisabledPanel}
                 >
-                  {/* Gradient accent */}
-                  <div className={cn(
-                    "absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500",
-                    "bg-gradient-to-br",
-                    wing.accent,
-                    !wing.disabled && "group-hover:opacity-100"
-                  )} />
+                  {/* Tooltip for disabled panel */}
+                  {isDisabledPanel && showTooltip && (
+                    <span className="wing-tooltip" role="tooltip">
+                      {gatewayText.comingSoon}
+                    </span>
+                  )}
                   
-                  {/* Content */}
-                  <div className="relative z-10">
-                    {/* Icon */}
-                    <div className={cn(
-                      "w-14 h-14 rounded-xl flex items-center justify-center mb-6",
-                      "bg-primary/10 transition-colors duration-300",
-                      !wing.disabled && "group-hover:bg-primary/20"
-                    )}>
-                      <Icon className={cn(
-                        "w-7 h-7",
-                        wing.disabled ? "text-muted-foreground" : "text-primary"
-                      )} />
-                    </div>
-                    
-                    {/* Title */}
-                    <h3 className={cn(
-                      "panel-title text-2xl md:text-3xl font-heading font-bold mb-3",
-                      wing.disabled && "text-muted-foreground"
-                    )}>
-                      {t(wing.titleKey)}
-                    </h3>
-                    
-                    {/* Tagline */}
-                    <p className="panel-description text-muted-foreground mb-6 min-h-[3rem]">
-                      {t(wing.taglineKey)}
-                    </p>
-                    
-                    {/* CTA */}
-                    <div className={cn(
-                      "inline-flex items-center gap-2 text-sm font-medium",
-                      wing.disabled 
-                        ? "text-muted-foreground" 
-                        : "text-primary"
-                    )}>
-                      <span>{t(wing.ctaKey)}</span>
-                      {!wing.disabled && (
-                        <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                      )}
-                    </div>
-                  </div>
+                  {/* Icon */}
+                  <wing.Icon className="wing-panel-icon" />
+                  
+                  {/* Title */}
+                  <h2 className="wing-panel-title">
+                    {t(wing.titleKey)}
+                  </h2>
+                  
+                  {/* Description */}
+                  <p className="wing-panel-desc">
+                    {t(wing.taglineKey)}
+                  </p>
+                  
+                  {/* CTA */}
+                  <span className="wing-panel-cta">
+                    {isDisabledPanel ? gatewayText.comingSoon : gatewayText.enter}
+                    {!isDisabledPanel && <ArrowRight />}
+                  </span>
                 </button>
               );
             })}
           </div>
-
-          {/* Scroll indicator */}
-          <button 
-            onClick={scrollToContent}
-            className="mx-auto mt-16 flex flex-col items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Scroll to content"
-          >
-            <span className="text-xs uppercase tracking-wider">
-              {t("common.readMore")}
-            </span>
-            <ChevronDown className="w-5 h-5 animate-bounce" />
-          </button>
         </div>
+
+        {/* Scroll Indicator - minimal, pinned to bottom */}
+        <button 
+          onClick={scrollToContent}
+          className="scroll-indicator"
+          aria-label={locale === "pl" ? "Przewiń w dół" : locale === "de" ? "Nach unten scrollen" : "Scroll down"}
+        >
+          <ChevronDown />
+        </button>
       </section>
 
-      {/* Content Section - Below Fold */}
-      <section id="content-section" className="py-24 bg-muted/30">
+      {/* Mission Section - Below Fold */}
+      <section id="mission-section" className="py-24 md:py-32">
         <div className="container-custom">
-          <div className="max-w-3xl mx-auto text-center">
-            {/* Mission Summary */}
-            <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-6">
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="reveal-section reveal-delay-1 text-2xl md:text-3xl font-heading font-semibold mb-6 text-foreground">
               {t("mission.title")}
             </h2>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-10">
+            <p className="reveal-section reveal-delay-2 text-muted-foreground leading-relaxed mb-10">
               {t("mission.summary")}
             </p>
             
             {/* Quick Links */}
-            <div className="flex flex-wrap justify-center gap-4">
-              <Button variant="outline" asChild>
+            <div className="reveal-section reveal-delay-3 flex flex-wrap justify-center gap-3">
+              <Button variant="outline" size="sm" asChild className="hover-lift">
                 <Link href="/manifesto">{t("nav.manifesto")}</Link>
               </Button>
-              <Button variant="outline" asChild>
+              <Button variant="outline" size="sm" asChild className="hover-lift">
                 <Link href="/about">{t("nav.about")}</Link>
               </Button>
-              <Button asChild>
+              <Button size="sm" asChild className="hover-lift">
                 <Link href="/contact">
                   {t("nav.join")}
-                  <ArrowRight className="ml-2 w-4 h-4" />
+                  <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
                 </Link>
               </Button>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* News Teaser (minimal) */}
-      <section className="py-16">
-        <div className="container-custom">
-          <div className="max-w-3xl mx-auto text-center">
-            <Link 
-              href="/announcements" 
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group"
-            >
-              <span className="text-sm uppercase tracking-wider">
-                {t("section.news")}
-              </span>
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </Link>
           </div>
         </div>
       </section>

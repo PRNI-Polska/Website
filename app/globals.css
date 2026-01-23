@@ -396,19 +396,19 @@
     background: linear-gradient(180deg, #ffffff 0%, #ffffff 40%, #fef2f2 50%, #fecaca 70%, #fca5a5 100%);
   }
   
-  /* Female Wing - roses background with pink overlay */
+  /* Female Wing - roses background with light pink overlay */
   .wing-panel-female {
     background: 
-      linear-gradient(145deg, rgba(253, 244, 247, 0.65) 0%, rgba(252, 231, 240, 0.55) 50%, rgba(251, 207, 232, 0.45) 100%),
-      url('/women_wing.png') center/cover no-repeat;
+      linear-gradient(145deg, rgba(253, 242, 248, 0.4) 0%, rgba(252, 231, 243, 0.35) 50%, rgba(251, 207, 232, 0.3) 100%),
+      url('/women_wing.jpg') center/cover no-repeat;
     border-color: rgba(219, 39, 119, 0.12);
   }
   
   .wing-panel-female:hover {
-    border-color: rgba(219, 39, 119, 0.18);
+    border-color: rgba(219, 39, 119, 0.2);
     background: 
-      linear-gradient(145deg, rgba(253, 244, 247, 0.55) 0%, rgba(252, 228, 237, 0.45) 50%, rgba(249, 168, 212, 0.35) 100%),
-      url('/women_wing.png') center/cover no-repeat;
+      linear-gradient(145deg, rgba(253, 242, 248, 0.3) 0%, rgba(252, 231, 243, 0.25) 50%, rgba(251, 207, 232, 0.2) 100%),
+      url('/women_wing.jpg') center/cover no-repeat;
   }
   
   /* Panel title */
@@ -478,32 +478,6 @@
     transform: translateX(3px);
   }
   
-  /* "Coming soon" badge */
-  .wing-panel-badge {
-    @apply text-xs font-medium text-muted-foreground;
-    background: hsl(var(--muted));
-    padding: 5px 12px;
-    border-radius: 100px;
-  }
-  
-  /* Disabled panel */
-  .wing-panel-disabled {
-    @apply cursor-default;
-  }
-  
-  .wing-panel-disabled:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 14px -3px rgba(16, 24, 39, 0.08);
-  }
-  
-  .wing-panel-disabled .wing-panel-title {
-    @apply text-muted-foreground;
-  }
-  
-  .wing-panel-disabled .wing-panel-desc {
-    opacity: 0.7;
-  }
-  
   /* Panel takeover states */
   .wing-panel.is-selected {
     animation: panelTakeover var(--dur-3) var(--ease-enter) forwards;
@@ -541,6 +515,16 @@
   .reveal-delay-2 { animation-delay: 80ms; }
   .reveal-delay-3 { animation-delay: 160ms; }
   .reveal-delay-4 { animation-delay: 240ms; }
+  
+  /* Hover lift for buttons */
+  .hover-lift {
+    transition: transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevated);
+  }
   
   /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
@@ -592,15 +576,6 @@
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
-  }
-  
-  .hover-lift {
-    transition: transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
-  }
-  
-  .hover-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-elevated);
   }
   
   .animate-fade-in {

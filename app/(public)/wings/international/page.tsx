@@ -12,16 +12,35 @@ import {
   CheckCircle2, 
   XCircle, 
   Scale,
-  Shield
+  Shield,
+  Link2,
+  Heart,
+  Handshake,
+  Languages,
+  BookOpen,
+  Radio,
+  Calendar,
+  MessagesSquare,
+  Palette
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
-import { GlobalBackdrop } from "@/components/global-backdrop";
+import { GlobalBackdrop, SectionDivider, FloatingAccent } from "@/components/global-backdrop";
 import { useRevealOnScroll, useStaggeredReveal } from "@/hooks/use-reveal-on-scroll";
 import { InternationalJoinForm } from "./international-join-form";
 import { cn } from "@/lib/utils";
 
 const activityIcons = [Globe, Share2, Users, MessageSquare, Search];
+
+// Icons for cooperation areas
+const areaIcons = {
+  languages: Languages,
+  research: BookOpen,
+  media: Radio,
+  events: Calendar,
+  dialogue: MessagesSquare,
+  culture: Palette,
+};
 
 // Reusable reveal wrapper component
 function RevealSection({ 
@@ -72,6 +91,33 @@ export default function InternationalWingPage() {
     t("wings.international.boundaries.cannot.4"),
   ];
 
+  const howItWorksSteps = [
+    {
+      icon: Link2,
+      title: t("wings.international.howItWorks.step1.title"),
+      desc: t("wings.international.howItWorks.step1.desc"),
+    },
+    {
+      icon: Heart,
+      title: t("wings.international.howItWorks.step2.title"),
+      desc: t("wings.international.howItWorks.step2.desc"),
+    },
+    {
+      icon: Handshake,
+      title: t("wings.international.howItWorks.step3.title"),
+      desc: t("wings.international.howItWorks.step3.desc"),
+    },
+  ];
+
+  const cooperationAreas = [
+    { key: "languages", icon: areaIcons.languages },
+    { key: "research", icon: areaIcons.research },
+    { key: "media", icon: areaIcons.media },
+    { key: "events", icon: areaIcons.events },
+    { key: "dialogue", icon: areaIcons.dialogue },
+    { key: "culture", icon: areaIcons.culture },
+  ];
+
   const scrollToForm = () => {
     const formElement = document.getElementById("join-form");
     if (formElement) {
@@ -87,11 +133,15 @@ export default function InternationalWingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
       {/* ====== HERO SECTION ====== */}
-      <section className="relative py-20 md:py-28 lg:py-32 overflow-hidden">
+      <section className="relative py-20 md:py-28 lg:py-36 overflow-hidden">
         {/* Background */}
-        <GlobalBackdrop variant="hero" showGrid showDots />
+        <GlobalBackdrop variant="hero" showGrid showDots showNoise showFloatingDots />
+        
+        {/* Floating accent shapes */}
+        <FloatingAccent className="top-20 -right-16 opacity-40" variant="ring" />
+        <FloatingAccent className="bottom-32 -left-10 opacity-30" />
         
         <div className="container-custom relative z-10">
           {/* Back Link */}
@@ -104,7 +154,12 @@ export default function InternationalWingPage() {
           </Link>
 
           <div className="max-w-4xl">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight text-foreground mb-6">
+            {/* Overline */}
+            <p className="text-sm font-medium text-blue-600/80 tracking-widest uppercase mb-4">
+              PRNI · Global Network
+            </p>
+            
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight text-foreground mb-6 leading-[1.1]">
               {t("wings.international.title")}
             </h1>
             
@@ -117,7 +172,7 @@ export default function InternationalWingPage() {
               <Button 
                 size="lg" 
                 onClick={scrollToForm}
-                className="px-8 shadow-md hover:shadow-lg transition-shadow"
+                className="px-8 shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
               >
                 <Globe className="w-4 h-4 mr-2" />
                 {t("wings.joinCta")}
@@ -126,7 +181,7 @@ export default function InternationalWingPage() {
                 size="lg" 
                 variant="outline" 
                 asChild
-                className="border-2 hover:bg-slate-50"
+                className="border-2 hover:bg-slate-50 transition-all hover:-translate-y-0.5"
               >
                 <Link href="/contact">
                   <MessageSquare className="w-4 h-4 mr-2" />
@@ -139,7 +194,7 @@ export default function InternationalWingPage() {
         
         {/* Subtle bottom gradient fade */}
         <div 
-          className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
+          className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
           style={{
             background: "linear-gradient(to top, hsl(var(--background)), transparent)"
           }}
@@ -147,15 +202,92 @@ export default function InternationalWingPage() {
       </section>
 
       {/* ====== PURPOSE SECTION ====== */}
-      <section className="py-16 md:py-24">
+      <section className="py-16 md:py-20">
         <div className="container-custom">
           <RevealSection className="max-w-3xl">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading font-semibold mb-6 text-foreground">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading font-semibold mb-6 text-foreground tracking-tight">
               {t("wings.international.purpose.title")}
             </h2>
-            <p className="text-lg text-muted-foreground leading-relaxed">
+            <p className="text-lg text-muted-foreground leading-[1.8] max-w-prose">
               {t("wings.international.purpose.text")}
             </p>
+          </RevealSection>
+        </div>
+      </section>
+
+      {/* Section Divider */}
+      <SectionDivider className="my-4" />
+
+      {/* ====== HOW IT WORKS SECTION ====== */}
+      <section className="py-16 md:py-24 relative overflow-hidden">
+        <div className="container-custom">
+          <RevealSection className="text-center mb-14">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading font-semibold text-foreground tracking-tight">
+              {t("wings.international.howItWorks.title")}
+            </h2>
+          </RevealSection>
+
+          <div className="grid md:grid-cols-3 gap-8 lg:gap-12 max-w-5xl mx-auto">
+            {howItWorksSteps.map((step, index) => {
+              const Icon = step.icon;
+              return (
+                <RevealSection key={index} delay={index * 100}>
+                  <div className="text-center group">
+                    {/* Step number + icon */}
+                    <div className="relative inline-flex items-center justify-center mb-6">
+                      <div className="absolute -inset-3 rounded-full bg-blue-100/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-100 to-blue-50 border border-slate-200/80 flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                        <Icon className="w-7 h-7 text-blue-600" />
+                      </div>
+                      <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-slate-800 text-white text-xs font-semibold flex items-center justify-center">
+                        {index + 1}
+                      </span>
+                    </div>
+                    
+                    <h3 className="text-lg font-semibold text-foreground mb-2 tracking-tight">
+                      {step.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed max-w-xs mx-auto">
+                      {step.desc}
+                    </p>
+                  </div>
+                </RevealSection>
+              );
+            })}
+          </div>
+
+          {/* Connecting lines (desktop only) */}
+          <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-3xl pointer-events-none" aria-hidden="true">
+            <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+          </div>
+        </div>
+      </section>
+
+      {/* ====== COOPERATION AREAS STRIP ====== */}
+      <section className="py-12 md:py-16 bg-gradient-to-r from-slate-50 via-blue-50/40 to-slate-50 border-y border-slate-100">
+        <div className="container-custom">
+          <RevealSection>
+            <p className="text-center text-sm font-medium text-muted-foreground uppercase tracking-widest mb-8">
+              {t("wings.international.areas.title")}
+            </p>
+            
+            <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+              {cooperationAreas.map((area, index) => {
+                const Icon = area.icon;
+                return (
+                  <div
+                    key={area.key}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white border border-slate-200/80 shadow-sm hover:shadow-md hover:border-blue-200/50 transition-all cursor-default"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <Icon className="w-4 h-4 text-blue-600/70" />
+                    <span className="text-sm font-medium text-slate-700">
+                      {t(`wings.international.areas.${area.key}`)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </RevealSection>
         </div>
       </section>
@@ -163,14 +295,14 @@ export default function InternationalWingPage() {
       {/* ====== ACTIVITIES SECTION ====== */}
       <section className="py-16 md:py-24 relative overflow-hidden">
         {/* Subtle background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-50/80 via-blue-50/30 to-slate-50/80" />
+        <GlobalBackdrop variant="section" showGrid={false} showDots showNoise />
         
         <div className="container-custom relative z-10">
           <RevealSection>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading font-semibold mb-4 text-foreground">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading font-semibold mb-4 text-foreground tracking-tight">
               {t("wings.international.activities.title")}
             </h2>
-            <p className="text-muted-foreground mb-12 max-w-2xl">
+            <p className="text-muted-foreground mb-12 max-w-2xl leading-relaxed">
               {t("wings.international.purpose.text").split('.')[0]}.
             </p>
           </RevealSection>
@@ -182,7 +314,7 @@ export default function InternationalWingPage() {
                 <RevealSection key={index} delay={getDelay(index)}>
                   <div className="int-activity-card h-full p-6">
                     <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/5 flex items-center justify-center border border-blue-200/50">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/5 flex items-center justify-center border border-blue-200/50 group-hover:border-blue-300/60 transition-colors">
                         <Icon className="w-5 h-5 text-blue-600" />
                       </div>
                       <div className="flex-1 pt-1">
@@ -199,11 +331,14 @@ export default function InternationalWingPage() {
         </div>
       </section>
 
+      {/* Section Divider */}
+      <SectionDivider className="my-4" />
+
       {/* ====== BOUNDARIES SECTION ====== */}
       <section className="py-16 md:py-24">
         <div className="container-custom">
           <RevealSection className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading font-semibold mb-3 text-foreground">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading font-semibold mb-3 text-foreground tracking-tight">
               {t("wings.international.boundaries.title")}
             </h2>
             <p className="text-muted-foreground">
@@ -274,11 +409,12 @@ export default function InternationalWingPage() {
       {/* ====== ENGAGE / FORM SECTION ====== */}
       <section className="py-16 md:py-24 relative overflow-hidden">
         {/* Background */}
-        <GlobalBackdrop variant="section" showGrid showDots={false} />
+        <GlobalBackdrop variant="full" showGrid showDots={false} showNoise />
+        <FloatingAccent className="top-10 right-[10%] opacity-20" variant="ring" />
         
         <div className="container-custom relative z-10">
           <RevealSection className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading font-semibold mb-4 text-foreground">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading font-semibold mb-4 text-foreground tracking-tight">
               {t("wings.international.engage.title")}
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed">

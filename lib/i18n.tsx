@@ -150,9 +150,9 @@ export const translations: Translations = {
     de: "Unser Zweck" 
   },
   "wings.international.purpose.text": { 
-    en: "The International Wing serves as a bridge between PRNI and supporters abroad who share our commitment to national sovereignty, traditional values, and the preservation of European identity. We provide a structured way for international affiliates to contribute to our cause through outreach, translation, and cultural exchange—without formal party membership.", 
-    pl: "Skrzydło Międzynarodowe stanowi pomost między PRNI a sympatykami za granicą, którzy podzielają nasze zaangażowanie w suwerenność narodową, tradycyjne wartości i zachowanie europejskiej tożsamości. Zapewniamy ustrukturyzowany sposób, w jaki międzynarodowi współpracownicy mogą wspierać naszą sprawę poprzez działania informacyjne, tłumaczenia i wymianę kulturową — bez formalnego członkostwa w partii.",
-    de: "Die Internationale Abteilung dient als Brücke zwischen PRNI und Unterstützern im Ausland, die unser Engagement für nationale Souveränität, traditionelle Werte und die Bewahrung der europäischen Identität teilen."
+    en: "The International Wing serves as a bridge between PRNI and supporters abroad who share our commitment to national sovereignty, traditional values, and the preservation of European identity. We provide a structured way for international affiliates to contribute to our cause through outreach, translation, and cultural exchange—without formal membership in the movement.", 
+    pl: "Skrzydło Międzynarodowe stanowi pomost między PRNI a sympatykami za granicą, którzy podzielają nasze zaangażowanie w suwerenność narodową, tradycyjne wartości i zachowanie europejskiej tożsamości. Zapewniamy ustrukturyzowany sposób, w jaki międzynarodowi współpracownicy mogą wspierać naszą sprawę poprzez działania informacyjne, tłumaczenia i wymianę kulturową — bez formalnego członkostwa w ruchu.",
+    de: "Die Internationale Abteilung dient als Brücke zwischen PRNI und Unterstützern im Ausland, die unser Engagement für nationale Souveränität, traditionelle Werte und die Bewahrung der europäischen Identität teilen — ohne formelle Mitgliedschaft in der Bewegung."
   },
   
   // International Wing - Activities (Safe activities)
@@ -224,9 +224,9 @@ export const translations: Translations = {
     de: "Offen für Unterstützer unabhängig von Staatsbürgerschaft oder Wohnsitz" 
   },
   "wings.international.boundaries.cannot.1": { 
-    en: "Formal membership in the Polish political party PRNI", 
-    pl: "Formalne członkostwo w polskiej partii politycznej PRNI", 
-    de: "Formelle Mitgliedschaft in der polnischen politischen Partei PRNI" 
+    en: "Formal membership in the PRNI movement", 
+    pl: "Formalne członkostwo w ruchu PRNI", 
+    de: "Formelle Mitgliedschaft in der PRNI-Bewegung" 
   },
   "wings.international.boundaries.cannot.2": { 
     en: "A path to voting rights or electoral participation in Poland", 
@@ -234,9 +234,9 @@ export const translations: Translations = {
     de: "Ein Weg zu Wahlrechten oder Wahlbeteiligung in Polen" 
   },
   "wings.international.boundaries.cannot.3": { 
-    en: "Representation in internal party decision-making structures", 
-    pl: "Reprezentacja w wewnętrznych strukturach decyzyjnych partii", 
-    de: "Vertretung in internen Entscheidungsstrukturen der Partei" 
+    en: "Representation in internal movement decision-making structures", 
+    pl: "Reprezentacja w wewnętrznych strukturach decyzyjnych ruchu", 
+    de: "Vertretung in internen Entscheidungsstrukturen der Bewegung" 
   },
   "wings.international.boundaries.cannot.4": { 
     en: "A channel for financial contributions to Polish political campaigns", 
@@ -246,9 +246,9 @@ export const translations: Translations = {
   
   // International Wing - Disclaimer
   "wings.international.disclaimer": { 
-    en: "The International Wing does not constitute membership in the Polish political party PRNI. Participation is voluntary and does not confer any legal status, voting rights, or electoral privileges within the Polish political system.", 
-    pl: "Skrzydło Międzynarodowe nie stanowi członkostwa w polskiej partii politycznej PRNI. Uczestnictwo jest dobrowolne i nie nadaje żadnego statusu prawnego, praw wyborczych ani przywilejów wyborczych w polskim systemie politycznym.",
-    de: "Die Internationale Abteilung stellt keine Mitgliedschaft in der polnischen politischen Partei PRNI dar. Die Teilnahme ist freiwillig und verleiht keinen rechtlichen Status, kein Wahlrecht oder Wahlprivilegien im polnischen politischen System."
+    en: "The International Wing does not constitute membership in the PRNI movement. Participation is voluntary and does not confer any legal status, voting rights, or electoral privileges within the Polish political system.", 
+    pl: "Skrzydło Międzynarodowe nie stanowi członkostwa w ruchu PRNI. Uczestnictwo jest dobrowolne i nie nadaje żadnego statusu prawnego, praw wyborczych ani przywilejów wyborczych w polskim systemie politycznym.",
+    de: "Die Internationale Abteilung stellt keine Mitgliedschaft in der PRNI-Bewegung dar. Die Teilnahme ist freiwillig und verleiht keinen rechtlichen Status, kein Wahlrecht oder Wahlprivilegien im polnischen politischen System."
   },
   
   // International Wing - Engage
@@ -285,9 +285,9 @@ export const translations: Translations = {
   "wings.international.form.message": { en: "Short Message (Optional)", pl: "Krótka wiadomość (opcjonalnie)", de: "Kurze Nachricht (optional)" },
   "wings.international.form.messagePlaceholder": { en: "Tell us about yourself and how you'd like to contribute...", pl: "Opowiedz nam o sobie i jak chciałbyś się zaangażować...", de: "Erzählen Sie uns von sich und wie Sie beitragen möchten..." },
   "wings.international.form.consent": { 
-    en: "I confirm that I have read and accept the principles of the movement and the privacy policy. I understand that this registration does not constitute party membership.", 
-    pl: "Potwierdzam, że zapoznałem się z zasadami ruchu i polityką prywatności oraz je akceptuję. Rozumiem, że ta rejestracja nie stanowi członkostwa w partii.",
-    de: "Ich bestätige, dass ich die Grundsätze der Bewegung und die Datenschutzrichtlinie gelesen und akzeptiert habe. Ich verstehe, dass diese Registrierung keine Parteimitgliedschaft darstellt."
+    en: "I confirm that I have read and accept the principles of the movement and the privacy policy. I understand that this registration does not constitute movement membership.", 
+    pl: "Potwierdzam, że zapoznałem się z zasadami ruchu i polityką prywatności oraz je akceptuję. Rozumiem, że ta rejestracja nie stanowi członkostwa w ruchu.",
+    de: "Ich bestätige, dass ich die Grundsätze der Bewegung und die Datenschutzrichtlinie gelesen und akzeptiert habe. Ich verstehe, dass diese Registrierung keine Bewegungsmitgliedschaft darstellt."
   },
   "wings.international.form.submit": { en: "Submit Registration", pl: "Wyślij rejestrację", de: "Registrierung absenden" },
   "wings.international.form.submitting": { en: "Submitting...", pl: "Wysyłanie...", de: "Wird gesendet..." },

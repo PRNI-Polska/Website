@@ -33,15 +33,15 @@ export function GlobalBackdrop({
       )}
       aria-hidden="true"
     >
-      {/* Base gradient layer - cool neutrals with hint of blue */}
+      {/* Base gradient layer - neutral greys/whites */}
       <div
         className={cn(
           "absolute inset-0",
           variant === "hero"
-            ? "bg-gradient-to-br from-slate-50 via-blue-50/40 to-slate-100/60"
+            ? "bg-gradient-to-br from-slate-50 via-slate-50 to-slate-100/70"
             : variant === "full"
-            ? "bg-gradient-to-b from-slate-50/50 via-blue-50/20 to-slate-50/50"
-            : "bg-gradient-to-b from-transparent via-blue-50/20 to-transparent"
+            ? "bg-gradient-to-b from-slate-50/60 via-slate-100/30 to-slate-50/60"
+            : "bg-gradient-to-b from-transparent via-slate-100/20 to-transparent"
         )}
       />
 
@@ -51,8 +51,8 @@ export function GlobalBackdrop({
         style={{
           background:
             variant === "hero"
-              ? "radial-gradient(ellipse 90% 60% at 50% 20%, rgba(147, 197, 253, 0.18), transparent 70%)"
-              : "radial-gradient(ellipse 70% 50% at 50% 50%, rgba(147, 197, 253, 0.1), transparent 60%)",
+              ? "radial-gradient(ellipse 90% 60% at 50% 20%, rgba(148, 163, 184, 0.16), transparent 70%)"
+              : "radial-gradient(ellipse 70% 50% at 50% 50%, rgba(148, 163, 184, 0.1), transparent 60%)",
         }}
       />
 
@@ -146,11 +146,11 @@ export function GlobalBackdrop({
       {/* Floating decorative dots - positioned absolutely */}
       {showFloatingDots && (
         <>
-          <div className="absolute top-[15%] left-[10%] w-2 h-2 rounded-full bg-blue-400/20" />
+          <div className="absolute top-[15%] left-[10%] w-2 h-2 rounded-full bg-slate-400/20" />
           <div className="absolute top-[25%] right-[15%] w-3 h-3 rounded-full bg-slate-400/15" />
-          <div className="absolute top-[45%] left-[5%] w-1.5 h-1.5 rounded-full bg-blue-300/25" />
+          <div className="absolute top-[45%] left-[5%] w-1.5 h-1.5 rounded-full bg-slate-300/25" />
           <div className="absolute bottom-[30%] right-[8%] w-2.5 h-2.5 rounded-full bg-slate-400/20" />
-          <div className="absolute bottom-[20%] left-[20%] w-2 h-2 rounded-full bg-blue-400/15" />
+          <div className="absolute bottom-[20%] left-[20%] w-2 h-2 rounded-full bg-slate-400/15" />
           <div className="absolute top-[60%] right-[25%] w-1.5 h-1.5 rounded-full bg-slate-300/20" />
         </>
       )}
@@ -202,7 +202,7 @@ export function FloatingAccent({
       className={cn(
         "absolute pointer-events-none",
         variant === "circle"
-          ? "w-32 h-32 rounded-full bg-gradient-to-br from-blue-200/10 to-transparent"
+          ? "w-32 h-32 rounded-full bg-gradient-to-br from-slate-300/10 to-transparent"
           : "w-40 h-40 rounded-full border border-slate-300/10",
         className
       )}

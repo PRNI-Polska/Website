@@ -9,52 +9,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/lib/i18n";
 
-// Ideology sections data
-const ideologySections = [
-  {
-    id: "s1",
-    title: "§ 1. Naród jako najwyższa wartość polityczna",
-    text: "Uznajemy naród za najwyższą wartość polityczną. Naród pojmujemy jako byt historyczny i kulturowy, stojący ponad interesami jednostek oraz grup społecznych."
-  },
-  {
-    id: "s2",
-    title: "§ 2. Jedność ideowa i kulturowa",
-    text: "Opowiadamy się za zachowaniem jedności ideowej i kulturowej wspólnoty narodowej. Uznajemy konieczność obrony jednej, polskiej tradycji narodowej jako fundamentu tożsamości i ciągłości narodu."
-  },
-  {
-    id: "s3",
-    title: "§ 3. Antyliberalizm",
-    text: "Odrzucamy liberalizm polityczny, oparty na skrajnym pluralizmie i indywidualizmie, jak również liberalizm kulturowy, prowadzący do relatywizacji wartości i osłabienia więzi narodowych."
-  },
-  {
-    id: "s4",
-    title: "§ 4. Degeneracja moralna współczesnego społeczeństwa",
-    text: "Sprzeciwiamy się ogarniającym świat globalizmowi oraz międzynarodowym korporacjom wspierającym liberalne i progresywne inicjatywy mające na celu destabilizację i kontrolę narodów, w wyniku których współczesne społeczeństwa poddawane są procesowi głębokiej erozji moralnej i aksjologicznej — jeśli proces ten nie zostanie powstrzymany, doprowadzi on do destrukcji ładu społecznego i tożsamości narodowej."
-  },
-  {
-    id: "s5",
-    title: "§ 5. Gospodarka podporządkowana narodowi",
-    text: "Uznajemy, że gospodarka powinna służyć narodowi. Nie opowiadamy się ani za skrajnym wolnym rynkiem, ani za socjalizmem. Dopuszczamy interwencję państwa tam, gdzie wymaga tego interes narodowy lub stabilność społeczna."
-  },
-  {
-    id: "s6",
-    title: "§ 6. Zasady współpracy międzynarodowej",
-    text: "Opowiadamy się za współpracą międzynarodową opartą na poszanowaniu suwerenności, samostanowienia oraz pełnej niezależności politycznej i gospodarczej państw. Wszelkie formy integracji ponadnarodowej uznajemy za dopuszczalne wyłącznie wówczas, gdy nie naruszają one nadrzędności interesu narodowego, nie ograniczają kompetencji państwa w kluczowych obszarach oraz pozostają oparte na dobrowolności i równoprawności uczestników."
-  },
-  {
-    id: "s7",
-    title: "§ 7. Bezpieczeństwo i obronność państwa",
-    text: "Uznajemy, że bezpieczeństwo państwa powinno opierać się na zdolności do samodzielnej obrony oraz na współpracy międzynarodowej o wyłącznie obronnym charakterze. Sprzeciwiamy się polityce ekspansji militarnej, wykorzystywaniu sojuszy wojskowych jako narzędzi presji politycznej oraz działaniom prowadzącym do destabilizacji ładu międzynarodowego. Trwałe bezpieczeństwo może być budowane jedynie w oparciu o równowagę sił, odpowiedzialność państw oraz poszanowanie ich suwerenności."
-  },
-  {
-    id: "s8",
-    title: "§ 8. Państwo organiczne",
-    text: "Uznajemy państwo za organiczny wyraz woli narodu. Państwo nie jest neutralnym arbitrem pomiędzy konkurującymi interesami, lecz narzędziem realizacji interesu narodowego."
-  },
-];
-
 export default function HomePage() {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
+
+  const ideologySections = [
+    { id: "s1", title: t("ideology.s1.title"), text: t("ideology.s1.text") },
+    { id: "s2", title: t("ideology.s2.title"), text: t("ideology.s2.text") },
+    { id: "s3", title: t("ideology.s3.title"), text: t("ideology.s3.text") },
+    { id: "s4", title: t("ideology.s4.title"), text: t("ideology.s4.text") },
+    { id: "s5", title: t("ideology.s5.title"), text: t("ideology.s5.text") },
+    { id: "s6", title: t("ideology.s6.title"), text: t("ideology.s6.text") },
+    { id: "s7", title: t("ideology.s7.title"), text: t("ideology.s7.text") },
+    { id: "s8", title: t("ideology.s8.title"), text: t("ideology.s8.text") },
+  ];
 
   return (
     <div className="flex flex-col">
@@ -120,10 +87,10 @@ export default function HomePage() {
         <div className="container-custom">
           <div className="text-center mb-12">
             <Badge variant="secondary" className="mb-4">
-              {locale === "pl" ? "Deklaracja Ideowa" : locale === "de" ? "Ideologische Erklärung" : "Declaration of Ideology"}
+              {t("home.ideology.badge")}
             </Badge>
             <h2 className="text-2xl md:text-3xl font-heading font-semibold">
-              {locale === "pl" ? "Deklaracja Ideowa Narodowego Integralizmu" : locale === "de" ? "Erklärung der nationalen Integralismus-Ideologie" : "Declaration of National Integralism Ideology"}
+              {t("home.ideology.title")}
             </h2>
           </div>
 
@@ -146,6 +113,41 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Merch */}
+      <section className="section-spacing">
+        <div className="container-custom">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-3">
+              {t("merch.title")}
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              {t("merch.subtitle")}
+            </p>
+          </div>
+
+          <div className="max-w-3xl mx-auto">
+            <Card className="card-hover">
+              <CardContent className="py-8 md:py-10 text-center">
+                <Badge variant="secondary" className="mb-4">
+                  {t("merch.comingSoon")}
+                </Badge>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button asChild>
+                    <Link href="/merch">
+                      {t("merch.title")}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <Link href="/contact">{t("nav.contact")}</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>

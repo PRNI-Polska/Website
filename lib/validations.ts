@@ -227,6 +227,51 @@ export const contactFormSchema = z.object({
 export type ContactFormInput = z.infer<typeof contactFormSchema>;
 
 // ============================================================================
+// RECRUITMENT FORM SCHEMA (Similar to Contact)
+// ============================================================================
+export const recruitmentFormSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(100, "Name must be less than 100 characters")
+    .regex(/^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s\-'.]+$/, "Name contains invalid characters")
+    .transform((val) => val.trim()),
+  email: z
+    .string()
+    .email("Invalid email address")
+    .max(254, "Email too long")
+    .transform((val) => val.toLowerCase().trim())
+    .refine(
+      (email) => {
+        const domain = email.split("@")[1];
+        return !BLOCKED_EMAIL_DOMAINS.includes(domain);
+      },
+      { message: "Please use a valid email address" }
+    ),
+  location: z
+    .string()
+    .max(120, "Location must be less than 120 characters")
+    .optional()
+    .transform((val) => (val ?? "").trim())
+    .refine((val) => !containsDangerousContent(val), {
+      message: "Location contains invalid content",
+    }),
+  message: z
+    .string()
+    .min(20, "Message must be at least 20 characters")
+    .max(5000, "Message must be less than 5000 characters")
+    .transform((val) => val.trim())
+    .refine((val) => !containsDangerousContent(val), {
+      message: "Message contains invalid content",
+    }),
+  // Honeypot field - should always be empty
+  website: z.string().optional(),
+  timestamp: z.number().optional(),
+});
+
+export type RecruitmentFormInput = z.infer<typeof recruitmentFormSchema>;
+
+// ============================================================================
 // AUTH SCHEMAS
 // ============================================================================
 export const loginSchema = z.object({

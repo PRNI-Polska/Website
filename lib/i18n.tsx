@@ -20,6 +20,7 @@ export const translations: Translations = {
   "nav.announcements": { en: "Announcements", pl: "Komunikaty", de: "Mitteilungen" },
   "nav.events": { en: "Events", pl: "Wydarzenia", de: "Veranstaltungen" },
   "nav.manifesto": { en: "Manifesto", pl: "Manifest", de: "Manifest" },
+  "nav.recruitment": { en: "Recruitment", pl: "Rekrutacja", de: "Rekrutierung" },
   "nav.merch": { en: "Merch", pl: "Merch", de: "Merch" },
   "nav.about": { en: "About", pl: "O nas", de: "Über uns" },
   "nav.contact": { en: "Contact", pl: "Kontakt", de: "Kontakt" },
@@ -169,6 +170,91 @@ export const translations: Translations = {
     de: "Offizieller PRNI-Merchandise ist derzeit in Arbeit.",
   },
   "merch.comingSoon": { en: "Coming soon", pl: "Wkrótce", de: "Kommt bald" },
+
+  // Recruitment
+  "recruitment.title": { en: "Recruitment", pl: "Rekrutacja", de: "Rekrutierung" },
+  "recruitment.subtitle": {
+    en: "If you want to join and help build PRNI, contact us securely and clearly. Use the form below or email us directly.",
+    pl: "Jeśli chcesz dołączyć i współtworzyć PRNI, skontaktuj się z nami w sposób jasny i bezpieczny. Użyj formularza poniżej lub napisz bezpośrednio e-mail.",
+    de: "Wenn du beitreten und beim Aufbau von PRNI helfen willst, kontaktiere uns klar und sicher. Nutze das Formular unten oder schreibe uns direkt per E-Mail.",
+  },
+  "recruitment.instructions.title": {
+    en: "How to write to us",
+    pl: "Jak do nas napisać",
+    de: "So schreibst du uns",
+  },
+  "recruitment.instructions.desc": {
+    en: "Prefer email if you want to include more detail or attachments. Use a clear subject line and tell us how you want to contribute.",
+    pl: "Jeśli chcesz podać więcej szczegółów lub dodać załączniki, wybierz e-mail. Użyj jasnego tematu i napisz, jak chcesz się zaangażować.",
+    de: "Bevorzuge E-Mail, wenn du mehr Details oder Anhänge hinzufügen willst. Nutze eine klare Betreffzeile und schreibe, wie du beitragen willst.",
+  },
+  "recruitment.instructions.emailLabel": {
+    en: "Email",
+    pl: "E-mail",
+    de: "E-Mail",
+  },
+  "recruitment.instructions.subjectLabel": {
+    en: "Suggested subject",
+    pl: "Proponowany temat",
+    de: "Vorgeschlagener Betreff",
+  },
+  "recruitment.instructions.subjectValue": {
+    en: "Recruitment — [Your Name]",
+    pl: "Rekrutacja — [Twoje imię i nazwisko]",
+    de: "Rekrutierung — [Dein Name]",
+  },
+  "recruitment.instructions.includeLabel": {
+    en: "Include",
+    pl: "Dodaj",
+    de: "Enthalten",
+  },
+  "recruitment.instructions.include.1": {
+    en: "Who you are (name, city/country)",
+    pl: "Kim jesteś (imię, miasto/kraj)",
+    de: "Wer du bist (Name, Stadt/Land)",
+  },
+  "recruitment.instructions.include.2": {
+    en: "Why you want to join",
+    pl: "Dlaczego chcesz dołączyć",
+    de: "Warum du beitreten willst",
+  },
+  "recruitment.instructions.include.3": {
+    en: "How you can contribute (skills, time, areas of work)",
+    pl: "Jak możesz pomóc (umiejętności, czas, obszary działania)",
+    de: "Wie du beitragen kannst (Fähigkeiten, Zeit, Arbeitsbereiche)",
+  },
+  "recruitment.form.title": {
+    en: "Express interest in joining",
+    pl: "Zgłoś chęć dołączenia",
+    de: "Interesse am Beitritt bekunden",
+  },
+  "recruitment.form.name": { en: "Name", pl: "Imię i nazwisko", de: "Name" },
+  "recruitment.form.namePlaceholder": { en: "Your name", pl: "Twoje imię i nazwisko", de: "Dein Name" },
+  "recruitment.form.email": { en: "Email", pl: "E-mail", de: "E-Mail" },
+  "recruitment.form.emailPlaceholder": { en: "your@email.com", pl: "twoj@email.com", de: "deine@email.de" },
+  "recruitment.form.location": { en: "City / Country (optional)", pl: "Miasto / Kraj (opcjonalnie)", de: "Stadt / Land (optional)" },
+  "recruitment.form.locationPlaceholder": { en: "e.g., Warsaw, PL", pl: "np. Warszawa, PL", de: "z.B. Warschau, PL" },
+  "recruitment.form.message": { en: "Message", pl: "Wiadomość", de: "Nachricht" },
+  "recruitment.form.messagePlaceholder": {
+    en: "Tell us why you want to join and how you can contribute…",
+    pl: "Napisz dlaczego chcesz dołączyć i jak możesz pomóc…",
+    de: "Schreibe, warum du beitreten willst und wie du beitragen kannst…",
+  },
+  "recruitment.form.send": { en: "Send", pl: "Wyślij", de: "Senden" },
+  "recruitment.form.sending": { en: "Sending…", pl: "Wysyłanie…", de: "Wird gesendet…" },
+  "recruitment.form.success.title": { en: "Request sent", pl: "Zgłoszenie wysłane", de: "Anfrage gesendet" },
+  "recruitment.form.success.text": {
+    en: "Thank you. We’ll review your message and get back to you.",
+    pl: "Dziękujemy. Przejrzymy Twoją wiadomość i odezwiemy się.",
+    de: "Danke. Wir prüfen deine Nachricht und melden uns.",
+  },
+  "recruitment.form.sendAnother": { en: "Send another", pl: "Wyślij kolejne", de: "Noch eine senden" },
+  "recruitment.form.error": { en: "Something went wrong. Please try again.", pl: "Coś poszło nie tak. Spróbuj ponownie.", de: "Etwas ist schief gelaufen. Bitte versuche es erneut." },
+  "recruitment.form.requiredHint": {
+    en: "* Required fields. Your information will be kept confidential.",
+    pl: "* Pola wymagane. Twoje informacje pozostaną poufne.",
+    de: "* Pflichtfelder. Deine Informationen bleiben vertraulich.",
+  },
   
   // Sections
   "section.news": { en: "Latest News", pl: "Najnowsze Wiadomości" },

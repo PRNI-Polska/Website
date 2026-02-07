@@ -600,51 +600,59 @@ export const translations: Translations = {
   // About
   "about.title": { 
     en: "About National Integralism", 
-    pl: "O Narodowym Integralizmie" 
+    pl: "O Narodowym Integralizmie",
+    de: "Über den Nationalen Integralismus",
   },
   "about.subtitle": { 
     en: "We are building a strong and sovereign future founded on responsibility, order, and loyalty to the national community.", 
-    pl: "Budujemy silną i suwerenną przyszłość opartą na odpowiedzialności, porządku oraz lojalności wobec wspólnoty narodowej." 
+    pl: "Budujemy silną i suwerenną przyszłość opartą na odpowiedzialności, porządku oraz lojalności wobec wspólnoty narodowej.",
+    de: "Wir bauen eine starke und souveräne Zukunft, gegründet auf Verantwortung, Ordnung und Loyalität gegenüber der nationalen Gemeinschaft.",
   },
-  "about.mission.title": { en: "Our Mission", pl: "Nasza Misja" },
+  "about.mission.title": { en: "Our Mission", pl: "Nasza Misja", de: "Unsere Mission" },
   "about.mission.text": { 
     en: "Our mission is to rebuild the state on conservative principles, a stable social order, and decisive, radical solutions to problems that have been ignored for years.\nWe act in the interest of the Polish nation by strengthening its identity, security, and capacity for self-determination. The state must serve the nation, protect its interests, and ensure cultural and institutional continuity.", 
-    pl: "Naszą misją jest odbudowa państwa opartego na konserwatywnych zasadach, stabilnym porządku społecznym oraz zdecydowanych, radykalnych rozwiązaniach wobec problemów, które przez lata były ignorowane.\nDziałamy w interesie narodu polskiego, wzmacniając jego tożsamość, bezpieczeństwo oraz zdolność do samostanowienia. Państwo powinno służyć narodowi, chronić jego interesy i zapewniać ciągłość kulturową oraz instytucjonalną." 
+    pl: "Naszą misją jest odbudowa państwa opartego na konserwatywnych zasadach, stabilnym porządku społecznym oraz zdecydowanych, radykalnych rozwiązaniach wobec problemów, które przez lata były ignorowane.\nDziałamy w interesie narodu polskiego, wzmacniając jego tożsamość, bezpieczeństwo oraz zdolność do samostanowienia. Państwo powinno służyć narodowi, chronić jego interesy i zapewniać ciągłość kulturową oraz instytucjonalną.",
+    de: "Unsere Mission ist der Wiederaufbau des Staates auf konservativen Grundsätzen, einer stabilen sozialen Ordnung und entschlossenen, radikalen Lösungen für Probleme, die jahrelang ignoriert wurden.\nWir handeln im Interesse der polnischen Nation, indem wir ihre Identität, Sicherheit und Fähigkeit zur Selbstbestimmung stärken. Der Staat muss der Nation dienen, ihre Interessen schützen und kulturelle sowie institutionelle Kontinuität gewährleisten.",
   },
-  "about.vision.title": { en: "Our Vision", pl: "Nasza Wizja" },
+  "about.vision.title": { en: "Our Vision", pl: "Nasza Wizja", de: "Unsere Vision" },
   "about.vision.text": { 
     en: "We see Poland as a state founded on morality, responsibility, and clearly defined social norms.\nOur vision is a country where the security of citizens is an absolute priority and public authority acts decisively and effectively.\nWe strive for a state free from excessive influence of international corporations that subordinate the economy and politics to external interests at the expense of national sovereignty.", 
-    pl: "Widzimy Polskę jako państwo oparte na moralności, odpowiedzialności i jasno określonych normach społecznych.\nNaszą wizją jest kraj, w którym bezpieczeństwo obywateli stanowi absolutny priorytet, a władza publiczna działa stanowczo i skutecznie.\nDążymy do państwa wolnego od nadmiernego wpływu międzynarodowych korporacji, które podporządkowują gospodarkę i politykę interesom zewnętrznym kosztem suwerenności narodowej." 
+    pl: "Widzimy Polskę jako państwo oparte na moralności, odpowiedzialności i jasno określonych normach społecznych.\nNaszą wizją jest kraj, w którym bezpieczeństwo obywateli stanowi absolutny priorytet, a władza publiczna działa stanowczo i skutecznie.\nDążymy do państwa wolnego od nadmiernego wpływu międzynarodowych korporacji, które podporządkowują gospodarkę i politykę interesom zewnętrznym kosztem suwerenności narodowej.",
+    de: "Wir sehen Polen als einen Staat, der auf Moral, Verantwortung und klar definierten sozialen Normen gegründet ist.\nUnsere Vision ist ein Land, in dem die Sicherheit der Bürger absolute Priorität hat und die öffentliche Gewalt entschlossen und effektiv handelt.\nWir streben einen Staat an, der frei von übermäßigem Einfluss internationaler Konzerne ist, die Wirtschaft und Politik auf Kosten der nationalen Souveränität externen Interessen unterordnen.",
   },
-  "about.values.title": { en: "Our Values", pl: "Nasze Wartości" },
+  "about.values.title": { en: "Our Values", pl: "Nasze Wartości", de: "Unsere Werte" },
   
   // Values
-  "about.value.nationalism.title": { en: "Nationalism", pl: "Nacjonalizm" },
+  "about.value.nationalism.title": { en: "Nationalism", pl: "Nacjonalizm", de: "Nationalismus" },
   "about.value.nationalism.text": { 
     en: "The primacy of the national interest in all actions of the state. Protection of the identity, culture, language, and historical continuity of the Polish nation.", 
-    pl: "Prymat interesu narodowego we wszystkich działaniach państwa. Ochrona tożsamości, kultury, języka oraz ciągłości historycznej narodu polskiego." 
+    pl: "Prymat interesu narodowego we wszystkich działaniach państwa. Ochrona tożsamości, kultury, języka oraz ciągłości historycznej narodu polskiego.",
+    de: "Der Vorrang des nationalen Interesses in allen Handlungen des Staates. Schutz der Identität, Kultur, Sprache und historischen Kontinuität der polnischen Nation.",
   },
-  "about.value.integralism.title": { en: "Integralism", pl: "Integralizm" },
+  "about.value.integralism.title": { en: "Integralism", pl: "Integralizm", de: "Integralismus" },
   "about.value.integralism.text": { 
     en: "The unity of nation and state, cohesion between the national community and public institutions, and the inseparability of social and state interests. Integralism means a strong, unified state free from internal divisions, particularism, and systemic chaos.", 
-    pl: "Jedność narodu i państwa, spójność wspólnoty narodowej z instytucjami publicznymi oraz nierozerwalność interesu społecznego i państwowego. Integralizm oznacza silne, jednolite państwo wolne od wewnętrznych podziałów, partykularyzmu i chaosu ustrojowego." 
+    pl: "Jedność narodu i państwa, spójność wspólnoty narodowej z instytucjami publicznymi oraz nierozerwalność interesu społecznego i państwowego. Integralizm oznacza silne, jednolite państwo wolne od wewnętrznych podziałów, partykularyzmu i chaosu ustrojowego.",
+    de: "Die Einheit von Nation und Staat, Zusammenhalt zwischen der nationalen Gemeinschaft und öffentlichen Institutionen sowie die Untrennbarkeit sozialer und staatlicher Interessen. Integralismus bedeutet einen starken, einheitlichen Staat, frei von internen Spaltungen, Partikularismus und systemischem Chaos.",
   },
-  "about.value.sovereignty.title": { en: "Sovereignty", pl: "Suwerenność" },
+  "about.value.sovereignty.title": { en: "Sovereignty", pl: "Suwerenność", de: "Souveränität" },
   "about.value.sovereignty.text": { 
     en: "Full political, economic, and legal independence enabling independent decision-making in accordance with the national interest.", 
-    pl: "Pełna niezależność polityczna, gospodarcza i prawna, umożliwiająca samodzielne podejmowanie decyzji zgodnych z interesem narodu." 
+    pl: "Pełna niezależność polityczna, gospodarcza i prawna, umożliwiająca samodzielne podejmowanie decyzji zgodnych z interesem narodu.",
+    de: "Volle politische, wirtschaftliche und rechtliche Unabhängigkeit, die eigenständige Entscheidungsfindung im Einklang mit dem nationalen Interesse ermöglicht.",
   },
-  "about.value.order.title": { en: "Order and Authority", pl: "Porządek i Autorytet" },
+  "about.value.order.title": { en: "Order and Authority", pl: "Porządek i Autorytet", de: "Ordnung und Autorität" },
   "about.value.order.text": { 
     en: "Effective law, stable institutions, and a clear hierarchy of responsibility ensuring security and social order.", 
-    pl: "Skuteczne prawo, stabilne instytucje oraz jasna hierarchia odpowiedzialności, gwarantujące bezpieczeństwo i ład społeczny." 
+    pl: "Skuteczne prawo, stabilne instytucje oraz jasna hierarchia odpowiedzialności, gwarantujące bezpieczeństwo i ład społeczny.",
+    de: "Effektives Recht, stabile Institutionen und eine klare Verantwortungshierarchie, die Sicherheit und soziale Ordnung gewährleisten.",
   },
   
-  "about.leadership": { en: "Our Leadership", pl: "Nasze Kierownictwo" },
-  "about.leadership.subtitle": { en: "Meet the dedicated individuals leading our movement forward.", pl: "Poznaj oddanych liderów naszego ruchu." },
-  "about.team": { en: "Our Team", pl: "Nasz Zespół" },
-  "about.team.subtitle": { en: "The dedicated people working to make our vision a reality.", pl: "Oddani ludzie pracujący nad realizacją naszej wizji." },
-  "about.team.coming": { en: "Team information coming soon.", pl: "Informacje o zespole wkrótce." },
+  "about.leadership": { en: "Our Leadership", pl: "Nasze Kierownictwo", de: "Unsere Führung" },
+  "about.leadership.subtitle": { en: "Meet the dedicated individuals leading our movement forward.", pl: "Poznaj oddanych liderów naszego ruchu.", de: "Lernen Sie die engagierten Persönlichkeiten kennen, die unsere Bewegung vorantreiben." },
+  "about.team": { en: "Our Team", pl: "Nasz Zespół", de: "Unser Team" },
+  "about.team.subtitle": { en: "The dedicated people working to make our vision a reality.", pl: "Oddani ludzie pracujący nad realizacją naszej wizji.", de: "Die engagierten Menschen, die unsere Vision Wirklichkeit werden lassen." },
+  "about.team.coming": { en: "Team information coming soon.", pl: "Informacje o zespole wkrótce.", de: "Informationen zum Team folgen in Kürze." },
 };
 
 interface I18nContextType {

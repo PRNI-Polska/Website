@@ -1,12 +1,12 @@
 // file: app/(public)/about/about-client.tsx
 "use client";
 
+import Image from "next/image";
 import { Mail, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { useI18n } from "@/lib/i18n";
-import { AnimatedSection } from "@/components/ui/animated-section";
 
 interface TeamMember {
   id: string;
@@ -31,75 +31,92 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
   const values = ["nationalism", "integralism", "sovereignty", "order"];
 
   return (
-    <div className="container-custom py-12">
+    <div className="relative min-h-screen">
+      {/* Fixed sword background — stationary behind all content */}
+      <div
+        className="fixed inset-0 pointer-events-none z-0"
+        aria-hidden="true"
+        style={{
+          backgroundImage: "url('/sword.png')",
+          backgroundPosition: "center center",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "220px auto",
+          opacity: 0.04,
+        }}
+      />
+
+      <div className="relative z-10 container-custom py-12">
       {/* Header */}
-      <AnimatedSection className="max-w-3xl mx-auto text-center mb-16">
+      <div className="max-w-3xl mx-auto text-center mb-16">
+        {/* Small sword icon above the title */}
+        <div className="flex justify-center mb-6">
+          <Image
+            src="/sword.png"
+            alt=""
+            width={48}
+            height={96}
+            className="opacity-60"
+            aria-hidden="true"
+          />
+        </div>
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold mb-4">
           {t("about.title")}
         </h1>
         <p className="text-xl text-muted-foreground">
           {t("about.subtitle")}
         </p>
-      </AnimatedSection>
+      </div>
 
       {/* Mission & Vision */}
       <section className="max-w-4xl mx-auto mb-16">
         <div className="grid md:grid-cols-2 gap-8">
-          <AnimatedSection delay={0} animation="slide-left">
-            <Card className="h-full hover-lift">
-              <CardHeader>
-                <CardTitle>{t("about.mission.title")}</CardTitle>
-              </CardHeader>
-              <CardContent className="text-muted-foreground">
-                {t("about.mission.text").split("\n").map((paragraph, i) => (
-                  <p key={i} className={i > 0 ? "mt-4" : ""}>
-                    {paragraph}
-                  </p>
-                ))}
-              </CardContent>
-            </Card>
-          </AnimatedSection>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("about.mission.title")}</CardTitle>
+            </CardHeader>
+            <CardContent className="text-muted-foreground">
+              {t("about.mission.text").split("\n").map((paragraph, i) => (
+                <p key={i} className={i > 0 ? "mt-4" : ""}>
+                  {paragraph}
+                </p>
+              ))}
+            </CardContent>
+          </Card>
 
-          <AnimatedSection delay={100} animation="slide-right">
-            <Card className="h-full hover-lift">
-              <CardHeader>
-                <CardTitle>{t("about.vision.title")}</CardTitle>
-              </CardHeader>
-              <CardContent className="text-muted-foreground">
-                {t("about.vision.text").split("\n").map((paragraph, i) => (
-                  <p key={i} className={i > 0 ? "mt-4" : ""}>
-                    {paragraph}
-                  </p>
-                ))}
-              </CardContent>
-            </Card>
-          </AnimatedSection>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("about.vision.title")}</CardTitle>
+            </CardHeader>
+            <CardContent className="text-muted-foreground">
+              {t("about.vision.text").split("\n").map((paragraph, i) => (
+                <p key={i} className={i > 0 ? "mt-4" : ""}>
+                  {paragraph}
+                </p>
+              ))}
+            </CardContent>
+          </Card>
         </div>
       </section>
 
       {/* Core Values */}
-      <section className="max-w-6xl mx-auto mb-16 px-4">
-        <AnimatedSection className="text-center mb-8">
-          <h2 className="text-2xl md:text-3xl font-heading font-semibold">
-            {t("about.values.title")}
-          </h2>
-        </AnimatedSection>
-        <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-8">
-          {values.map((key, index) => (
-            <AnimatedSection key={key} delay={index * 100} animation="scale">
-              <Card className="h-full hover-lift">
-                <CardHeader>
-                  <CardTitle className="text-xl text-center">
-                    {t(`about.value.${key}.title`)}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {t(`about.value.${key}.text`)}
-                  </p>
-                </CardContent>
-              </Card>
-            </AnimatedSection>
+      <section className="max-w-4xl mx-auto mb-16">
+        <h2 className="text-2xl md:text-3xl font-heading font-semibold text-center mb-8">
+          {t("about.values.title")}
+        </h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {values.map((key) => (
+            <Card key={key} className="text-center">
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  {t(`about.value.${key}.title`)}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  {t(`about.value.${key}.text`)}
+                </p>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </section>
@@ -109,20 +126,18 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
       {/* Leadership Team */}
       {leadership.length > 0 && (
         <section className="mb-16">
-          <AnimatedSection className="text-center mb-8">
+          <div className="text-center mb-8">
             <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-2">
               {t("about.leadership")}
             </h2>
             <p className="text-muted-foreground">
               {t("about.leadership.subtitle")}
             </p>
-          </AnimatedSection>
+          </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {leadership.map((member, index) => (
-              <AnimatedSection key={member.id} delay={index * 100} animation="scale">
-                <TeamMemberCard member={member} featured contactLabel={t("about.member.contact")} />
-              </AnimatedSection>
+            {leadership.map((member) => (
+              <TeamMemberCard key={member.id} member={member} featured />
             ))}
           </div>
         </section>
@@ -131,20 +146,18 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
       {/* Team Members */}
       {team.length > 0 && (
         <section>
-          <AnimatedSection className="text-center mb-8">
+          <div className="text-center mb-8">
             <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-2">
               {t("about.team")}
             </h2>
             <p className="text-muted-foreground">
               {t("about.team.subtitle")}
             </p>
-          </AnimatedSection>
+          </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {team.map((member, index) => (
-              <AnimatedSection key={member.id} delay={index * 75} animation="fade-up">
-                <TeamMemberCard member={member} contactLabel={t("about.member.contact")} />
-              </AnimatedSection>
+            {team.map((member) => (
+              <TeamMemberCard key={member.id} member={member} />
             ))}
           </div>
         </section>
@@ -161,6 +174,7 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
           </CardContent>
         </Card>
       )}
+      </div>
     </div>
   );
 }
@@ -175,10 +189,9 @@ interface TeamMemberCardProps {
     email: string | null;
   };
   featured?: boolean;
-  contactLabel: string;
 }
 
-function TeamMemberCard({ member, featured, contactLabel }: TeamMemberCardProps) {
+function TeamMemberCard({ member, featured }: TeamMemberCardProps) {
   const initials = member.name
     .split(" ")
     .map((n) => n[0])
@@ -187,7 +200,7 @@ function TeamMemberCard({ member, featured, contactLabel }: TeamMemberCardProps)
     .slice(0, 2);
 
   return (
-    <Card className={`hover-lift ${featured ? "text-center" : ""}`}>
+    <Card className={featured ? "text-center" : ""}>
       <CardHeader className={featured ? "items-center" : ""}>
         <Avatar className={featured ? "h-24 w-24 mb-4" : "h-16 w-16"}>
           {member.photoUrl && (
@@ -214,7 +227,7 @@ function TeamMemberCard({ member, featured, contactLabel }: TeamMemberCardProps)
             className="inline-flex items-center gap-1 mt-3 text-sm text-primary hover:underline"
           >
             <Mail className="h-4 w-4" />
-            {contactLabel}
+            Contact
           </a>
         )}
       </CardContent>

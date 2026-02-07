@@ -28,7 +28,7 @@ export function Header() {
   const { t } = useI18n();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-neutral-800 bg-black/95 backdrop-blur-sm">
       <nav className="container-custom flex h-20 items-center justify-between" aria-label="Main navigation">
         {/* Logo and Party Name */}
         <Link href="/" className="flex items-center gap-3">

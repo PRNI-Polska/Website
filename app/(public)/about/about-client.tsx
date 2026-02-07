@@ -40,7 +40,7 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
           backgroundPosition: "center center",
           backgroundRepeat: "no-repeat",
           backgroundSize: "auto 110vh",
-          opacity: 1,
+          opacity: 0.15,
         }}
       />
 

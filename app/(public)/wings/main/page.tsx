@@ -2,144 +2,280 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Shield,
+  Flag,
+  Users,
+  Megaphone,
+  MapPin,
+  CalendarDays,
+  Wrench,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
+import { useRevealOnScroll } from "@/hooks/use-reveal-on-scroll";
+import { SectionDivider } from "@/components/global-backdrop";
+import { cn } from "@/lib/utils";
 
-// Minimal icons
-const TargetIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10" />
-    <circle cx="12" cy="12" r="6" />
-    <circle cx="12" cy="12" r="2" />
-  </svg>
-);
+// Activity icons for the grid
+const activityIcons = [Flag, MapPin, Megaphone, Users, CalendarDays, Wrench];
 
-const StructureIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="3" width="7" height="7" />
-    <rect x="14" y="3" width="7" height="7" />
-    <rect x="14" y="14" width="7" height="7" />
-    <rect x="3" y="14" width="7" height="7" />
-  </svg>
-);
-
-const UsersIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-    <circle cx="9" cy="7" r="4" />
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-  </svg>
-);
-
-const CalendarIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-    <line x1="16" y1="2" x2="16" y2="6" />
-    <line x1="8" y1="2" x2="8" y2="6" />
-    <line x1="3" y1="10" x2="21" y2="10" />
-  </svg>
-);
-
-const PlatformIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-    <polyline points="14,2 14,8 20,8" />
-    <line x1="16" y1="13" x2="8" y2="13" />
-    <line x1="16" y1="17" x2="8" y2="17" />
-    <polyline points="10,9 9,9 8,9" />
-  </svg>
-);
-
-export default function MainWingPage() {
-  const { t, locale } = useI18n();
-
-  const responsibilities = [
-    { key: "wings.main.responsibilities.1", Icon: PlatformIcon },
-    { key: "wings.main.responsibilities.2", Icon: StructureIcon },
-    { key: "wings.main.responsibilities.3", Icon: UsersIcon },
-    { key: "wings.main.responsibilities.4", Icon: CalendarIcon },
-  ];
-
-  const backText = locale === "pl" ? "Powrót" : locale === "de" ? "Zurück" : "Back";
+// Reusable reveal wrapper
+function RevealSection({
+  children,
+  className,
+  delay = 0,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  delay?: number;
+}) {
+  const { ref, isVisible } = useRevealOnScroll<HTMLDivElement>();
 
   return (
-    <div className="min-h-screen">
-      {/* Hero */}
-      <section className="py-24 md:py-32">
-        <div className="container-custom max-w-3xl">
-          {/* Back */}
-          <Link 
-            href="/"
-            className="reveal-section reveal-delay-1 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-12 group"
+    <div
+      ref={ref}
+      className={cn("int-reveal", isVisible && "is-visible", className)}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
+
+export default function MainWingPage() {
+  const { t } = useI18n();
+
+  const activities = [
+    { key: "wings.main.activities.1", icon: activityIcons[0] },
+    { key: "wings.main.activities.2", icon: activityIcons[1] },
+    { key: "wings.main.activities.3", icon: activityIcons[2] },
+    { key: "wings.main.activities.4", icon: activityIcons[3] },
+    { key: "wings.main.activities.5", icon: activityIcons[4] },
+    { key: "wings.main.activities.6", icon: activityIcons[5] },
+  ];
+
+  return (
+    <div className="min-h-screen bg-background relative">
+      {/* ====== HERO SECTION ====== */}
+      <section className="relative py-20 md:py-28 lg:py-36 overflow-hidden">
+        {/* Subtle background gradient */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          aria-hidden="true"
+          style={{
+            background:
+              "radial-gradient(ellipse 80% 50% at 50% 20%, rgba(148,163,184,0.12), transparent 70%)",
+          }}
+        />
+
+        <div className="container-custom relative z-10">
+          {/* Back Link */}
+          <Link
+            href="/wings"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-10 group"
           >
-            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" style={{ transitionDuration: 'var(--dur-2)', transitionTimingFunction: 'var(--ease-out)' }} />
-            {backText}
+            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            {t("wings.back")}
           </Link>
 
-          <h1 className="reveal-section reveal-delay-2 text-4xl md:text-5xl font-heading font-bold tracking-tight text-foreground mb-4">
-            {t("wings.main.title")}
-          </h1>
-          <p className="reveal-section reveal-delay-3 text-lg text-muted-foreground">
-            {t("wings.main.tagline")}
-          </p>
-        </div>
-      </section>
+          <div className="max-w-4xl">
+            {/* Overline */}
+            <p className="text-sm font-medium text-muted-foreground tracking-widest uppercase mb-4">
+              {t("wings.main.overline")}
+            </p>
 
-      {/* Purpose */}
-      <section className="py-16 border-t border-border">
-        <div className="container-custom max-w-3xl">
-          <h2 className="reveal-section reveal-delay-1 text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-4">
-            {t("wings.main.purpose.title")}
-          </h2>
-          <p className="reveal-section reveal-delay-2 text-lg text-foreground leading-relaxed">
-            {t("wings.main.purpose.text")}
-          </p>
-        </div>
-      </section>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight text-foreground mb-6 leading-[1.1]">
+              {t("wings.main.title")}
+            </h1>
 
-      {/* Responsibilities */}
-      <section className="py-16 border-t border-border">
-        <div className="container-custom max-w-3xl">
-          <h2 className="reveal-section reveal-delay-1 text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-8">
-            {t("wings.main.responsibilities.title")}
-          </h2>
-          <ul className="space-y-4">
-            {responsibilities.map((item, index) => (
-              <li 
-                key={item.key}
-                className="reveal-section flex items-start gap-4"
-                style={{ animationDelay: `${(index + 1) * 80}ms` }}
+            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-10 max-w-3xl">
+              {t("wings.main.tagline")}
+            </p>
+
+            {/* CTAs */}
+            <div className="flex flex-wrap gap-4">
+              <Button
+                size="lg"
+                asChild
+                className="px-8 shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
               >
-                <item.Icon className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                <span className="text-foreground">{t(item.key)}</span>
-              </li>
-            ))}
-          </ul>
+                <Link href="/recruitment">
+                  <Users className="w-4 h-4 mr-2" />
+                  {t("nav.recruitment")}
+                </Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                asChild
+                className="border-2 transition-all hover:-translate-y-0.5"
+              >
+                <Link href="/contact">
+                  {t("wings.contactCta")}
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom gradient fade */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(to top, hsl(var(--background)), transparent)",
+          }}
+        />
+      </section>
+
+      {/* ====== PURPOSE SECTION ====== */}
+      <section className="py-16 md:py-20">
+        <div className="container-custom">
+          <RevealSection className="max-w-3xl">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading font-semibold mb-6 text-foreground tracking-tight">
+              {t("wings.main.purpose.title")}
+            </h2>
+            {t("wings.main.purpose.text")
+              .split("\n")
+              .filter(Boolean)
+              .map((paragraph, i) => (
+                <p
+                  key={i}
+                  className="text-lg text-muted-foreground leading-[1.8] max-w-prose mb-4 last:mb-0"
+                >
+                  {paragraph}
+                </p>
+              ))}
+          </RevealSection>
         </div>
       </section>
 
-      {/* Engage */}
-      <section className="py-20 border-t border-border bg-muted/30">
-        <div className="container-custom max-w-3xl">
-          <h2 className="reveal-section reveal-delay-1 text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-4">
-            {t("wings.main.engage.title")}
-          </h2>
-          <p className="reveal-section reveal-delay-2 text-lg text-foreground mb-8">
-            {t("wings.main.engage.text")}
-          </p>
-          <div className="reveal-section reveal-delay-3 flex flex-wrap gap-3">
-            <Button asChild className="hover-lift">
-              <Link href="/contact">
-                {t("wings.joinCta")}
-                <ArrowRight className="ml-1.5 w-4 h-4" />
+      <SectionDivider className="my-4" />
+
+      {/* ====== AFTER JOINING SECTION ====== */}
+      <section className="py-16 md:py-20 relative overflow-hidden">
+        {/* Subtle tinted background */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          aria-hidden="true"
+          style={{
+            background:
+              "linear-gradient(145deg, rgba(148,163,184,0.04) 0%, transparent 60%)",
+          }}
+        />
+
+        <div className="container-custom relative z-10">
+          <RevealSection className="max-w-3xl">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Shield className="w-5 h-5 text-primary" />
+              </div>
+              <h2 className="text-2xl md:text-3xl font-heading font-semibold text-foreground tracking-tight">
+                {t("wings.main.afterJoin.title")}
+              </h2>
+            </div>
+            <p className="text-lg text-muted-foreground leading-[1.8] max-w-prose">
+              {t("wings.main.afterJoin.text")}
+            </p>
+          </RevealSection>
+        </div>
+      </section>
+
+      <SectionDivider className="my-4" />
+
+      {/* ====== ACTIVITIES GRID ====== */}
+      <section className="py-16 md:py-24">
+        <div className="container-custom">
+          <RevealSection className="text-center mb-14">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading font-semibold text-foreground tracking-tight">
+              {t("wings.main.activities.title")}
+            </h2>
+          </RevealSection>
+
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+            {activities.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <RevealSection key={item.key} delay={index * 80}>
+                  <div className="relative bg-card border border-border rounded-xl p-6 h-full transition-all hover:shadow-md hover:-translate-y-1 hover:border-primary/20"
+                    style={{
+                      transitionDuration: "var(--dur-2)",
+                      transitionTimingFunction: "var(--ease-out)",
+                    }}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/5 border border-primary/10 flex items-center justify-center">
+                        <Icon className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1 pt-1">
+                        <p className="text-foreground leading-relaxed font-medium">
+                          {t(item.key)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </RevealSection>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <SectionDivider className="my-4" />
+
+      {/* ====== ENGAGE / CTA SECTION ====== */}
+      <section className="py-16 md:py-24 relative overflow-hidden">
+        {/* Background */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          aria-hidden="true"
+          style={{
+            background:
+              "radial-gradient(ellipse 70% 40% at 50% 50%, rgba(148,163,184,0.08), transparent 70%)",
+          }}
+        />
+
+        <div className="container-custom relative z-10">
+          <RevealSection className="max-w-3xl mx-auto text-center mb-12">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading font-semibold mb-4 text-foreground tracking-tight">
+              {t("wings.main.engage.title")}
+            </h2>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              {t("wings.main.engage.text")}
+            </p>
+          </RevealSection>
+
+          <RevealSection delay={100} className="flex flex-wrap justify-center gap-4">
+            <Button
+              size="lg"
+              asChild
+              className="px-8 shadow-md hover:shadow-lg transition-all hover:-translate-y-0.5"
+            >
+              <Link href="/recruitment">
+                {t("nav.recruitment")}
+                <ArrowRight className="ml-2 w-4 h-4" />
               </Link>
             </Button>
-            <Button variant="outline" asChild className="hover-lift">
+            <Button
+              size="lg"
+              variant="outline"
+              asChild
+              className="border-2 transition-all hover:-translate-y-0.5"
+            >
               <Link href="/contact">{t("wings.contactCta")}</Link>
             </Button>
-          </div>
+          </RevealSection>
+
+          {/* Security note */}
+          <RevealSection delay={200} className="max-w-2xl mx-auto mt-8">
+            <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+              <Shield className="w-3.5 h-3.5" />
+              <span>{t("recruitment.form.requiredHint")}</span>
+            </div>
+          </RevealSection>
         </div>
       </section>
     </div>

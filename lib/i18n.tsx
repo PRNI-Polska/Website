@@ -273,8 +273,46 @@ export const translations: Translations = {
   "wings.contactCta": { en: "Contact Us", pl: "Kontakt", de: "Kontakt" },
   
   // Wings - Main
-  "wings.main.title": { en: "Main Wing", pl: "Skrzydło Główne", de: "Hauptabteilung" },
-  "wings.main.tagline": { en: "The heart of the national movement", pl: "Serce ruchu narodowego", de: "Das Herz der nationalen Bewegung" },
+  "wings.main.title": { en: "Main Wing", pl: "Skrzydło Główne", de: "Hauptflügel" },
+  "wings.main.tagline": {
+    en: "The central organizational platform responsible for the development and coordination of PRNI's core activities in Poland.",
+    pl: "Centralna platforma organizacyjna odpowiedzialna za rozwój i koordynację podstawowych działań PRNI w kraju.",
+    de: "Die zentrale Organisationsplattform, verantwortlich für die Entwicklung und Koordination der Kernaktivitäten von PRNI im Inland.",
+  },
+  "wings.main.overline": { en: "PRNI · National Core", pl: "PRNI · Rdzeń Krajowy", de: "PRNI · Nationaler Kern" },
+  "wings.main.purpose.title": { en: "Our Purpose", pl: "Nasz Cel", de: "Unser Zweck" },
+  "wings.main.purpose.text": {
+    en: "The Main Wing forms the organizational core of PRNI, responsible for building, maintaining, and developing the movement's national structures and implementing its key initiatives. It ensures consistency of direction, coordinates the work of individual sections, and oversees the implementation of programmatic objectives in organizational practice.\n\nIt creates a structured space for organizational, educational, and communication activities, enabling members and associates to actively engage in developing the community and strengthening its operational capacity at the national level.",
+    pl: "Skrzydło Główne stanowi rdzeń organizacyjny PRNI, odpowiadający za budowę, utrzymanie i rozwój krajowych struktur ruchu oraz realizację jego kluczowych inicjatyw. Zapewnia spójność kierunku działania, koordynuje pracę poszczególnych sekcji oraz nadzoruje wdrażanie założeń programowych w praktyce organizacyjnej.\n\nTworzy ustrukturyzowaną przestrzeń do prowadzenia działalności organizacyjnej, edukacyjnej i komunikacyjnej, umożliwiając członkom i współpracownikom aktywne zaangażowanie w rozwój środowiska oraz wzmacnianie jego zaplecza operacyjnego na poziomie krajowym.",
+    de: "Der Hauptflügel bildet den organisatorischen Kern von PRNI, der für den Aufbau, die Pflege und die Entwicklung der nationalen Strukturen der Bewegung sowie die Umsetzung ihrer Schlüsselinitiativen verantwortlich ist. Er gewährleistet Richtungskonsistenz, koordiniert die Arbeit einzelner Sektionen und überwacht die Umsetzung programmatischer Ziele in der organisatorischen Praxis.\n\nEr schafft einen strukturierten Raum für organisatorische, bildungsbezogene und kommunikative Aktivitäten, der Mitgliedern und Mitarbeitern eine aktive Beteiligung an der Entwicklung der Gemeinschaft und der Stärkung ihrer operativen Kapazitäten auf nationaler Ebene ermöglicht.",
+  },
+  "wings.main.afterJoin.title": {
+    en: "After Joining",
+    pl: "Po dołączeniu",
+    de: "Nach dem Beitritt",
+  },
+  "wings.main.afterJoin.text": {
+    en: "After joining the Main Wing's activities, direct participation in the movement's initiatives becomes possible, such as organizing and participating in marches and protests, regional activity, informational and poster campaigns, participation in meetings and gatherings of local structures, community events, and other undertakings supporting the organization's ongoing activity.",
+    pl: "Po dołączeniu do działań Skrzydła Głównego możliwe jest bezpośrednie uczestnictwo w inicjatywach ruchu, takich jak organizacja i udział w marszach oraz protestach, działalność regionalna, akcje informacyjne i plakatowe, udział w spotkaniach i zebraniach struktur lokalnych, wydarzeniach środowiskowych oraz innych przedsięwzięciach wspierających bieżącą aktywność organizacji.",
+    de: "Nach dem Beitritt zu den Aktivitäten des Hauptflügels wird die direkte Teilnahme an Initiativen der Bewegung möglich, wie die Organisation und Teilnahme an Märschen und Protesten, regionale Aktivitäten, Informations- und Plakatkampagnen, Teilnahme an Sitzungen und Versammlungen lokaler Strukturen, Gemeinschaftsveranstaltungen und andere Unternehmungen zur Unterstützung der laufenden Tätigkeit der Organisation.",
+  },
+  "wings.main.activities.title": {
+    en: "Areas of Activity",
+    pl: "Obszary działania",
+    de: "Tätigkeitsbereiche",
+  },
+  "wings.main.activities.1": { en: "Marches & Protests", pl: "Marsze i protesty", de: "Märsche & Proteste" },
+  "wings.main.activities.2": { en: "Regional Operations", pl: "Działalność regionalna", de: "Regionale Tätigkeit" },
+  "wings.main.activities.3": { en: "Informational Campaigns", pl: "Akcje informacyjne i plakatowe", de: "Informations- & Plakatkampagnen" },
+  "wings.main.activities.4": { en: "Local Meetings & Gatherings", pl: "Spotkania i zebrania struktur lokalnych", de: "Lokale Treffen & Versammlungen" },
+  "wings.main.activities.5": { en: "Community Events", pl: "Wydarzenia środowiskowe", de: "Gemeinschaftsveranstaltungen" },
+  "wings.main.activities.6": { en: "Organizational Support", pl: "Wsparcie operacyjne organizacji", de: "Organisatorische Unterstützung" },
+  "wings.main.engage.title": { en: "Get Involved", pl: "Zaangażuj się", de: "Mach mit" },
+  "wings.main.engage.text": {
+    en: "Ready to take part in building the national movement from within? Join the Main Wing and contribute directly to PRNI's core mission in Poland.",
+    pl: "Gotowy, by współtworzyć ruch narodowy od wewnątrz? Dołącz do Skrzydła Głównego i weź bezpośredni udział w realizacji misji PRNI w kraju.",
+    de: "Bereit, die nationale Bewegung von innen mitzugestalten? Tritt dem Hauptflügel bei und trage direkt zur Kernmission von PRNI in Polen bei.",
+  },
   
   // Wings - Female
   "wings.female.title": { en: "Female Wing", pl: "Skrzydło Kobiece", de: "Frauenabteilung" },

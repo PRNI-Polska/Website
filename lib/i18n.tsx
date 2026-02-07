@@ -22,7 +22,7 @@ export const translations: Translations = {
   "nav.manifesto": { en: "Manifesto", pl: "Manifest", de: "Manifest" },
   "nav.recruitment": { en: "Recruitment", pl: "Rekrutacja", de: "Rekrutierung" },
   "nav.merch": { en: "Merch", pl: "Merch", de: "Merch" },
-  "nav.about": { en: "About", pl: "O nas", de: "Über uns" },
+  "nav.about": { en: "About National Integralism", pl: "O Narodowym Integralizmie", de: "Über den Nationalen Integralismus" },
   "nav.contact": { en: "Contact", pl: "Kontakt", de: "Kontakt" },
   "nav.join": { en: "Join", pl: "Dołącz", de: "Beitreten" },
   

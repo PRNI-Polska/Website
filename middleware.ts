@@ -304,18 +304,25 @@ export default withAuth(
     // ============================================
     setBaseUrl(req.url);
 
-    // Check if IP is already blocked by threat system
-    const ipBlockStatus = isIPBlocked(ip);
-    if (ipBlockStatus.blocked) {
-      logSecurityEvent("THREAT_BLOCKED", { ip, pathname, reason: ipBlockStatus.reason });
-      return blockAndLog(req, "RATE_LIMIT_ABUSE", "high", ip, `Blocked IP attempted access: ${pathname}`);
-    }
+    // Authenticated admins bypass the threat system IP block
+    // (so you never lock yourself out of your own admin panel)
+    const token = req.nextauth.token;
+    const isAuthenticated = !!token && token.role === "ADMIN";
 
-    // Track this request in the alert system
-    const requestTracking = trackRequest(ip, pathname);
-    if (requestTracking.blocked) {
-      logSecurityEvent("FLOOD_BLOCKED", { ip, pathname, reason: requestTracking.reason });
-      return blockAndLog(req, "BOT_FLOOD", "critical", ip, `Bot flood blocked: ${requestTracking.reason}`);
+    if (!isAuthenticated) {
+      // Check if IP is already blocked by threat system
+      const ipBlockStatus = isIPBlocked(ip);
+      if (ipBlockStatus.blocked) {
+        logSecurityEvent("THREAT_BLOCKED", { ip, pathname, reason: ipBlockStatus.reason });
+        return blockAndLog(req, "RATE_LIMIT_ABUSE", "high", ip, `Blocked IP attempted access: ${pathname}`);
+      }
+
+      // Track this request in the alert system
+      const requestTracking = trackRequest(ip, pathname);
+      if (requestTracking.blocked) {
+        logSecurityEvent("FLOOD_BLOCKED", { ip, pathname, reason: requestTracking.reason });
+        return blockAndLog(req, "BOT_FLOOD", "critical", ip, `Bot flood blocked: ${requestTracking.reason}`);
+      }
     }
 
     // ============================================

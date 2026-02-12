@@ -1,6 +1,7 @@
 // file: app/api/international-join/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/utils";
+import { escapeHtml } from "@/lib/security-alerts";
 
 interface InternationalJoinData {
   name: string;
@@ -65,29 +66,29 @@ Note: This person has acknowledged that participation does not constitute party 
         <table style="border-collapse: collapse; width: 100%; max-width: 600px;">
           <tr>
             <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold; width: 140px;">Name:</td>
-            <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.name}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(data.name)}</td>
           </tr>
           <tr>
             <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Email:</td>
-            <td style="padding: 8px; border-bottom: 1px solid #eee;"><a href="mailto:${data.email}">${data.email}</a></td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;"><a href="mailto:${escapeHtml(data.email)}">${escapeHtml(data.email)}</a></td>
           </tr>
           <tr>
             <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Country:</td>
-            <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.country}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(data.country)}</td>
           </tr>
           <tr>
             <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Languages:</td>
-            <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.languages || "<em>Not specified</em>"}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${data.languages ? escapeHtml(data.languages) : "<em>Not specified</em>"}</td>
           </tr>
           <tr>
             <td style="padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;">Interest Area:</td>
-            <td style="padding: 8px; border-bottom: 1px solid #eee;">${interestLabel}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(interestLabel)}</td>
           </tr>
         </table>
         
         ${data.message ? `
           <h3 style="margin-top: 20px;">Message:</h3>
-          <p style="background: #f5f5f5; padding: 15px; border-radius: 5px;">${data.message.replace(/\n/g, "<br>")}</p>
+          <p style="background: #f5f5f5; padding: 15px; border-radius: 5px;">${escapeHtml(data.message).replace(/\n/g, "<br>")}</p>
         ` : ""}
         
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">

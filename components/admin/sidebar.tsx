@@ -11,12 +11,14 @@ import {
   Users,
   ExternalLink,
   BarChart3,
+  ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  { name: "Security", href: "/admin/security", icon: ShieldAlert },
   { name: "Announcements", href: "/admin/announcements", icon: FileText },
   { name: "Events", href: "/admin/events", icon: Calendar },
   { name: "Manifesto", href: "/admin/manifesto", icon: Book },

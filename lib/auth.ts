@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { prisma } from "./db";
 import { loginSchema } from "./validations";
+import { trackLoginFailure } from "./security-alerts";
 
 // Extend the built-in session types
 declare module "next-auth" {
@@ -212,6 +213,8 @@ export const authOptions: NextAuthOptions = {
           if (!user) {
             logSecurityEvent("LOGIN_USER_NOT_FOUND", { email: normalizedEmail });
             recordFailedLogin(normalizedEmail);
+            // Track in security alert system for attack detection
+            trackLoginFailure("unknown", normalizedEmail);
             // Use generic message to prevent user enumeration
             throw new Error("Invalid email or password");
           }
@@ -224,6 +227,8 @@ export const authOptions: NextAuthOptions = {
               remainingAttempts: rateLimit.remainingAttempts - 1 
             });
             recordFailedLogin(normalizedEmail);
+            // Track in security alert system for brute force detection
+            trackLoginFailure("unknown", normalizedEmail);
             await logAuthAudit("LOGIN_FAILED", normalizedEmail, false, "Invalid password");
             throw new Error("Invalid email or password");
           }

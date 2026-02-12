@@ -307,33 +307,22 @@ export function getActiveThreats(): { ip: string; tracker: ThreatTracker }[] {
 // by calling a Node.js API route to write to DB
 // ============================================
 
-// We need the base URL to call our own API
-function getBaseUrl(requestUrl?: string): string {
-  // If we have a request URL, derive the origin
-  if (requestUrl) {
-    try {
-      const url = new URL(requestUrl);
-      return url.origin;
-    } catch {
-      // fall through
-    }
-  }
-  // Fallback to env vars
-  if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
+// Get the direct deployment URL (bypasses domain redirects like 308)
+function getBaseUrl(): string {
+  // VERCEL_URL is the actual deployment URL (no domain redirects)
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
   return "http://localhost:3000";
 }
 
-// Store the base URL once we learn it from a request
-let _cachedBaseUrl: string | null = null;
-
 /**
- * Call this from middleware to set the base URL for internal API calls
+ * Call this from middleware to cache the base URL from the request
+ * Falls back to VERCEL_URL which bypasses 308 domain redirects
  */
-export function setBaseUrl(requestUrl: string): void {
-  if (!_cachedBaseUrl) {
-    _cachedBaseUrl = getBaseUrl(requestUrl);
-  }
+export function setBaseUrl(_requestUrl: string): void {
+  // We intentionally don't use requestUrl because the custom domain
+  // may trigger 308 redirects that break the internal API call.
+  // VERCEL_URL always works directly.
 }
 
 function persistAlert(alert: SecurityAlert): void {
@@ -350,7 +339,7 @@ function persistAlert(alert: SecurityAlert): void {
   );
 
   // Fire-and-forget: call our internal API to persist to database
-  const baseUrl = _cachedBaseUrl || getBaseUrl();
+  const baseUrl = getBaseUrl();
   const payload = JSON.stringify({
     type: alert.type,
     severity: alert.severity,
@@ -362,16 +351,27 @@ function persistAlert(alert: SecurityAlert): void {
   });
 
   // Use fetch (available in Edge Runtime) - fire and forget
-  fetch(`${baseUrl}/api/internal/security-log`, {
+  const url = `${baseUrl}/api/internal/security-log`;
+  console.log(`[SECURITY] Persisting alert to: ${url}`);
+
+  fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-Internal-Secret": process.env.NEXTAUTH_SECRET || "internal",
     },
     body: payload,
-  }).catch((err) => {
-    console.error("Failed to persist alert via API:", err);
-  });
+  })
+    .then((res) => {
+      if (!res.ok) {
+        console.error(`[SECURITY] Alert persist failed: ${res.status} ${res.statusText}`);
+      } else {
+        console.log(`[SECURITY] Alert persisted successfully`);
+      }
+    })
+    .catch((err) => {
+      console.error(`[SECURITY] Alert persist fetch error:`, err);
+    });
 }
 
 // ============================================

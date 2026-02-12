@@ -45,9 +45,9 @@ interface LoginAttempt {
 }
 
 const loginAttempts = new Map<string, LoginAttempt>();
-const MAX_LOGIN_ATTEMPTS = 3; // Reduced from 5 for political site
-const LOCKOUT_DURATION = 30 * 60 * 1000; // 30 minutes lockout
-const PROGRESSIVE_LOCKOUT = true; // Each lockout doubles
+const MAX_LOGIN_ATTEMPTS = 3;
+const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 minutes base lockout
+const PROGRESSIVE_LOCKOUT = true; // Doubles each time: 5min → 10min → 20min → 30min (capped)
 
 function checkLoginRateLimit(email: string): { allowed: boolean; remainingAttempts: number; lockoutRemaining?: number } {
   const now = Date.now();
@@ -87,10 +87,11 @@ function checkLoginRateLimit(email: string): { allowed: boolean; remainingAttemp
 
   // Check if exceeded attempts
   if (record.count >= MAX_LOGIN_ATTEMPTS) {
-    // Apply progressive lockout
-    const lockoutMultiplier = PROGRESSIVE_LOCKOUT ? Math.min(record.count - MAX_LOGIN_ATTEMPTS + 1, 4) : 1;
+    // Apply progressive lockout: 5min → 10min → 20min → 30min (capped)
+    const lockoutMultiplier = PROGRESSIVE_LOCKOUT ? Math.pow(2, Math.min(record.count - MAX_LOGIN_ATTEMPTS, 3)) : 1;
+    const lockoutMs = Math.min(LOCKOUT_DURATION * lockoutMultiplier, 30 * 60 * 1000);
     record.blocked = true;
-    record.blockExpiry = now + (LOCKOUT_DURATION * lockoutMultiplier);
+    record.blockExpiry = now + lockoutMs;
     const lockoutRemaining = Math.ceil((record.blockExpiry - now) / 1000 / 60);
     
     logSecurityEvent("LOGIN_LOCKOUT", { 

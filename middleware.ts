@@ -261,6 +261,36 @@ function logSecurityEvent(type: string, details: Record<string, unknown>): void 
 }
 
 // ============================================
+// REWRITE TO SECURITY LOG (persists alert to DB and returns 403)
+// Instead of returning 403 directly from Edge (which can't write to DB),
+// we rewrite the request to a Node.js API route that logs + blocks.
+// ============================================
+function blockAndLog(
+  req: NextRequest,
+  alertType: string,
+  severity: string,
+  ip: string,
+  details: string,
+  patternType?: string,
+): NextResponse {
+  const url = req.nextUrl.clone();
+  url.pathname = "/api/internal/security-log";
+
+  const headers = new Headers(req.headers);
+  headers.set("X-Security-Alert-Type", alertType);
+  headers.set("X-Security-Alert-Severity", severity);
+  headers.set("X-Security-Alert-IP", ip);
+  headers.set("X-Security-Alert-Path", req.nextUrl.pathname);
+  headers.set("X-Security-Alert-UA", req.headers.get("user-agent") || "unknown");
+  headers.set("X-Security-Alert-Details", details);
+  if (patternType) {
+    headers.set("X-Security-Alert-Metadata", JSON.stringify({ patternType }));
+  }
+
+  return NextResponse.rewrite(url, { request: { headers } });
+}
+
+// ============================================
 // MAIN MIDDLEWARE
 // ============================================
 export default withAuth(
@@ -272,25 +302,20 @@ export default withAuth(
     // ============================================
     // SECURITY ALERT SYSTEM - Track all requests
     // ============================================
-    // Set the base URL so alerts can be persisted via internal API
     setBaseUrl(req.url);
 
     // Check if IP is already blocked by threat system
     const ipBlockStatus = isIPBlocked(ip);
     if (ipBlockStatus.blocked) {
       logSecurityEvent("THREAT_BLOCKED", { ip, pathname, reason: ipBlockStatus.reason });
-      return new NextResponse(null, { status: 403 });
+      return blockAndLog(req, "RATE_LIMIT_ABUSE", "high", ip, `Blocked IP attempted access: ${pathname}`);
     }
 
     // Track this request in the alert system
     const requestTracking = trackRequest(ip, pathname);
     if (requestTracking.blocked) {
       logSecurityEvent("FLOOD_BLOCKED", { ip, pathname, reason: requestTracking.reason });
-      const response = NextResponse.json(
-        { error: "Access denied", message: "Your IP has been temporarily blocked." },
-        { status: 403 }
-      );
-      return applySecurityHeaders(response);
+      return blockAndLog(req, "BOT_FLOOD", "critical", ip, `Bot flood blocked: ${requestTracking.reason}`);
     }
 
     // ============================================
@@ -299,9 +324,29 @@ export default withAuth(
     const suspiciousCheck = detectSuspiciousPattern(req);
     if (suspiciousCheck.suspicious) {
       logSecurityEvent("BLOCKED_SUSPICIOUS", { ip, pathname, userAgent, pattern: suspiciousCheck.patternType });
-      // Feed into security alert system
+      // Track in-memory + rewrite to logging endpoint that persists to DB
       trackSuspiciousRequest(ip, pathname, userAgent, suspiciousCheck.patternType);
-      return new NextResponse(null, { status: 404 });
+      
+      const threatTypeMap: Record<string, string> = {
+        "path_traversal": "PATH_TRAVERSAL",
+        "xss": "XSS_ATTEMPT",
+        "sql_injection": "SQL_INJECTION",
+        "scanner": "SCANNER_DETECTED",
+        "suspicious_ua": "SUSPICIOUS_UA",
+        "env_access": "ENV_FILE_ACCESS",
+        "admin_probe": "ADMIN_PROBE",
+        "payload_injection": "PAYLOAD_INJECTION",
+      };
+      const alertType = threatTypeMap[suspiciousCheck.patternType] || "SCANNER_DETECTED";
+      
+      return blockAndLog(
+        req,
+        alertType,
+        "medium",
+        ip,
+        `Suspicious pattern detected: ${suspiciousCheck.patternType} on ${pathname}`,
+        suspiciousCheck.patternType,
+      );
     }
     
     // Determine route type
@@ -382,12 +427,22 @@ export default withAuth(
       // Track rate limit hit in alert system
       trackRateLimitHit(ip, pathname, rateLimitType);
 
+      // Log to DB via rewrite for repeated abusers
+      if (rateLimit.blocked) {
+        return blockAndLog(
+          req,
+          "RATE_LIMIT_ABUSE",
+          "high",
+          ip,
+          `Rate limit exceeded and IP blocked (type: ${rateLimitType}) on ${pathname}`,
+        );
+      }
+
+      // Normal rate limit (not blocked yet) - return 429 directly
       const response = NextResponse.json(
         {
           error: "Too many requests",
-          message: rateLimit.blocked 
-            ? "Your IP has been temporarily blocked due to suspicious activity."
-            : "Rate limit exceeded. Please try again later.",
+          message: "Rate limit exceeded. Please try again later.",
           retryAfter: Math.ceil(rateLimit.resetIn / 1000),
         },
         { status: 429 }

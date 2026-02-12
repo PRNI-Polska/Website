@@ -359,11 +359,18 @@ export default function SecurityPage() {
                             </span>
                           </div>
                           <p className="text-sm mt-1">{alert.details}</p>
-                          <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground flex-wrap">
                             <span className="flex items-center gap-1">
                               <Globe className="h-3 w-3" />
                               {alert.ipAddress}
                             </span>
+                            {alert.metadata?.country && (
+                              <span className="flex items-center gap-1 font-medium text-foreground/70">
+                                {alert.metadata.city && `${alert.metadata.city as string}, `}
+                                {alert.metadata.region && `${alert.metadata.region as string}, `}
+                                {alert.metadata.country as string}
+                              </span>
+                            )}
                             {alert.path && (
                               <span className="font-mono">{alert.path}</span>
                             )}

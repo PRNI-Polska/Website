@@ -264,6 +264,7 @@ function logSecurityEvent(type: string, details: Record<string, unknown>): void 
 // PERSIST ALERT TO DB (awaited fetch to internal API)
 // ============================================
 async function saveAlert(
+  req: NextRequest,
   alertType: string,
   severity: string,
   ip: string,
@@ -276,6 +277,20 @@ async function saveAlert(
   const base = process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
     : process.env.NEXTAUTH_URL || "http://localhost:3000";
+
+  // Extract geolocation from Cloudflare / Vercel headers
+  const country = req.headers.get("cf-ipcountry") || req.headers.get("x-vercel-ip-country") || null;
+  const city = req.headers.get("cf-ipcity") || req.headers.get("x-vercel-ip-city") || null;
+  const region = req.headers.get("cf-region") || req.headers.get("x-vercel-ip-country-region") || null;
+  const latitude = req.headers.get("x-vercel-ip-latitude") || null;
+  const longitude = req.headers.get("x-vercel-ip-longitude") || null;
+
+  const metadata: Record<string, unknown> = {};
+  if (patternType) metadata.patternType = patternType;
+  if (country) metadata.country = country;
+  if (city) metadata.city = city;
+  if (region) metadata.region = region;
+  if (latitude && longitude) metadata.coordinates = { lat: latitude, lon: longitude };
 
   try {
     const res = await fetch(`${base}/api/internal/security-log`, {
@@ -291,10 +306,10 @@ async function saveAlert(
         path,
         userAgent: userAgent.slice(0, 200),
         details: details.slice(0, 500),
-        metadata: patternType ? JSON.stringify({ patternType }) : null,
+        metadata: Object.keys(metadata).length > 0 ? JSON.stringify(metadata) : null,
       }),
     });
-    console.log(`[SECURITY] Alert saved: ${alertType} (${res.status})`);
+    console.log(`[SECURITY] Alert saved: ${alertType} from ${country || "unknown"} (${res.status})`);
   } catch (err) {
     console.error(`[SECURITY] Failed to save alert:`, err);
   }
@@ -324,7 +339,7 @@ export default withAuth(
       const ipBlockStatus = isIPBlocked(ip);
       if (ipBlockStatus.blocked) {
         logSecurityEvent("THREAT_BLOCKED", { ip, pathname, reason: ipBlockStatus.reason });
-        await saveAlert("RATE_LIMIT_ABUSE", "high", ip, pathname, userAgent, `Blocked IP attempted access: ${pathname}`);
+        await saveAlert(req, "RATE_LIMIT_ABUSE", "high", ip, pathname, userAgent, `Blocked IP attempted access: ${pathname}`);
         return new NextResponse(null, { status: 403 });
       }
 
@@ -332,7 +347,7 @@ export default withAuth(
       const requestTracking = trackRequest(ip, pathname);
       if (requestTracking.blocked) {
         logSecurityEvent("FLOOD_BLOCKED", { ip, pathname, reason: requestTracking.reason });
-        await saveAlert("BOT_FLOOD", "critical", ip, pathname, userAgent, `Bot flood blocked: ${requestTracking.reason}`);
+        await saveAlert(req, "BOT_FLOOD", "critical", ip, pathname, userAgent, `Bot flood blocked: ${requestTracking.reason}`);
         return new NextResponse(null, { status: 403 });
       }
     }
@@ -358,7 +373,7 @@ export default withAuth(
       };
       const alertType = threatTypeMap[suspiciousCheck.patternType] || "SCANNER_DETECTED";
       
-      await saveAlert(alertType, "medium", ip, pathname, userAgent, `Suspicious pattern detected: ${suspiciousCheck.patternType} on ${pathname}`, suspiciousCheck.patternType);
+      await saveAlert(req, alertType, "medium", ip, pathname, userAgent, `Suspicious pattern detected: ${suspiciousCheck.patternType} on ${pathname}`, suspiciousCheck.patternType);
       return new NextResponse(null, { status: 403 });
     }
     
@@ -442,7 +457,7 @@ export default withAuth(
 
       // Log to DB for repeated abusers
       if (rateLimit.blocked) {
-        await saveAlert("RATE_LIMIT_ABUSE", "high", ip, pathname, userAgent, `Rate limit exceeded and IP blocked (type: ${rateLimitType}) on ${pathname}`);
+        await saveAlert(req, "RATE_LIMIT_ABUSE", "high", ip, pathname, userAgent, `Rate limit exceeded and IP blocked (type: ${rateLimitType}) on ${pathname}`);
         return new NextResponse(null, { status: 403 });
       }
 

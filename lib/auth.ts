@@ -195,7 +195,54 @@ export const authOptions: NextAuthOptions = {
           const { email, password } = parsed.data;
           const normalizedEmail = email.toLowerCase();
 
-          // Check rate limiting
+          // Check if this is a 2FA challenge token login
+          // (password field contains the challengeToken after 2FA verification)
+          const challengeToken = (credentials as Record<string, string>)?.challengeToken;
+          
+          if (challengeToken) {
+            // Verify the 2FA challenge token
+            const challenge = await prisma.twoFactorCode.findUnique({
+              where: { challengeToken },
+            });
+
+            if (!challenge || !challenge.verified || challenge.used || new Date() > challenge.expiresAt) {
+              throw new Error("Invalid or expired verification. Please log in again.");
+            }
+
+            if (challenge.email !== normalizedEmail) {
+              throw new Error("Invalid verification");
+            }
+
+            // Mark as used
+            await prisma.twoFactorCode.update({
+              where: { id: challenge.id },
+              data: { used: true },
+            });
+
+            // Find the user
+            const user = await prisma.user.findUnique({
+              where: { email: normalizedEmail },
+            });
+
+            if (!user || user.role !== "ADMIN") {
+              throw new Error("Access denied");
+            }
+
+            // Success via 2FA
+            resetLoginAttempts(normalizedEmail);
+            logSecurityEvent("LOGIN_SUCCESS_2FA", { email: normalizedEmail, userId: user.id });
+            await logAuthAudit("LOGIN_SUCCESS", normalizedEmail, true, "2FA verified");
+
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+            };
+          }
+
+          // Regular password login (should not be used directly anymore,
+          // but kept as fallback)
           const rateLimit = checkLoginRateLimit(normalizedEmail);
           if (!rateLimit.allowed) {
             logSecurityEvent("LOGIN_RATE_LIMITED", { 
@@ -213,13 +260,11 @@ export const authOptions: NextAuthOptions = {
           if (!user) {
             logSecurityEvent("LOGIN_USER_NOT_FOUND", { email: normalizedEmail });
             recordFailedLogin(normalizedEmail);
-            // Track in security alert system for attack detection
             trackLoginFailure("unknown", normalizedEmail);
-            // Use generic message to prevent user enumeration
             throw new Error("Invalid email or password");
           }
 
-          // Verify password with timing-safe comparison
+          // Verify password
           const isValidPassword = await compare(password, user.passwordHash);
           if (!isValidPassword) {
             logSecurityEvent("LOGIN_INVALID_PASSWORD", { 
@@ -227,31 +272,19 @@ export const authOptions: NextAuthOptions = {
               remainingAttempts: rateLimit.remainingAttempts - 1 
             });
             recordFailedLogin(normalizedEmail);
-            // Track in security alert system for brute force detection
             trackLoginFailure("unknown", normalizedEmail);
             await logAuthAudit("LOGIN_FAILED", normalizedEmail, false, "Invalid password");
             throw new Error("Invalid email or password");
           }
 
-          // Verify user has admin role
           if (user.role !== "ADMIN") {
             logSecurityEvent("LOGIN_NON_ADMIN", { email: normalizedEmail, role: user.role });
             await logAuthAudit("LOGIN_DENIED", normalizedEmail, false, "Non-admin user");
             throw new Error("Access denied");
           }
 
-          // Success - reset rate limit
-          resetLoginAttempts(normalizedEmail);
-          
-          logSecurityEvent("LOGIN_SUCCESS", { email: normalizedEmail, userId: user.id });
-          await logAuthAudit("LOGIN_SUCCESS", normalizedEmail, true);
-
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-          };
+          // Direct password login without 2FA - block it, require 2FA
+          throw new Error("Two-factor authentication required");
         } catch (error) {
           console.error("Auth error:", error);
           throw error;

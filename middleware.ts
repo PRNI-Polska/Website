@@ -474,9 +474,8 @@ export default withAuth(
     }
     
     // ============================================
-    // AUTH CHECKS
+    // AUTH CHECKS (token already declared above)
     // ============================================
-    const token = req.nextauth.token;
     
     // Allow access to login page
     if (isLoginPage) {

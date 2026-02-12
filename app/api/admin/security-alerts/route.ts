@@ -7,6 +7,8 @@ import {
   getThreatSummary,
   resolveAlert,
   resolveAlertsByIP,
+} from "@/lib/security-alerts-db";
+import {
   getActiveThreats,
   type ThreatSeverity,
   type ThreatType,
@@ -14,15 +16,6 @@ import {
 
 /**
  * GET /api/admin/security-alerts
- * Fetch security alerts with optional filters
- * 
- * Query params:
- *   - action: "list" | "summary" | "active-threats" (default: "list")
- *   - severity: "low" | "medium" | "high" | "critical"
- *   - type: threat type filter
- *   - resolved: "true" | "false"
- *   - since: ISO date string
- *   - limit: number (default: 50)
  */
 export async function GET(request: NextRequest) {
   try {
@@ -42,7 +35,6 @@ export async function GET(request: NextRequest) {
 
     if (action === "active-threats") {
       const threats = getActiveThreats();
-      // Serialize the Set for JSON
       const serialized = threats.map((t) => ({
         ip: t.ip,
         tracker: {
@@ -53,7 +45,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ threats: serialized });
     }
 
-    // Default: list alerts
     const severity = params.get("severity") as ThreatSeverity | null;
     const type = params.get("type") as ThreatType | null;
     const resolvedParam = params.get("resolved");
@@ -80,12 +71,6 @@ export async function GET(request: NextRequest) {
 
 /**
  * PATCH /api/admin/security-alerts
- * Resolve alerts
- * 
- * Body:
- *   - action: "resolve" | "resolve-ip"
- *   - alertId: string (for "resolve")
- *   - ipAddress: string (for "resolve-ip")
  */
 export async function PATCH(request: NextRequest) {
   try {
@@ -109,7 +94,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: "Invalid action. Use 'resolve' with alertId or 'resolve-ip' with ipAddress." },
+      { error: "Invalid action" },
       { status: 400 }
     );
   } catch (error) {

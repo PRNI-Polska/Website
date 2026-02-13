@@ -6,6 +6,7 @@ import { compare } from "bcryptjs";
 import { prisma } from "./db";
 import { loginSchema } from "./validations";
 import { trackLoginFailure } from "./security-alerts";
+import { getRedis } from "./redis";
 
 // Extend the built-in session types
 declare module "next-auth" {
@@ -49,9 +50,52 @@ const MAX_LOGIN_ATTEMPTS = 3;
 const LOCKOUT_DURATION = 5 * 60 * 1000; // 5 minutes base lockout
 const PROGRESSIVE_LOCKOUT = true; // Doubles each time: 5min → 10min → 20min → 30min (capped)
 
-function checkLoginRateLimit(email: string): { allowed: boolean; remainingAttempts: number; lockoutRemaining?: number } {
+async function checkLoginRateLimit(email: string): Promise<{ allowed: boolean; remainingAttempts: number; lockoutRemaining?: number }> {
   const now = Date.now();
   const normalizedEmail = email.toLowerCase();
+
+  // ── Try Redis first (distributed, serverless-safe) ──
+  const redis = getRedis();
+  if (redis) {
+    try {
+      const attemptsKey = `auth:attempts:${normalizedEmail}`;
+      const blockKey = `auth:blocked:${normalizedEmail}`;
+
+      // Check if currently blocked
+      const blockedUntil = await redis.get<number>(blockKey);
+      if (blockedUntil && now < blockedUntil) {
+        const lockoutRemaining = Math.ceil((blockedUntil - now) / 1000 / 60);
+        return { allowed: false, remainingAttempts: 0, lockoutRemaining };
+      }
+
+      // Get current attempt count
+      const attempts = (await redis.get<number>(attemptsKey)) || 0;
+
+      if (attempts >= MAX_LOGIN_ATTEMPTS) {
+        // Progressive lockout: 5min → 10min → 20min → 30min (capped)
+        const excess = attempts - MAX_LOGIN_ATTEMPTS;
+        const lockoutMultiplier = PROGRESSIVE_LOCKOUT ? Math.pow(2, Math.min(excess, 3)) : 1;
+        const lockoutMs = Math.min(LOCKOUT_DURATION * lockoutMultiplier, 30 * 60 * 1000);
+
+        await redis.set(blockKey, now + lockoutMs, { px: lockoutMs });
+        const lockoutRemaining = Math.ceil(lockoutMs / 1000 / 60);
+
+        logSecurityEvent("LOGIN_LOCKOUT", {
+          email: normalizedEmail,
+          attempts,
+          lockoutMinutes: lockoutRemaining,
+        });
+
+        return { allowed: false, remainingAttempts: 0, lockoutRemaining };
+      }
+
+      return { allowed: true, remainingAttempts: MAX_LOGIN_ATTEMPTS - attempts };
+    } catch (err) {
+      console.error("[AUTH] Redis rate limit error, falling back to in-memory:", err);
+    }
+  }
+
+  // ── In-memory fallback ──
   const record = loginAttempts.get(normalizedEmail);
 
   if (!record) {
@@ -64,13 +108,11 @@ function checkLoginRateLimit(email: string): { allowed: boolean; remainingAttemp
     return { allowed: true, remainingAttempts: MAX_LOGIN_ATTEMPTS - 1 };
   }
 
-  // Check if currently blocked
   if (record.blocked && now < record.blockExpiry) {
     const lockoutRemaining = Math.ceil((record.blockExpiry - now) / 1000 / 60);
     return { allowed: false, remainingAttempts: 0, lockoutRemaining };
   }
 
-  // Reset if block has expired
   if (record.blocked && now >= record.blockExpiry) {
     record.blocked = false;
     record.count = 1;
@@ -78,16 +120,13 @@ function checkLoginRateLimit(email: string): { allowed: boolean; remainingAttemp
     return { allowed: true, remainingAttempts: MAX_LOGIN_ATTEMPTS - 1 };
   }
 
-  // Reset if enough time has passed (1 hour)
   if (now - record.lastAttempt > 60 * 60 * 1000) {
     record.count = 1;
     record.lastAttempt = now;
     return { allowed: true, remainingAttempts: MAX_LOGIN_ATTEMPTS - 1 };
   }
 
-  // Check if exceeded attempts
   if (record.count >= MAX_LOGIN_ATTEMPTS) {
-    // Apply progressive lockout: 5min → 10min → 20min → 30min (capped)
     const lockoutMultiplier = PROGRESSIVE_LOCKOUT ? Math.pow(2, Math.min(record.count - MAX_LOGIN_ATTEMPTS, 3)) : 1;
     const lockoutMs = Math.min(LOCKOUT_DURATION * lockoutMultiplier, 30 * 60 * 1000);
     record.blocked = true;
@@ -108,16 +147,43 @@ function checkLoginRateLimit(email: string): { allowed: boolean; remainingAttemp
   return { allowed: true, remainingAttempts: MAX_LOGIN_ATTEMPTS - record.count };
 }
 
-function resetLoginAttempts(email: string): void {
-  loginAttempts.delete(email.toLowerCase());
+async function resetLoginAttempts(email: string): Promise<void> {
+  const normalizedEmail = email.toLowerCase();
+  loginAttempts.delete(normalizedEmail);
+
+  const redis = getRedis();
+  if (redis) {
+    try {
+      await redis.del(`auth:attempts:${normalizedEmail}`, `auth:blocked:${normalizedEmail}`);
+    } catch (err) {
+      console.error("[AUTH] Redis cleanup error:", err);
+    }
+  }
 }
 
-function recordFailedLogin(email: string): void {
+async function recordFailedLogin(email: string): Promise<void> {
   const normalizedEmail = email.toLowerCase();
+
+  // In-memory
   const record = loginAttempts.get(normalizedEmail);
   if (record) {
     record.count++;
     record.lastAttempt = Date.now();
+  }
+
+  // Redis
+  const redis = getRedis();
+  if (redis) {
+    try {
+      const key = `auth:attempts:${normalizedEmail}`;
+      await redis.incr(key);
+      const ttl = await redis.ttl(key);
+      if (ttl < 0) {
+        await redis.expire(key, 3600); // 1 hour window
+      }
+    } catch (err) {
+      console.error("[AUTH] Redis record login error:", err);
+    }
   }
 }
 
@@ -230,7 +296,7 @@ export const authOptions: NextAuthOptions = {
             }
 
             // Success via 2FA
-            resetLoginAttempts(normalizedEmail);
+            await resetLoginAttempts(normalizedEmail);
             logSecurityEvent("LOGIN_SUCCESS_2FA", { email: normalizedEmail, userId: user.id });
             await logAuthAudit("LOGIN_SUCCESS", normalizedEmail, true, "2FA verified");
 
@@ -244,7 +310,7 @@ export const authOptions: NextAuthOptions = {
 
           // Regular password login (should not be used directly anymore,
           // but kept as fallback)
-          const rateLimit = checkLoginRateLimit(normalizedEmail);
+          const rateLimit = await checkLoginRateLimit(normalizedEmail);
           if (!rateLimit.allowed) {
             logSecurityEvent("LOGIN_RATE_LIMITED", { 
               email: normalizedEmail,
@@ -260,7 +326,7 @@ export const authOptions: NextAuthOptions = {
 
           if (!user) {
             logSecurityEvent("LOGIN_USER_NOT_FOUND", { email: normalizedEmail });
-            recordFailedLogin(normalizedEmail);
+            await recordFailedLogin(normalizedEmail);
             trackLoginFailure("unknown", normalizedEmail);
             throw new Error("Invalid email or password");
           }
@@ -272,7 +338,7 @@ export const authOptions: NextAuthOptions = {
               email: normalizedEmail,
               remainingAttempts: rateLimit.remainingAttempts - 1 
             });
-            recordFailedLogin(normalizedEmail);
+            await recordFailedLogin(normalizedEmail);
             trackLoginFailure("unknown", normalizedEmail);
             await logAuthAudit("LOGIN_FAILED", normalizedEmail, false, "Invalid password");
             throw new Error("Invalid email or password");
@@ -331,7 +397,7 @@ export const authOptions: NextAuthOptions = {
       name: `__Secure-next-auth.session-token`,
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'strict',
         path: '/',
         secure: true,
       },

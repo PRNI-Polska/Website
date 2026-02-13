@@ -1,76 +1,85 @@
 // file: app/api/internal/security-log/route.ts
-// Receives rewritten requests from middleware and persists security alerts to DB.
-// Alert data is passed as URL search params (survives rewrites reliably).
+// Internal API to persist security alerts to the database.
+//
+// SECURITY HARDENED:
+//  - POST only (all other methods → 405)
+//  - X-Internal-Secret required on ALL code paths
+//  - Input lengths capped before DB write
 
 import { NextRequest, NextResponse } from "next/server";
 import { writeAlertToDB } from "@/lib/security-alerts-db";
 
-async function handleAlert(request: NextRequest) {
-  const params = request.nextUrl.searchParams;
-  const alertType = params.get("t");
-
-  // Rewritten request from middleware (has alert params)
-  if (alertType) {
-    const alertData = {
-      type: alertType,
-      severity: params.get("s") || "medium",
-      ipAddress: params.get("ip") || "unknown",
-      path: params.get("p") || null,
-      userAgent: params.get("ua") || null,
-      details: params.get("d") || "Suspicious request blocked",
-      metadata: params.get("pt") ? JSON.stringify({ patternType: params.get("pt") }) : null,
-    };
-
-    console.log(`[SECURITY-LOG] Writing alert: ${alertData.type} | IP: ${alertData.ipAddress} | ${alertData.details}`);
-
-    try {
-      await writeAlertToDB(alertData);
-      console.log(`[SECURITY-LOG] Saved to database`);
-    } catch (error) {
-      console.error("[SECURITY-LOG] DB write failed:", error);
-    }
-
-    return new NextResponse(null, { status: 403 });
+// ============================================
+// AUTH
+// ============================================
+function isAuthorized(request: NextRequest): boolean {
+  const secret = process.env.NEXTAUTH_SECRET;
+  if (!secret) {
+    console.error(
+      "[SECURITY-LOG] NEXTAUTH_SECRET is not set — refusing all requests",
+    );
+    return false;
   }
 
-  // Direct POST call from API routes (honeypot triggers etc.)
-  if (request.method === "POST") {
-    try {
-      const secret = request.headers.get("X-Internal-Secret");
-      const expectedSecret = process.env.NEXTAUTH_SECRET || "internal";
-
-      if (secret !== expectedSecret) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-      }
-
-      const body = await request.json();
-
-      if (!body.type || !body.severity || !body.ipAddress || !body.details) {
-        return NextResponse.json({ error: "Missing fields" }, { status: 400 });
-      }
-
-      await writeAlertToDB({
-        type: body.type,
-        severity: body.severity,
-        ipAddress: body.ipAddress,
-        path: body.path || null,
-        userAgent: body.userAgent || null,
-        details: body.details,
-        metadata: body.metadata || null,
-      });
-
-      return NextResponse.json({ success: true });
-    } catch (error) {
-      console.error("Security log POST error:", error);
-      return NextResponse.json({ error: "Failed" }, { status: 500 });
-    }
-  }
-
-  return new NextResponse(null, { status: 404 });
+  const provided = request.headers.get("X-Internal-Secret");
+  return !!provided && provided === secret;
 }
 
-export async function GET(request: NextRequest) { return handleAlert(request); }
-export async function POST(request: NextRequest) { return handleAlert(request); }
-export async function PUT(request: NextRequest) { return handleAlert(request); }
-export async function DELETE(request: NextRequest) { return handleAlert(request); }
-export async function PATCH(request: NextRequest) { return handleAlert(request); }
+// ============================================
+// POST — persist an alert
+// ============================================
+export async function POST(request: NextRequest) {
+  try {
+    if (!isAuthorized(request)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const body = await request.json();
+
+    if (!body.type || !body.severity || !body.ipAddress || !body.details) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 },
+      );
+    }
+
+    // Cap input lengths before writing to DB
+    await writeAlertToDB({
+      type: String(body.type).slice(0, 50),
+      severity: String(body.severity).slice(0, 10),
+      ipAddress: String(body.ipAddress).slice(0, 45),
+      path: body.path ? String(body.path).slice(0, 500) : null,
+      userAgent: body.userAgent ? String(body.userAgent).slice(0, 300) : null,
+      details: String(body.details).slice(0, 1000),
+      metadata: body.metadata ? String(body.metadata).slice(0, 2000) : null,
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("[SECURITY-LOG] Error:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
+  }
+}
+
+// ============================================
+// All other HTTP methods → 405
+// ============================================
+function methodNotAllowed() {
+  return new NextResponse(null, {
+    status: 405,
+    headers: { Allow: "POST" },
+  });
+}
+
+export async function GET() {
+  return methodNotAllowed();
+}
+export async function PUT() {
+  return methodNotAllowed();
+}
+export async function DELETE() {
+  return methodNotAllowed();
+}
+export async function PATCH() {
+  return methodNotAllowed();
+}

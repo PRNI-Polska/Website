@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { recruitmentFormSchema } from "@/lib/validations";
-import { checkRateLimit, validateHoneypot } from "@/lib/utils";
+import { validateHoneypot } from "@/lib/utils";
 import { escapeHtml, trackHoneypotTrigger } from "@/lib/security-alerts";
+import { rateLimit, getClientIP, validateOrigin, RATE_LIMITS } from "@/lib/rate-limit";
 
 async function sendEmail(data: { name: string; email: string; location?: string; message: string }) {
   // If no API key configured, just log
@@ -64,18 +65,22 @@ async function sendEmail(data: { name: string; email: string; location?: string;
 
 export async function POST(request: NextRequest) {
   try {
-    const ip =
-      request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    // Origin validation (CSRF protection)
+    if (!validateOrigin(request)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
-    // Rate limiting: 2 requests per hour per IP
-    const rateLimit = checkRateLimit(`recruitment:${ip}`, 2, 60 * 60 * 1000);
-    if (!rateLimit.allowed) {
+    const ip = getClientIP(request);
+
+    // Rate limiting: 2 requests per hour per IP (Redis-backed)
+    const rl = await rateLimit(ip, "recruitment", RATE_LIMITS.recruitment.maxRequests, RATE_LIMITS.recruitment.windowMs, RATE_LIMITS.recruitment.blockDuration);
+    if (!rl.allowed) {
       return NextResponse.json(
         { error: "Too many requests. Please try again later." },
         {
           status: 429,
           headers: {
-            "Retry-After": Math.ceil(rateLimit.resetIn / 1000).toString(),
+            "Retry-After": Math.ceil(rl.resetIn / 1000).toString(),
           },
         }
       );

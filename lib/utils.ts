@@ -78,33 +78,6 @@ export function createExcerpt(markdown: string, length: number = 160): string {
 }
 
 /**
- * Simple rate limiter using a Map
- * For production, use Redis or similar
- */
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-
-export function checkRateLimit(
-  key: string,
-  limit: number,
-  windowMs: number
-): { allowed: boolean; remaining: number; resetIn: number } {
-  const now = Date.now();
-  const record = rateLimitMap.get(key);
-  
-  if (!record || now > record.resetTime) {
-    rateLimitMap.set(key, { count: 1, resetTime: now + windowMs });
-    return { allowed: true, remaining: limit - 1, resetIn: windowMs };
-  }
-  
-  if (record.count >= limit) {
-    return { allowed: false, remaining: 0, resetIn: record.resetTime - now };
-  }
-  
-  record.count++;
-  return { allowed: true, remaining: limit - record.count, resetIn: record.resetTime - now };
-}
-
-/**
  * Validate honeypot field (should be empty)
  */
 export function validateHoneypot(value: string | undefined | null): boolean {

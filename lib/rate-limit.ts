@@ -209,13 +209,28 @@ export async function rateLimit(
 // HELPERS
 // ============================================
 
-/** Extract the real client IP from proxy / CDN headers. */
+/**
+ * Extract the real client IP from proxy / CDN headers.
+ *
+ * SECURITY: Header priority matters.  Platform-set headers that cannot be
+ * spoofed by the client come first.  User-controlled headers like
+ * x-forwarded-for come last as a fallback.
+ *
+ * - Vercel sets `x-vercel-forwarded-for` at its edge (cannot be spoofed).
+ * - Cloudflare sets `cf-connecting-ip` (trusted when traffic goes through CF).
+ * - `x-forwarded-for` is easily spoofable when not stripped by a trusted proxy.
+ */
 export function getClientIP(request: {
   headers: { get(name: string): string | null };
 }): string {
   const h = request.headers;
   return (
+    // Vercel-set header — highest trust, cannot be spoofed by clients
+    h.get("x-vercel-forwarded-for")?.split(",")[0].trim() ||
+    // Cloudflare-set header — trusted when behind CF
     h.get("cf-connecting-ip") ||
+    // Standard proxy header — lower trust, can be spoofed if not behind a
+    // reverse proxy that overwrites it
     h.get("x-forwarded-for")?.split(",")[0].trim() ||
     h.get("x-real-ip") ||
     "unknown"
@@ -241,34 +256,67 @@ export function rateLimitResponse(resetIn: number): NextResponse {
 }
 
 /**
- * Validate that the request Origin matches the site host.
- * Returns true when Origin is absent (same-origin) or matches the host / NEXTAUTH_URL.
+ * Validate that the request Origin (or Referer) matches the site host.
+ *
+ * SECURITY: When the Origin header is missing we fall back to the Referer
+ * header.  If BOTH are missing on a mutation request the call is rejected in
+ * production, because modern browsers always send at least one of them on
+ * POST/PUT/DELETE.  A missing pair most likely indicates a forged request from
+ * a non-browser HTTP client (CSRF via curl, scripts, etc.).
  */
 export function validateOrigin(request: {
   headers: { get(name: string): string | null };
 }): boolean {
   const origin = request.headers.get("origin");
-  if (!origin) return true; // same-origin requests omit the Origin header
+  const referer = request.headers.get("referer");
 
-  try {
-    const originHost = new URL(origin).host;
-
-    // Match against Host header
+  // Determine the host to validate against
+  function matchesHost(headerHost: string): boolean {
     const host = request.headers.get("host");
-    if (host && originHost === host) return true;
+    if (host && headerHost === host) return true;
 
-    // Match against configured site URL
     const siteUrl = process.env.NEXTAUTH_URL;
-    if (siteUrl && originHost === new URL(siteUrl).host) return true;
+    if (siteUrl) {
+      try {
+        if (headerHost === new URL(siteUrl).host) return true;
+      } catch { /* invalid URL */ }
+    }
 
-    // Vercel preview deploys
     const vercelUrl = process.env.VERCEL_URL;
-    if (vercelUrl && originHost === vercelUrl) return true;
+    if (vercelUrl && headerHost === vercelUrl) return true;
 
-    return false;
-  } catch {
     return false;
   }
+
+  // 1. Prefer Origin header (sent by browsers on cross-origin & same-origin POST)
+  if (origin) {
+    try {
+      return matchesHost(new URL(origin).host);
+    } catch {
+      return false;
+    }
+  }
+
+  // 2. Fallback to Referer header
+  if (referer) {
+    try {
+      return matchesHost(new URL(referer).host);
+    } catch {
+      return false;
+    }
+  }
+
+  // 3. Neither Origin nor Referer present.
+  // In production, reject — modern browsers always send at least one on POST.
+  // In development, allow to avoid friction with local tooling.
+  if (process.env.NODE_ENV === "production") {
+    console.warn(
+      "[SECURITY] Request rejected: neither Origin nor Referer header present",
+    );
+    return false;
+  }
+
+  return true;
 }
 
 // ============================================

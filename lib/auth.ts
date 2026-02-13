@@ -374,7 +374,7 @@ export const authOptions: NextAuthOptions = {
           if (!user) {
             logSecurityEvent("LOGIN_USER_NOT_FOUND", { email: normalizedEmail });
             await recordFailedLogin(normalizedEmail);
-            trackLoginFailure("unknown", normalizedEmail);
+            await trackLoginFailure("unknown", normalizedEmail);
             throw new Error("Invalid email or password");
           }
 
@@ -386,7 +386,7 @@ export const authOptions: NextAuthOptions = {
               remainingAttempts: rateLimit.remainingAttempts - 1 
             });
             await recordFailedLogin(normalizedEmail);
-            trackLoginFailure("unknown", normalizedEmail);
+            await trackLoginFailure("unknown", normalizedEmail);
             await logAuthAudit("LOGIN_FAILED", normalizedEmail, false, "Invalid password");
             throw new Error("Invalid email or password");
           }

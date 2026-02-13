@@ -49,7 +49,7 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
+      "script-src 'self'",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://images.unsplash.com https://res.cloudinary.com https://lh3.googleusercontent.com",
       "font-src 'self' data:",
@@ -68,6 +68,9 @@ const securityHeaders = [
 const nextConfig = {
   // Disable x-powered-by header (don't reveal we're using Next.js)
   poweredByHeader: false,
+
+  // SECURITY: Never expose source maps to the browser in production
+  productionBrowserSourceMaps: false,
 
   images: {
     // SECURITY: Restrict image optimization to known domains only

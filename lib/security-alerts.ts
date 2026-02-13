@@ -3,7 +3,13 @@
 // SECURITY ALERT & MONITORING SYSTEM
 // Edge-compatible: NO Prisma imports here.
 // Alerts are persisted via internal API call.
+//
+// SECURITY: Threat tracking is backed by Upstash Redis so that state is
+// shared across ALL serverless function instances.  In-memory Maps are
+// kept only as a fallback for local development.
 // ============================================
+
+import { getRedis } from "./redis";
 
 // ============================================
 // TYPES
@@ -40,7 +46,7 @@ export interface SecurityAlert {
 }
 
 // ============================================
-// IN-MEMORY THREAT TRACKING
+// THREAT TRACKER DATA STRUCTURES
 // ============================================
 interface ThreatTracker {
   requestCount: number;
@@ -55,8 +61,26 @@ interface ThreatTracker {
   blockExpiry: number;
 }
 
-const threatTrackers = new Map<string, ThreatTracker>();
+/** JSON-serialisable shape stored in Redis. */
+interface ThreatTrackerData {
+  requestCount: number;
+  rateLimitHits: number;
+  suspiciousHits: number;
+  loginFailures: number;
+  emailsAttemptedArr: string[];
+  firstSeen: number;
+  lastSeen: number;
+  alertsSent: number;
+  blocked: boolean;
+  blockExpiry: number;
+}
+
+// ============================================
+// IN-MEMORY FALLBACK (local dev only)
+// ============================================
+const memTrackers = new Map<string, ThreatTracker>();
 const TRACKER_WINDOW = 10 * 60 * 1000;
+const TRACKER_WINDOW_S = Math.ceil(TRACKER_WINDOW / 1000);
 const TRACKER_CLEANUP_INTERVAL = 60 * 1000;
 
 const THRESHOLDS = {
@@ -67,53 +91,152 @@ const THRESHOLDS = {
   BOT_FLOOD_RPS: 10,
   SUSPICIOUS_PATTERN_COUNT: 3,
   BLOCK_DURATION: 60 * 60 * 1000,
+  BLOCK_DURATION_S: 3600,
 };
-
-// ============================================
-// TRACKER MANAGEMENT
-// ============================================
-function getOrCreateTracker(ip: string): ThreatTracker {
-  const now = Date.now();
-  let tracker = threatTrackers.get(ip);
-
-  if (!tracker || now - tracker.firstSeen > TRACKER_WINDOW) {
-    tracker = {
-      requestCount: 0,
-      rateLimitHits: 0,
-      suspiciousHits: 0,
-      loginFailures: 0,
-      emailsAttempted: new Set(),
-      firstSeen: now,
-      lastSeen: now,
-      alertsSent: 0,
-      blocked: false,
-      blockExpiry: 0,
-    };
-    threatTrackers.set(ip, tracker);
-  }
-
-  tracker.lastSeen = now;
-  return tracker;
-}
 
 if (typeof setInterval !== "undefined") {
   setInterval(() => {
     const now = Date.now();
-    for (const [ip, tracker] of threatTrackers.entries()) {
+    for (const [ip, tracker] of memTrackers.entries()) {
       if (tracker.blocked && now < tracker.blockExpiry) continue;
       if (now - tracker.lastSeen > TRACKER_WINDOW * 2) {
-        threatTrackers.delete(ip);
+        memTrackers.delete(ip);
       }
     }
   }, TRACKER_CLEANUP_INTERVAL);
 }
 
 // ============================================
-// CORE ALERT FUNCTIONS
+// REDIS-BACKED TRACKER I/O
+// ============================================
+function toData(t: ThreatTracker): ThreatTrackerData {
+  return {
+    requestCount: t.requestCount,
+    rateLimitHits: t.rateLimitHits,
+    suspiciousHits: t.suspiciousHits,
+    loginFailures: t.loginFailures,
+    emailsAttemptedArr: Array.from(t.emailsAttempted),
+    firstSeen: t.firstSeen,
+    lastSeen: t.lastSeen,
+    alertsSent: t.alertsSent,
+    blocked: t.blocked,
+    blockExpiry: t.blockExpiry,
+  };
+}
+
+function fromData(d: ThreatTrackerData): ThreatTracker {
+  return {
+    requestCount: d.requestCount ?? 0,
+    rateLimitHits: d.rateLimitHits ?? 0,
+    suspiciousHits: d.suspiciousHits ?? 0,
+    loginFailures: d.loginFailures ?? 0,
+    emailsAttempted: new Set(d.emailsAttemptedArr ?? []),
+    firstSeen: d.firstSeen ?? Date.now(),
+    lastSeen: d.lastSeen ?? Date.now(),
+    alertsSent: d.alertsSent ?? 0,
+    blocked: d.blocked ?? false,
+    blockExpiry: d.blockExpiry ?? 0,
+  };
+}
+
+function newTracker(): ThreatTracker {
+  const now = Date.now();
+  return {
+    requestCount: 0,
+    rateLimitHits: 0,
+    suspiciousHits: 0,
+    loginFailures: 0,
+    emailsAttempted: new Set(),
+    firstSeen: now,
+    lastSeen: now,
+    alertsSent: 0,
+    blocked: false,
+    blockExpiry: 0,
+  };
+}
+
+const REDIS_PREFIX = "threat:";
+const REDIS_BLOCK_PREFIX = "threat:blocked:";
+
+/**
+ * Load a tracker from Redis (or in-memory fallback).
+ * Creates a fresh tracker if none exists or the window expired.
+ */
+async function loadTracker(ip: string): Promise<ThreatTracker> {
+  const redis = getRedis();
+  const now = Date.now();
+
+  if (redis) {
+    try {
+      const data = await redis.get<ThreatTrackerData>(`${REDIS_PREFIX}${ip}`);
+      if (data && now - data.firstSeen <= TRACKER_WINDOW) {
+        const tracker = fromData(data);
+        tracker.lastSeen = now;
+
+        // Also check the separate block key (survives concurrent writes)
+        const blockExpiry = await redis.get<number>(`${REDIS_BLOCK_PREFIX}${ip}`);
+        if (blockExpiry && now < blockExpiry) {
+          tracker.blocked = true;
+          tracker.blockExpiry = blockExpiry;
+        } else if (tracker.blocked && now >= tracker.blockExpiry) {
+          tracker.blocked = false;
+        }
+
+        return tracker;
+      }
+    } catch (err) {
+      console.error("[SECURITY] Redis load tracker error:", err);
+    }
+  }
+
+  // In-memory fallback
+  let tracker = memTrackers.get(ip);
+  if (!tracker || now - tracker.firstSeen > TRACKER_WINDOW) {
+    tracker = newTracker();
+    memTrackers.set(ip, tracker);
+  }
+  tracker.lastSeen = now;
+  return tracker;
+}
+
+/**
+ * Persist a tracker to Redis (or in-memory fallback).
+ * Also sets a separate block key for atomicity.
+ */
+async function saveTracker(ip: string, tracker: ThreatTracker): Promise<void> {
+  const redis = getRedis();
+
+  if (redis) {
+    try {
+      // Save tracker data with TTL
+      await redis.set(`${REDIS_PREFIX}${ip}`, toData(tracker), {
+        ex: TRACKER_WINDOW_S * 2,
+      });
+
+      // Persist block status in a separate key so concurrent writes can't
+      // accidentally un-block an IP.
+      if (tracker.blocked && tracker.blockExpiry > Date.now()) {
+        const ttl = Math.ceil((tracker.blockExpiry - Date.now()) / 1000);
+        await redis.set(`${REDIS_BLOCK_PREFIX}${ip}`, tracker.blockExpiry, {
+          ex: ttl,
+        });
+      }
+    } catch (err) {
+      console.error("[SECURITY] Redis save tracker error:", err);
+      // Fall through to in-memory
+    }
+  }
+
+  // Always keep in-memory copy as hot cache
+  memTrackers.set(ip, tracker);
+}
+
+// ============================================
+// CORE ALERT FUNCTIONS (now async for Redis)
 // ============================================
 
-export function trackRequest(ip: string, path: string): { blocked: boolean; reason?: string } {
-  const tracker = getOrCreateTracker(ip);
+export async function trackRequest(ip: string, path: string): Promise<{ blocked: boolean; reason?: string }> {
+  const tracker = await loadTracker(ip);
   const now = Date.now();
 
   if (tracker.blocked && now < tracker.blockExpiry) {
@@ -157,14 +280,16 @@ export function trackRequest(ip: string, path: string): { blocked: boolean; reas
     tracker.alertsSent++;
     tracker.blocked = true;
     tracker.blockExpiry = now + THRESHOLDS.BLOCK_DURATION;
+    await saveTracker(ip, tracker);
     return { blocked: true, reason: "Blocked: Bot-like flood detected" };
   }
 
+  await saveTracker(ip, tracker);
   return { blocked: false };
 }
 
-export function trackRateLimitHit(ip: string, path: string, limitType: string): void {
-  const tracker = getOrCreateTracker(ip);
+export async function trackRateLimitHit(ip: string, path: string, limitType: string): Promise<void> {
+  const tracker = await loadTracker(ip);
   tracker.rateLimitHits++;
 
   if (tracker.rateLimitHits >= THRESHOLDS.RATE_LIMIT_ABUSE_COUNT && tracker.alertsSent < 3) {
@@ -185,15 +310,17 @@ export function trackRateLimitHit(ip: string, path: string, limitType: string): 
       tracker.blockExpiry = Date.now() + THRESHOLDS.BLOCK_DURATION;
     }
   }
+
+  await saveTracker(ip, tracker);
 }
 
-export function trackSuspiciousRequest(
+export async function trackSuspiciousRequest(
   ip: string,
   path: string,
   userAgent: string,
   patternType: string
-): void {
-  const tracker = getOrCreateTracker(ip);
+): Promise<void> {
+  const tracker = await loadTracker(ip);
   tracker.suspiciousHits++;
 
   const threatTypeMap: Record<string, ThreatType> = {
@@ -226,10 +353,12 @@ export function trackSuspiciousRequest(
     tracker.blocked = true;
     tracker.blockExpiry = Date.now() + THRESHOLDS.BLOCK_DURATION;
   }
+
+  await saveTracker(ip, tracker);
 }
 
-export function trackLoginFailure(ip: string, email: string): void {
-  const tracker = getOrCreateTracker(ip);
+export async function trackLoginFailure(ip: string, email: string): Promise<void> {
+  const tracker = await loadTracker(ip);
   tracker.loginFailures++;
   tracker.emailsAttempted.add(email.toLowerCase());
 
@@ -260,6 +389,8 @@ export function trackLoginFailure(ip: string, email: string): void {
     tracker.blocked = true;
     tracker.blockExpiry = Date.now() + THRESHOLDS.BLOCK_DURATION;
   }
+
+  await saveTracker(ip, tracker);
 }
 
 export function trackHoneypotTrigger(ip: string, path: string, email?: string): void {
@@ -275,11 +406,30 @@ export function trackHoneypotTrigger(ip: string, path: string, email?: string): 
   });
 }
 
-export function isIPBlocked(ip: string): { blocked: boolean; reason?: string } {
-  const tracker = threatTrackers.get(ip);
+/**
+ * Check if an IP is currently blocked.
+ * Uses Redis for distributed state, falls back to in-memory.
+ */
+export async function isIPBlocked(ip: string): Promise<{ blocked: boolean; reason?: string }> {
+  const redis = getRedis();
+  const now = Date.now();
+
+  // Check Redis block key first (authoritative in production)
+  if (redis) {
+    try {
+      const blockExpiry = await redis.get<number>(`${REDIS_BLOCK_PREFIX}${ip}`);
+      if (blockExpiry && now < blockExpiry) {
+        return { blocked: true, reason: "IP blocked due to detected malicious activity" };
+      }
+    } catch (err) {
+      console.error("[SECURITY] Redis isIPBlocked error:", err);
+    }
+  }
+
+  // In-memory fallback
+  const tracker = memTrackers.get(ip);
   if (!tracker) return { blocked: false };
 
-  const now = Date.now();
   if (tracker.blocked && now < tracker.blockExpiry) {
     return { blocked: true, reason: "IP blocked due to detected malicious activity" };
   }
@@ -288,8 +438,11 @@ export function isIPBlocked(ip: string): { blocked: boolean; reason?: string } {
 }
 
 export function getActiveThreats(): { ip: string; tracker: ThreatTracker }[] {
+  // NOTE: This returns in-memory threats only (used for admin dashboard display).
+  // In serverless, this may be incomplete.  For full data, query the
+  // SecurityAlert table in the database via the admin API.
   const threats: { ip: string; tracker: ThreatTracker }[] = [];
-  for (const [ip, tracker] of threatTrackers.entries()) {
+  for (const [ip, tracker] of memTrackers.entries()) {
     if (tracker.requestCount > 10 || tracker.suspiciousHits > 0 || tracker.loginFailures > 0 || tracker.blocked) {
       threats.push({ ip, tracker: { ...tracker, emailsAttempted: new Set(tracker.emailsAttempted) } });
     }

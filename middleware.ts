@@ -308,10 +308,10 @@ export default withAuth(
     // ── Session revocation check ──
     // If a "revoked before" timestamp exists in the token, honour it.
     // The JWT callback in auth.ts sets `revokedBefore` from Redis.
-    const tokenIat = token.iat as number | undefined;
-    if (isAuthenticated && tokenIat) {
+    if (isAuthenticated && token) {
+      const tokenIat = token.iat as number | undefined;
       const revokedBefore = token.revokedBefore as number | undefined;
-      if (revokedBefore && tokenIat < revokedBefore) {
+      if (tokenIat && revokedBefore && tokenIat < revokedBefore) {
         // Session was issued before the revocation timestamp — force re-login
         const response = NextResponse.redirect(new URL("/admin/login", req.url));
         return applySecurityHeaders(response, nonce);

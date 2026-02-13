@@ -428,7 +428,9 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       // If the session was revoked, return an empty session to force re-login
-      if (token.revokedBefore && token.iat && token.iat < token.revokedBefore) {
+      const revokedBefore = token.revokedBefore as number | undefined;
+      const issuedAt = token.iat as number | undefined;
+      if (revokedBefore && issuedAt && issuedAt < revokedBefore) {
         return { ...session, user: undefined as never };
       }
 

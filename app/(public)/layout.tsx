@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { I18nProvider } from "@/lib/i18n";
 import { AnalyticsTracker } from "@/components/analytics-tracker";
+import { CookieConsent } from "@/components/cookie-consent";
 import { cn } from "@/lib/utils";
 
 export default function PublicLayout({
@@ -34,6 +35,8 @@ export default function PublicLayout({
         </main>
         <Footer />
       </div>
+      {/* GDPR cookie consent — blocks analytics until user accepts */}
+      <CookieConsent />
     </I18nProvider>
   );
 }

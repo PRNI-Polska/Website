@@ -174,11 +174,12 @@ model SiteSettings {
 model TwoFactorCode {
   id              String    @id @default(cuid())
   email           String
-  code            String    // 6-digit code
+  code            String    // SHA-256 hashed 6-digit code
   challengeToken  String    @unique // Token returned to client after password validation
   expiresAt       DateTime  // Code expires after 5 minutes
   verified        Boolean   @default(false) // Set to true after code is verified
   used            Boolean   @default(false) // Set to true after login completes
+  attempts        Int       @default(0) // Failed verification attempts (max 5 before invalidation)
   createdAt       DateTime  @default(now())
 
   @@index([email])

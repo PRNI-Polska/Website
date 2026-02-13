@@ -13,16 +13,26 @@ import { writeAlertToDB } from "@/lib/security-alerts-db";
 // AUTH
 // ============================================
 function isAuthorized(request: NextRequest): boolean {
-  const secret = process.env.NEXTAUTH_SECRET;
+  // Prefer a dedicated internal secret; fall back to NEXTAUTH_SECRET for
+  // backward compatibility.  Operators SHOULD set INTERNAL_API_SECRET to
+  // a separate, high-entropy value.
+  const secret = process.env.INTERNAL_API_SECRET || process.env.NEXTAUTH_SECRET;
   if (!secret) {
     console.error(
-      "[SECURITY-LOG] NEXTAUTH_SECRET is not set — refusing all requests",
+      "[SECURITY-LOG] Neither INTERNAL_API_SECRET nor NEXTAUTH_SECRET is set — refusing all requests",
     );
     return false;
   }
 
   const provided = request.headers.get("X-Internal-Secret");
-  return !!provided && provided === secret;
+  if (!provided || provided.length !== secret.length) return false;
+
+  // Constant-time comparison to prevent timing attacks on the secret
+  let mismatch = 0;
+  for (let i = 0; i < secret.length; i++) {
+    mismatch |= provided.charCodeAt(i) ^ secret.charCodeAt(i);
+  }
+  return mismatch === 0;
 }
 
 // ============================================

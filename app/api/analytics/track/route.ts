@@ -8,6 +8,15 @@ const MAX_PATH_LENGTH = 500;
 const MAX_REFERRER_LENGTH = 1000;
 const MAX_SESSION_ID_LENGTH = 100;
 
+/** Safely decode a URI component without throwing on malformed input. */
+function safeDecodeURI(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting: defense-in-depth backup (middleware also enforces this)
@@ -54,7 +63,7 @@ export async function POST(request: NextRequest) {
       data: {
         path: sanitizedPath,
         country,
-        city: city ? decodeURIComponent(city) : null,
+        city: city ? safeDecodeURI(city) : null,
         region,
         device,
         browser,

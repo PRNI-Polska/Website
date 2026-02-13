@@ -7,7 +7,7 @@
 // Protects against:
 //  - Brute force attacks (progressive lockout)
 //  - DDoS / bot floods (rate limiting + threat tracking)
-//  - XSS, CSRF, Clickjacking (security headers)
+//  - XSS, CSRF, Clickjacking (security headers + nonce-based CSP)
 //  - Unauthorized admin access (auth + IP allowlist)
 //  - Scanner/recon probes (pattern detection)
 
@@ -32,7 +32,9 @@ import {
 // SECURITY HEADERS (STRICT)
 // ============================================
 const securityHeaders: Record<string, string> = {
-  "X-XSS-Protection": "1; mode=block",
+  // X-XSS-Protection set to 0: the header is deprecated and can introduce
+  // vulnerabilities in older browsers.  CSP is the proper defense now.
+  "X-XSS-Protection": "0",
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "DENY",
   "Referrer-Policy": "strict-origin-when-cross-origin",
@@ -44,28 +46,52 @@ const securityHeaders: Record<string, string> = {
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
 };
 
-// Strict Content Security Policy (no unsafe-eval)
-const csp = `
-  default-src 'self';
-  script-src 'self' 'unsafe-inline';
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-  img-src 'self' data: https: blob:;
-  font-src 'self' data: https://fonts.gstatic.com;
-  connect-src 'self' https://*.neon.tech;
-  media-src 'self';
-  object-src 'none';
-  frame-src 'none';
-  frame-ancestors 'none';
-  form-action 'self';
-  base-uri 'self';
-  upgrade-insecure-requests;
-`.replace(/\s{2,}/g, " ").trim();
+/**
+ * Build a Content Security Policy string with a per-request nonce.
+ * - script-src uses nonce + strict-dynamic.  'unsafe-inline' is kept as a
+ *   fallback for browsers that don't support 'strict-dynamic' (it's ignored
+ *   by browsers that DO support it).
+ * - style-src keeps 'unsafe-inline' because Tailwind CSS generates inline
+ *   styles and there is no practical way to nonce every one of them.
+ * - img-src is restricted to known trusted domains instead of wildcard https:.
+ * - connect-src no longer includes https://*.neon.tech (server-side only).
+ */
+function buildCSP(nonce: string): string {
+  // NOTE: next/font/google self-hosts fonts at build time, so no runtime
+  // requests to fonts.googleapis.com or fonts.gstatic.com are made.
+  // We can keep the CSP tight by only allowing 'self' for fonts & styles.
+  return `
+    default-src 'self';
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data: blob: https://images.unsplash.com https://res.cloudinary.com https://lh3.googleusercontent.com;
+    font-src 'self' data:;
+    connect-src 'self';
+    media-src 'self';
+    object-src 'none';
+    frame-src 'none';
+    frame-ancestors 'none';
+    form-action 'self';
+    base-uri 'self';
+    upgrade-insecure-requests;
+    report-uri /api/internal/csp-report;
+    report-to csp-endpoint;
+  `.replace(/\s{2,}/g, " ").trim();
+}
 
-function applySecurityHeaders(response: NextResponse): NextResponse {
+// Report-To header for CSP violation reporting
+const REPORT_TO_HEADER = JSON.stringify({
+  group: "csp-endpoint",
+  max_age: 86400,
+  endpoints: [{ url: "/api/internal/csp-report" }],
+});
+
+function applySecurityHeaders(response: NextResponse, nonce: string): NextResponse {
   for (const [key, value] of Object.entries(securityHeaders)) {
     response.headers.set(key, value);
   }
-  response.headers.set("Content-Security-Policy", csp);
+  response.headers.set("Content-Security-Policy", buildCSP(nonce));
+  response.headers.set("Report-To", REPORT_TO_HEADER);
   return response;
 }
 
@@ -191,11 +217,12 @@ async function saveAlert(
   details: string,
   patternType?: string,
 ): Promise<void> {
-  // SECURITY: never fall back to a hardcoded secret
-  const secret = process.env.NEXTAUTH_SECRET;
+  // SECURITY: use a dedicated internal secret; fall back to NEXTAUTH_SECRET
+  // only if INTERNAL_API_SECRET is not set (backward-compatible).
+  const secret = process.env.INTERNAL_API_SECRET || process.env.NEXTAUTH_SECRET;
   if (!secret) {
     console.error(
-      "[SECURITY] Cannot persist alert: NEXTAUTH_SECRET is not set",
+      "[SECURITY] Cannot persist alert: neither INTERNAL_API_SECRET nor NEXTAUTH_SECRET is set",
     );
     return;
   }
@@ -264,6 +291,11 @@ export default withAuth(
     const userAgent = req.headers.get("user-agent") || "unknown";
 
     // ============================================
+    // GENERATE PER-REQUEST NONCE FOR CSP
+    // ============================================
+    const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+
+    // ============================================
     // SECURITY ALERT SYSTEM — Track all requests
     // ============================================
     setBaseUrl(req.url);
@@ -272,6 +304,18 @@ export default withAuth(
     // (so you never lock yourself out of your own admin panel)
     const token = req.nextauth.token;
     const isAuthenticated = !!token && token.role === "ADMIN";
+
+    // ── Session revocation check ──
+    // If a "revoked before" timestamp exists in the token, honour it.
+    // The JWT callback in auth.ts sets `revokedBefore` from Redis.
+    if (isAuthenticated && token.iat) {
+      const revokedBefore = token.revokedBefore as number | undefined;
+      if (revokedBefore && token.iat < revokedBefore) {
+        // Session was issued before the revocation timestamp — force re-login
+        const response = NextResponse.redirect(new URL("/admin/login", req.url));
+        return applySecurityHeaders(response, nonce);
+      }
+    }
 
     if (!isAuthenticated) {
       // Check if IP is already blocked by the threat system
@@ -452,6 +496,16 @@ export default withAuth(
         RATE_LIMITS.public.windowMs,
         RATE_LIMITS.public.blockDuration,
       );
+    } else if (!isAdminRoute && !pathname.startsWith("/api/")) {
+      // Public page views — lenient limit to prevent aggressive scraping
+      rateLimitType = "pages";
+      rateLimitResult = await performRateLimit(
+        ip,
+        "pages",
+        RATE_LIMITS.pages.maxRequests,
+        RATE_LIMITS.pages.windowMs,
+        RATE_LIMITS.pages.blockDuration,
+      );
     }
 
     if (rateLimitResult && !rateLimitResult.allowed) {
@@ -485,7 +539,7 @@ export default withAuth(
         "Retry-After",
         Math.ceil(rateLimitResult.resetIn / 1000).toString(),
       );
-      return applySecurityHeaders(response);
+      return applySecurityHeaders(response, nonce);
     }
 
     // ============================================
@@ -499,7 +553,7 @@ export default withAuth(
           { error: "Access denied" },
           { status: 403 },
         );
-        return applySecurityHeaders(response);
+        return applySecurityHeaders(response, nonce);
       }
     }
 
@@ -511,10 +565,13 @@ export default withAuth(
     if (isLoginPage) {
       if (token) {
         const response = NextResponse.redirect(new URL("/admin", req.url));
-        return applySecurityHeaders(response);
+        return applySecurityHeaders(response, nonce);
       }
-      const response = NextResponse.next();
-      return applySecurityHeaders(response);
+      const response = NextResponse.next({
+        request: { headers: new Headers(req.headers) },
+      });
+      response.headers.set("x-nonce", nonce);
+      return applySecurityHeaders(response, nonce);
     }
 
     // Protect admin routes and API routes
@@ -524,7 +581,7 @@ export default withAuth(
       const response = NextResponse.redirect(
         new URL("/admin/login", req.url),
       );
-      return applySecurityHeaders(response);
+      return applySecurityHeaders(response, nonce);
     }
 
     // Verify admin role
@@ -537,10 +594,18 @@ export default withAuth(
       const response = NextResponse.redirect(
         new URL("/admin/login", req.url),
       );
-      return applySecurityHeaders(response);
+      return applySecurityHeaders(response, nonce);
     }
 
-    const response = NextResponse.next();
+    // ============================================
+    // DEFAULT RESPONSE — pass nonce to downstream via header
+    // ============================================
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set("x-nonce", nonce);
+
+    const response = NextResponse.next({
+      request: { headers: requestHeaders },
+    });
 
     // Add rate limit headers if applicable
     if (rateLimitResult) {
@@ -554,7 +619,7 @@ export default withAuth(
       );
     }
 
-    return applySecurityHeaders(response);
+    return applySecurityHeaders(response, nonce);
   },
   {
     callbacks: {
@@ -580,20 +645,7 @@ export default withAuth(
 
 export const config = {
   matcher: [
-    // Admin routes
-    "/admin/:path*",
-    "/api/admin/:path*",
-    // Auth routes (for rate limiting)
-    "/api/auth/:path*",
-    // Contact route (for rate limiting)
-    "/api/contact",
-    // Analytics route (rate limited)
-    "/api/analytics/track",
-    // International join route (for rate limiting)
-    "/api/international-join",
-    // Recruitment route (for rate limiting)
-    "/api/recruitment",
-    // Public API routes (for rate limiting)
-    "/api/calendar/:path*",
+    // Match everything except Next.js internals and static assets
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

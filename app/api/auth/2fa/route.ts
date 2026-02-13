@@ -10,11 +10,18 @@
 //  - Console logging of codes suppressed in production
 //  - Expired codes are automatically cleaned up
 //  - Code format validated (must be exactly 6 digits)
+//  - Max 5 verification attempts per challenge token (prevents brute force)
 
 import { NextRequest, NextResponse } from "next/server";
 import { compare } from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { createHash, randomBytes, timingSafeEqual } from "crypto";
+
+// ============================================
+// CONSTANTS
+// ============================================
+const MAX_VERIFY_ATTEMPTS = 5;
+const CODE_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
 
 // ============================================
 // CRYPTO HELPERS
@@ -182,7 +189,7 @@ export async function POST(request: NextRequest) {
       // Generate code and challenge token
       const code = generateCode();
       const challengeToken = generateChallengeToken();
-      const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+      const expiresAt = new Date(Date.now() + CODE_EXPIRY_MS);
 
       // Clean up old codes for this email
       await prisma.twoFactorCode.deleteMany({
@@ -196,6 +203,7 @@ export async function POST(request: NextRequest) {
           code: hashCode(code),
           challengeToken,
           expiresAt,
+          attempts: 0,
         },
       });
 
@@ -267,11 +275,38 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // ── BRUTE-FORCE PROTECTION ──
+      // Max attempts per challenge token to prevent code guessing
+      if (challenge.attempts >= MAX_VERIFY_ATTEMPTS) {
+        // Invalidate the challenge entirely — force full re-authentication
+        await prisma.twoFactorCode.delete({ where: { id: challenge.id } });
+        console.log(
+          `[2FA] Challenge invalidated for ${challenge.email} — too many failed attempts (${challenge.attempts})`,
+        );
+        return NextResponse.json(
+          { error: "Too many failed attempts. Please log in again." },
+          { status: 401 },
+        );
+      }
+
       // Timing-safe comparison against the stored SHA-256 hash
       const codeMatch = verifyCodeHash(code, challenge.code);
       if (!codeMatch) {
+        // Increment attempt counter
+        await prisma.twoFactorCode.update({
+          where: { id: challenge.id },
+          data: { attempts: { increment: 1 } },
+        });
+        const remaining = MAX_VERIFY_ATTEMPTS - challenge.attempts - 1;
+        console.log(
+          `[2FA] Invalid code for ${challenge.email} (attempt ${challenge.attempts + 1}/${MAX_VERIFY_ATTEMPTS})`,
+        );
         return NextResponse.json(
-          { error: "Invalid code" },
+          {
+            error: remaining > 0
+              ? `Invalid code. ${remaining} attempt${remaining !== 1 ? "s" : ""} remaining.`
+              : "Invalid code. Please log in again.",
+          },
           { status: 401 },
         );
       }

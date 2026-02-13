@@ -5,21 +5,27 @@ import { z } from "zod";
 // SECURITY HELPERS
 // ============================================================================
 
-// Patterns to detect potential XSS/injection attempts
+// Patterns to detect potential XSS/injection attempts.
+// SECURITY: Patterns are intentionally simple to avoid ReDoS (catastrophic
+// backtracking).  Complex nested quantifiers have been replaced with safe
+// linear-time alternatives.
 const DANGEROUS_PATTERNS = [
-  /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+  /<script/gi,       // Opening script tag (simple, no backtracking)
   /javascript:/gi,
-  /on\w+\s*=/gi, // onclick=, onerror=, etc.
+  /on\w+\s*=/gi,     // onclick=, onerror=, etc.
   /data:\s*text\/html/gi,
   /vbscript:/gi,
 ];
 
 // Check for dangerous content
 function containsDangerousContent(value: string): boolean {
-  return DANGEROUS_PATTERNS.some((pattern) => pattern.test(value));
+  return DANGEROUS_PATTERNS.some((pattern) => {
+    pattern.lastIndex = 0; // Reset stateful regexes (global flag)
+    return pattern.test(value);
+  });
 }
 
-// Safe string refinement
+// Safe string refinement — applies XSS pattern check
 const safeString = (schema: z.ZodString) =>
   schema.refine(
     (val) => !containsDangerousContent(val),
@@ -46,20 +52,27 @@ export const announcementCategoryEnum = z.enum([
 export const contentStatusEnum = z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]);
 
 export const createAnnouncementSchema = z.object({
-  title: z
-    .string()
-    .min(1, "Title is required")
-    .max(200, "Title must be less than 200 characters"),
+  title: safeString(
+    z
+      .string()
+      .min(1, "Title is required")
+      .max(200, "Title must be less than 200 characters")
+  ),
   slug: z
     .string()
     .min(1, "Slug is required")
     .max(200, "Slug must be less than 200 characters")
     .regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
-  excerpt: z
-    .string()
-    .min(1, "Excerpt is required")
-    .max(500, "Excerpt must be less than 500 characters"),
-  content: z.string().min(1, "Content is required"),
+  excerpt: safeString(
+    z
+      .string()
+      .min(1, "Excerpt is required")
+      .max(500, "Excerpt must be less than 500 characters")
+  ),
+  content: z.string().min(1, "Content is required")
+    .refine((val) => !containsDangerousContent(val), {
+      message: "Content contains potentially dangerous elements",
+    }),
   category: announcementCategoryEnum,
   featuredImage: z.string().url().optional().or(z.literal("")),
   status: contentStatusEnum.default("DRAFT"),
@@ -77,20 +90,29 @@ export type UpdateAnnouncementInput = z.infer<typeof updateAnnouncementSchema>;
 // EVENT SCHEMAS
 // ============================================================================
 export const createEventSchema = z.object({
-  title: z
-    .string()
-    .min(1, "Title is required")
-    .max(200, "Title must be less than 200 characters"),
-  description: z.string().min(1, "Description is required"),
+  title: safeString(
+    z
+      .string()
+      .min(1, "Title is required")
+      .max(200, "Title must be less than 200 characters")
+  ),
+  description: z.string().min(1, "Description is required")
+    .refine((val) => !containsDangerousContent(val), {
+      message: "Description contains potentially dangerous elements",
+    }),
   startDateTime: z.string().datetime("Invalid start date/time"),
   endDateTime: z.string().datetime("Invalid end date/time"),
-  location: z
-    .string()
-    .min(1, "Location is required")
-    .max(500, "Location must be less than 500 characters"),
+  location: safeString(
+    z
+      .string()
+      .min(1, "Location is required")
+      .max(500, "Location must be less than 500 characters")
+  ),
   rsvpLink: z.string().url().optional().or(z.literal("")),
   organizerContact: z.string().max(200).optional().or(z.literal("")),
-  tags: z.string().max(500, "Tags must be less than 500 characters"),
+  tags: safeString(
+    z.string().max(500, "Tags must be less than 500 characters")
+  ),
   status: contentStatusEnum.default("DRAFT"),
 }).refine((data) => new Date(data.endDateTime) > new Date(data.startDateTime), {
   message: "End date must be after start date",
@@ -99,14 +121,17 @@ export const createEventSchema = z.object({
 
 export const updateEventSchema = z.object({
   id: z.string().cuid(),
-  title: z.string().min(1).max(200).optional(),
-  description: z.string().min(1).optional(),
+  title: safeString(z.string().min(1).max(200)).optional(),
+  description: z.string().min(1)
+    .refine((val) => !containsDangerousContent(val), {
+      message: "Description contains potentially dangerous elements",
+    }).optional(),
   startDateTime: z.string().datetime().optional(),
   endDateTime: z.string().datetime().optional(),
-  location: z.string().min(1).max(500).optional(),
+  location: safeString(z.string().min(1).max(500)).optional(),
   rsvpLink: z.string().url().optional().or(z.literal("")),
   organizerContact: z.string().max(200).optional().or(z.literal("")),
-  tags: z.string().max(500).optional(),
+  tags: safeString(z.string().max(500)).optional(),
   status: contentStatusEnum.optional(),
 });
 
@@ -117,16 +142,21 @@ export type UpdateEventInput = z.infer<typeof updateEventSchema>;
 // MANIFESTO SECTION SCHEMAS
 // ============================================================================
 export const createManifestoSectionSchema = z.object({
-  title: z
-    .string()
-    .min(1, "Title is required")
-    .max(200, "Title must be less than 200 characters"),
+  title: safeString(
+    z
+      .string()
+      .min(1, "Title is required")
+      .max(200, "Title must be less than 200 characters")
+  ),
   slug: z
     .string()
     .min(1, "Slug is required")
     .max(200, "Slug must be less than 200 characters")
     .regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
-  content: z.string().min(1, "Content is required"),
+  content: z.string().min(1, "Content is required")
+    .refine((val) => !containsDangerousContent(val), {
+      message: "Content contains potentially dangerous elements",
+    }),
   order: z.number().int().min(0),
   parentId: z.string().cuid().optional().nullable(),
   status: contentStatusEnum.default("DRAFT"),
@@ -143,18 +173,24 @@ export type UpdateManifestoSectionInput = z.infer<typeof updateManifestoSectionS
 // TEAM MEMBER SCHEMAS
 // ============================================================================
 export const createTeamMemberSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Name is required")
-    .max(100, "Name must be less than 100 characters"),
-  role: z
-    .string()
-    .min(1, "Role is required")
-    .max(100, "Role must be less than 100 characters"),
-  bio: z
-    .string()
-    .min(1, "Bio is required")
-    .max(1000, "Bio must be less than 1000 characters"),
+  name: safeString(
+    z
+      .string()
+      .min(1, "Name is required")
+      .max(100, "Name must be less than 100 characters")
+  ),
+  role: safeString(
+    z
+      .string()
+      .min(1, "Role is required")
+      .max(100, "Role must be less than 100 characters")
+  ),
+  bio: safeString(
+    z
+      .string()
+      .min(1, "Bio is required")
+      .max(1000, "Bio must be less than 1000 characters")
+  ),
   photoUrl: z.string().url().optional().or(z.literal("")),
   email: z.string().email().optional().or(z.literal("")),
   order: z.number().int().min(0),

@@ -3,6 +3,7 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { isAnalyticsAllowed } from "@/components/cookie-consent";
 
 function generateSessionId(): string {
   // Generate a simple session ID that persists for the browser session
@@ -20,6 +21,9 @@ export function AnalyticsTracker() {
   useEffect(() => {
     // Don't track admin pages
     if (pathname?.startsWith("/admin")) return;
+
+    // GDPR: Don't track if user hasn't consented
+    if (!isAnalyticsAllowed()) return;
 
     const trackPageView = async () => {
       try {

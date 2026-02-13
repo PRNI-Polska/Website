@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 
 // Security headers — consolidated, mirrors middleware.ts
+// NOTE: The middleware applies nonce-based CSP at runtime.  These static
+// headers act as a fallback for routes not matched by the middleware
+// (e.g. _next/static assets).
 const securityHeaders = [
   {
     key: "X-DNS-Prefetch-Control",
@@ -11,8 +14,9 @@ const securityHeaders = [
     value: "max-age=31536000; includeSubDomains; preload",
   },
   {
+    // Deprecated — set to 0 to prevent XSS filter bugs in older browsers
     key: "X-XSS-Protection",
-    value: "1; mode=block",
+    value: "0",
   },
   {
     key: "X-Frame-Options",
@@ -40,14 +44,16 @@ const securityHeaders = [
     value: "none",
   },
   {
+    // Static fallback CSP (no nonce).  The middleware overrides this with a
+    // per-request nonce for HTML pages.
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline'",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: https: blob:",
-      "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' https://*.neon.tech",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://images.unsplash.com https://res.cloudinary.com https://lh3.googleusercontent.com",
+      "font-src 'self' data:",
+      "connect-src 'self'",
       "media-src 'self'",
       "object-src 'none'",
       "frame-src 'none'",

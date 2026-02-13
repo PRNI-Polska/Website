@@ -32,6 +32,8 @@ declare module "next-auth/jwt" {
     email: string;
     name?: string | null;
     role: string;
+    /** Timestamp (epoch seconds) before which all sessions are revoked. */
+    revokedBefore?: number;
   }
 }
 
@@ -200,13 +202,14 @@ function logSecurityEvent(type: string, details: Record<string, unknown>): void 
 }
 
 // ============================================
-// AUDIT LOGGING TO DATABASE
+// AUDIT LOGGING TO DATABASE (with IP)
 // ============================================
 async function logAuthAudit(
   action: string,
   email: string,
   success: boolean,
-  details?: string
+  details?: string,
+  ipAddress?: string,
 ): Promise<void> {
   try {
     // Find user to get ID (might not exist for failed logins)
@@ -226,6 +229,7 @@ async function logAuthAudit(
             success,
             email,
             details,
+            ipAddress: ipAddress || "unknown",
             timestamp: new Date().toISOString(),
           }),
         },
@@ -234,6 +238,49 @@ async function logAuthAudit(
   } catch (error) {
     // Don't fail auth if audit logging fails
     console.error("Failed to log auth audit:", error);
+  }
+}
+
+// ============================================
+// SESSION REVOCATION VIA REDIS
+// ============================================
+const SESSION_REVOCATION_KEY = "auth:sessions_revoked_before";
+
+/**
+ * Revoke all sessions issued before now.
+ * Call this after password change or explicit "log out everywhere".
+ */
+export async function revokeAllSessions(): Promise<boolean> {
+  const redis = getRedis();
+  if (!redis) {
+    console.warn("[AUTH] Cannot revoke sessions: Redis not available");
+    return false;
+  }
+
+  try {
+    const now = Math.floor(Date.now() / 1000);
+    await redis.set(SESSION_REVOCATION_KEY, now);
+    logSecurityEvent("SESSIONS_REVOKED", { revokedBefore: now });
+    return true;
+  } catch (err) {
+    console.error("[AUTH] Failed to revoke sessions:", err);
+    return false;
+  }
+}
+
+/**
+ * Get the "revoked before" timestamp from Redis.
+ * Returns 0 if not set or Redis unavailable.
+ */
+async function getRevocationTimestamp(): Promise<number> {
+  const redis = getRedis();
+  if (!redis) return 0;
+
+  try {
+    const val = await redis.get<number>(SESSION_REVOCATION_KEY);
+    return val || 0;
+  } catch {
+    return 0;
   }
 }
 
@@ -367,9 +414,24 @@ export const authOptions: NextAuthOptions = {
         token.name = user.name;
         token.role = user.role;
       }
+
+      // Check session revocation timestamp from Redis
+      // (only on subsequent requests, not on initial login)
+      if (!user && token.iat) {
+        const revokedBefore = await getRevocationTimestamp();
+        if (revokedBefore > 0) {
+          token.revokedBefore = revokedBefore;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
+      // If the session was revoked, return an empty session to force re-login
+      if (token.revokedBefore && token.iat && token.iat < token.revokedBefore) {
+        return { ...session, user: undefined as never };
+      }
+
       session.user = {
         id: token.id,
         email: token.email,

@@ -323,20 +323,30 @@ export function validateOrigin(request: {
 // PREDEFINED RATE LIMIT CONFIGS
 // ============================================
 export const RATE_LIMITS = {
+  /**
+   * Auth endpoints (login page, NextAuth API).
+   * STRICT: 2 requests per 2 minutes.  Block for 30 minutes on abuse.
+   * An attacker gets at most 2 shots before a long cooldown.
+   */
   auth: {
-    maxRequests: 3,
-    windowMs: 60 * 1000,
-    blockDuration: 5 * 60 * 1000,
+    maxRequests: 2,
+    windowMs: 2 * 60 * 1000,         // 2-minute window
+    blockDuration: 30 * 60 * 1000,   // 30-minute block
   },
   contact: {
     maxRequests: 2,
     windowMs: 60 * 60 * 1000,
     blockDuration: 60 * 60 * 1000,
   },
+  /**
+   * Admin API routes (CRUD operations).
+   * Tight limit — legitimate admin usage rarely exceeds 15 req/min.
+   * Block for 15 minutes on abuse to deter automated enumeration.
+   */
   admin: {
-    maxRequests: 50,
-    windowMs: 60 * 1000,
-    blockDuration: 0,
+    maxRequests: 15,
+    windowMs: 60 * 1000,             // 1-minute window
+    blockDuration: 15 * 60 * 1000,   // 15-minute block
   },
   public: {
     maxRequests: 60,

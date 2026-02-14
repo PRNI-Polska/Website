@@ -30,17 +30,22 @@ async function main() {
     console.error("   Set them in your .env.local file before running the seed script.");
     console.error("   Example:");
     console.error('     ADMIN_EMAIL="admin@prni.org"');
-    console.error('     ADMIN_PASSWORD="YourStr0ng!P@ssword-Here"');
+    console.error('     ADMIN_PASSWORD="Xk9#mP2$vL7@nQ4!wR8&jF5*"');
     process.exit(1);
   }
 
-  // Enforce strong password requirements
+  // Enforce VERY strong password requirements
   const passwordErrors: string[] = [];
-  if (adminPassword.length < 12) passwordErrors.push("Must be at least 12 characters");
-  if (!/[A-Z]/.test(adminPassword)) passwordErrors.push("Must contain an uppercase letter");
-  if (!/[a-z]/.test(adminPassword)) passwordErrors.push("Must contain a lowercase letter");
-  if (!/[0-9]/.test(adminPassword)) passwordErrors.push("Must contain a number");
-  if (!/[^A-Za-z0-9]/.test(adminPassword)) passwordErrors.push("Must contain a special character");
+  if (adminPassword.length < 20) passwordErrors.push("Must be at least 20 characters");
+  if (!/[A-Z].*[A-Z]/.test(adminPassword)) passwordErrors.push("Must contain at least 2 uppercase letters");
+  if (!/[a-z].*[a-z]/.test(adminPassword)) passwordErrors.push("Must contain at least 2 lowercase letters");
+  if (!/[0-9].*[0-9]/.test(adminPassword)) passwordErrors.push("Must contain at least 2 numbers");
+  if (!/[^A-Za-z0-9].*[^A-Za-z0-9]/.test(adminPassword)) passwordErrors.push("Must contain at least 2 special characters");
+  if (/(.)\1{2,}/.test(adminPassword)) passwordErrors.push("Must not contain 3 or more repeating characters");
+  const commonPatterns = ["qwerty", "asdfgh", "zxcvbn", "123456", "abcdef", "password", "admin"];
+  if (commonPatterns.some((p) => adminPassword.toLowerCase().includes(p))) {
+    passwordErrors.push("Must not contain common keyboard patterns or words");
+  }
 
   if (passwordErrors.length > 0) {
     console.error("\n❌ ADMIN_PASSWORD does not meet security requirements:");

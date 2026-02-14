@@ -379,17 +379,33 @@ export const loginSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
-// For admin password changes (enforces strong passwords)
+// For admin password changes (enforces VERY strong passwords)
 export const passwordChangeSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
   newPassword: z
     .string()
-    .min(12, "Password must be at least 12 characters")
+    .min(20, "Password must be at least 20 characters")
     .max(128, "Password must be less than 128 characters")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number")
-    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+    .regex(/[A-Z].*[A-Z]/, "Password must contain at least 2 uppercase letters")
+    .regex(/[a-z].*[a-z]/, "Password must contain at least 2 lowercase letters")
+    .regex(/[0-9].*[0-9]/, "Password must contain at least 2 numbers")
+    .regex(/[^A-Za-z0-9].*[^A-Za-z0-9]/, "Password must contain at least 2 special characters")
+    .refine(
+      (val) => {
+        // Reject passwords with 3+ repeating characters (e.g. "aaa", "111")
+        return !/(.)\1{2,}/.test(val);
+      },
+      { message: "Password must not contain 3 or more repeating characters" }
+    )
+    .refine(
+      (val) => {
+        // Reject common keyboard patterns
+        const patterns = ["qwerty", "asdfgh", "zxcvbn", "123456", "abcdef", "password", "admin"];
+        const lower = val.toLowerCase();
+        return !patterns.some((p) => lower.includes(p));
+      },
+      { message: "Password contains a common pattern and is too predictable" }
+    ),
   confirmPassword: z.string(),
 }).refine((data) => data.newPassword === data.confirmPassword, {
   message: "Passwords don't match",

@@ -404,6 +404,34 @@ export default withAuth(
       return new NextResponse(null, { status: 403 });
     }
 
+    // ============================================
+    // HIDE POST-ONLY API ROUTES FROM BROWSERS
+    // ============================================
+    // If someone visits these in a browser (GET), return 404 so the
+    // routes appear not to exist.  This hides the attack surface.
+    const POST_ONLY_ROUTES = [
+      "/api/analytics/track",
+      "/api/contact",
+      "/api/recruitment",
+      "/api/international-join",
+      "/api/auth/2fa",
+      "/api/internal/csp-report",
+      "/api/internal/security-log",
+    ];
+    if (req.method === "GET" && POST_ONLY_ROUTES.includes(pathname)) {
+      return new NextResponse(null, { status: 404 });
+    }
+
+    // Also block GET requests to all /api/admin/* and /api/internal/* for
+    // non-authenticated users — they shouldn't even know these exist.
+    if (
+      req.method === "GET" &&
+      (pathname.startsWith("/api/internal/")) &&
+      !isAuthenticated
+    ) {
+      return new NextResponse(null, { status: 404 });
+    }
+
     // Determine route type
     const isAdminRoute = pathname.startsWith("/admin");
     const isAdminApiRoute = pathname.startsWith("/api/admin");

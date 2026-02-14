@@ -17,6 +17,11 @@ function safeDecodeURI(value: string): string {
   }
 }
 
+// SECURITY: Hide this route from browsers — return 404 for non-POST
+export async function GET() {
+  return new NextResponse(null, { status: 404 });
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting: defense-in-depth backup (middleware also enforces this)

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { Turnstile } from "@/components/turnstile";
 
 type FormState = "idle" | "loading" | "success" | "error";
 
@@ -52,6 +53,8 @@ export function InternationalJoinForm() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -107,7 +110,7 @@ export function InternationalJoinForm() {
       const response = await fetch("/api/international-join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, turnstileToken }),
       });
 
       if (!response.ok) {
@@ -115,8 +118,11 @@ export function InternationalJoinForm() {
       }
 
       setFormState("success");
+      setTurnstileToken("");
+      setTurnstileResetKey((k) => k + 1);
     } catch {
       setFormState("error");
+      setTurnstileResetKey((k) => k + 1);
     }
   };
 
@@ -360,6 +366,13 @@ export function InternationalJoinForm() {
           </p>
         )}
       </div>
+
+      {/* CAPTCHA */}
+      <Turnstile
+        onVerify={setTurnstileToken}
+        onExpire={() => setTurnstileToken("")}
+        resetKey={turnstileResetKey}
+      />
 
       {/* Submit */}
       <Button

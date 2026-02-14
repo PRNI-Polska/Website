@@ -4,6 +4,7 @@ import { contactFormSchema } from "@/lib/validations";
 import { validateHoneypot } from "@/lib/utils";
 import { escapeHtml, trackHoneypotTrigger } from "@/lib/security-alerts";
 import { rateLimit, getClientIP, validateOrigin, RATE_LIMITS } from "@/lib/rate-limit";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 async function sendEmail(data: {
   name: string;
@@ -104,6 +105,15 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+
+    // Verify CAPTCHA token
+    const isCaptchaValid = await verifyTurnstileToken(body.turnstileToken, ip);
+    if (!isCaptchaValid) {
+      return NextResponse.json(
+        { error: "CAPTCHA verification failed. Please try again." },
+        { status: 403 }
+      );
+    }
 
     // Validate input
     const parsed = contactFormSchema.safeParse(body);

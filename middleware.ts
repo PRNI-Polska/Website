@@ -62,14 +62,14 @@ function buildCSP(nonce: string): string {
   // We can keep the CSP tight by only allowing 'self' for fonts & styles.
   return `
     default-src 'self';
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline';
+    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-inline' https://challenges.cloudflare.com;
     style-src 'self' 'unsafe-inline';
     img-src 'self' data: blob: https://images.unsplash.com https://res.cloudinary.com https://lh3.googleusercontent.com;
     font-src 'self' data:;
     connect-src 'self';
     media-src 'self';
     object-src 'none';
-    frame-src 'none';
+    frame-src https://challenges.cloudflare.com;
     frame-ancestors 'none';
     form-action 'self';
     base-uri 'self';

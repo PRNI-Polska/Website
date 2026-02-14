@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { recruitmentFormSchema, type RecruitmentFormInput } from "@/lib/validations";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
+import { Turnstile } from "@/components/turnstile";
 
 type FormState = "idle" | "loading" | "success" | "error";
 
@@ -18,6 +19,8 @@ export function RecruitmentForm() {
   const { t } = useI18n();
   const [formState, setFormState] = useState<FormState>("idle");
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 
   const {
     register,
@@ -36,7 +39,7 @@ export function RecruitmentForm() {
       const response = await fetch("/api/recruitment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, turnstileToken }),
       });
 
       const result = await response.json();
@@ -47,11 +50,14 @@ export function RecruitmentForm() {
 
       setFormState("success");
       reset();
+      setTurnstileToken("");
+      setTurnstileResetKey((k) => k + 1);
     } catch (error) {
       setFormState("error");
       setErrorMessage(
         error instanceof Error ? error.message : t("recruitment.form.error")
       );
+      setTurnstileResetKey((k) => k + 1);
     }
   };
 
@@ -145,6 +151,13 @@ export function RecruitmentForm() {
           {...register("website")}
         />
       </div>
+
+      {/* CAPTCHA */}
+      <Turnstile
+        onVerify={setTurnstileToken}
+        onExpire={() => setTurnstileToken("")}
+        resetKey={turnstileResetKey}
+      />
 
       {/* Submit */}
       <Button

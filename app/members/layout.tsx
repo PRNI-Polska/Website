@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogOut, Loader2, Shield, Hash, MessageCircle, FileText } from "lucide-react";
+import { LogOut, Loader2, Shield, Hash, MessageCircle, FileText, Newspaper } from "lucide-react";
 
 interface MemberInfo {
   id: string;
@@ -90,15 +90,16 @@ export default function MembersLayout({
             </Link>
             <nav className="flex items-center gap-1">
               {[
-                { href: "/members", icon: FileText, label: "Dokumenty" },
+                { href: "/members", icon: Newspaper, label: "Aktualności", exact: true },
                 { href: "/members/channels", icon: Hash, label: "Kanały" },
                 { href: "/members/messages", icon: MessageCircle, label: "Wiadomości" },
+                { href: "/members/documents", icon: FileText, label: "Dokumenty" },
               ].map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm transition-colors ${
-                    pathname === item.href || (item.href !== "/members" && pathname.startsWith(item.href))
+                    (item as {exact?:boolean}).exact ? pathname === item.href : (pathname === item.href || pathname.startsWith(item.href))
                       ? "bg-[#1a1a1a] text-white"
                       : "text-[#666] hover:text-[#e8e8e8] hover:bg-[#111]"
                   }`}
@@ -126,7 +127,7 @@ export default function MembersLayout({
           )}
         </div>
       </header>
-      <main className={pathname.startsWith("/members/channels") || pathname.startsWith("/members/messages") ? "" : "max-w-6xl mx-auto px-6 py-8"}>{children}</main>
+      <main className={pathname.startsWith("/members/channels") || pathname.startsWith("/members/messages") ? "" : "max-w-4xl mx-auto px-6 py-8"}>{children}</main>
     </div>
   );
 }

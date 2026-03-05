@@ -3,9 +3,17 @@ import { prisma } from "@/lib/db";
 import { requireMember } from "@/lib/member-auth";
 import { decrypt } from "@/lib/encryption";
 
+function canAccessChannel(memberRole: string, allowedRoles: string | null): boolean {
+  if (memberRole === "ADMIN") return true;
+  if (!allowedRoles) return true;
+  const roles = allowedRoles.split(",").map((r) => r.trim());
+  return roles.includes(memberRole);
+}
+
 export async function GET(request: NextRequest) {
+  let member;
   try {
-    await requireMember(request);
+    member = await requireMember(request);
   } catch (e) {
     if (e instanceof Response) return e;
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -19,18 +27,18 @@ export async function GET(request: NextRequest) {
           orderBy: { createdAt: "desc" },
           take: 1,
           include: {
-            sender: {
-              select: { displayName: true },
-            },
+            sender: { select: { displayName: true } },
           },
         },
-        _count: {
-          select: { messages: true },
-        },
+        _count: { select: { messages: true } },
       },
     });
 
-    const result = channels.map((ch) => ({
+    const filtered = channels.filter((ch) =>
+      canAccessChannel(member.role, ch.allowedRoles)
+    );
+
+    const result = filtered.map((ch) => ({
       id: ch.id,
       name: ch.name,
       description: ch.description,
@@ -47,9 +55,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ channels: result });
   } catch {
-    return NextResponse.json(
-      { error: "Failed to fetch channels" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch channels" }, { status: 500 });
   }
 }

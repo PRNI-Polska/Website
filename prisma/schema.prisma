@@ -311,12 +311,13 @@ model PageView {
 // MEMBER CHANNEL - Group chat channels
 // ============================================================================
 model MemberChannel {
-  id          String           @id @default(cuid())
-  name        String           @unique
-  description String?
-  isDefault   Boolean          @default(false)
-  createdAt   DateTime         @default(now())
-  messages    ChannelMessage[]
+  id           String           @id @default(cuid())
+  name         String           @unique
+  description  String?
+  isDefault    Boolean          @default(false)
+  allowedRoles String?          // Comma-separated roles (e.g. "ADMIN,LEADERSHIP,MAIN_WING"). Null = everyone
+  createdAt    DateTime         @default(now())
+  messages     ChannelMessage[]
   
   @@map("member_channels")
 }

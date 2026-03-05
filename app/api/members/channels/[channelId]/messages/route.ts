@@ -31,6 +31,13 @@ export async function GET(
       return NextResponse.json({ error: "Channel not found" }, { status: 404 });
     }
 
+    if (member.role !== "ADMIN" && channel.allowedRoles) {
+      const roles = channel.allowedRoles.split(",").map((r) => r.trim());
+      if (!roles.includes(member.role)) {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
+    }
+
     const before = request.nextUrl.searchParams.get("before");
     const whereClause: Record<string, unknown> = { channelId };
     if (before) {
@@ -84,6 +91,13 @@ export async function POST(
     });
     if (!channel) {
       return NextResponse.json({ error: "Channel not found" }, { status: 404 });
+    }
+
+    if (member.role !== "ADMIN" && channel.allowedRoles) {
+      const roles = channel.allowedRoles.split(",").map((r) => r.trim());
+      if (!roles.includes(member.role)) {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
     }
 
     const body = await request.json();

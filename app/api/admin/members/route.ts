@@ -54,10 +54,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Code already exists" }, { status: 409 });
     }
 
+    const VALID_ROLES = ["ADMIN", "LEADERSHIP", "MAIN_WING", "INTERNATIONAL", "FEMALE_WING", "MEMBER"];
+    const role = typeof body.role === "string" && VALID_ROLES.includes(body.role) ? body.role : "MEMBER";
+
     const invite = await prisma.memberInvite.create({
       data: {
         code,
         email,
+        role,
         expiresAt,
       },
     });
@@ -67,6 +71,7 @@ export async function POST(request: Request) {
         id: invite.id,
         code: invite.code,
         email: invite.email,
+        role: invite.role,
         expiresAt: invite.expiresAt,
       },
     });

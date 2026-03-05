@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireMember } from "@/lib/member-auth";
 
+const UNRESTRICTED_ROLES = ["ADMIN", "LEADERSHIP"];
+
 export async function GET(request: NextRequest) {
   let member;
   try {
@@ -12,7 +14,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const members = await prisma.member.findMany({
+    const allMembers = await prisma.member.findMany({
       where: {
         isActive: true,
         id: { not: member.id },
@@ -25,11 +27,18 @@ export async function GET(request: NextRequest) {
       orderBy: { displayName: "asc" },
     });
 
-    return NextResponse.json({ members });
-  } catch {
-    return NextResponse.json(
-      { error: "Failed to fetch members" },
-      { status: 500 }
+    // Admins and leadership can see and message everyone
+    if (UNRESTRICTED_ROLES.includes(member.role)) {
+      return NextResponse.json({ members: allMembers });
+    }
+
+    // Regular wing members can only see: same role + admins + leadership
+    const visible = allMembers.filter(
+      (m) => m.role === member.role || UNRESTRICTED_ROLES.includes(m.role)
     );
+
+    return NextResponse.json({ members: visible });
+  } catch {
+    return NextResponse.json({ error: "Failed to fetch members" }, { status: 500 });
   }
 }

@@ -105,7 +105,7 @@ export async function POST(
 
     const receiver = await prisma.member.findUnique({
       where: { id: memberId, isActive: true },
-      select: { id: true },
+      select: { id: true, role: true },
     });
 
     if (!receiver) {
@@ -113,6 +113,11 @@ export async function POST(
         { error: "Member not found" },
         { status: 404 }
       );
+    }
+
+    const UNRESTRICTED = ["ADMIN", "LEADERSHIP"];
+    if (!UNRESTRICTED.includes(member.role) && !UNRESTRICTED.includes(receiver.role) && member.role !== receiver.role) {
+      return NextResponse.json({ error: "Cannot message members outside your wing" }, { status: 403 });
     }
 
     const message = await prisma.directMessage.create({

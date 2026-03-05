@@ -103,6 +103,7 @@ export async function POST(request: NextRequest) {
           passwordHash,
           displayName: trimmedName,
           inviteCode: trimmedCode,
+          role: invite.role || "MEMBER",
         },
       }),
       prisma.memberInvite.update({

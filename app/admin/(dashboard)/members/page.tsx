@@ -53,8 +53,11 @@ export default function AdminMembersPage() {
   const [loadingMembers, setLoadingMembers] = useState(true);
   const [loadingInvites, setLoadingInvites] = useState(true);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [customCode, setCustomCode] = useState("");
+  const [expiryHours, setExpiryHours] = useState(168);
   const [generatingInvite, setGeneratingInvite] = useState(false);
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
+  const [generatedExpiry, setGeneratedExpiry] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [channels, setChannels] = useState<Array<{id:string;name:string;description:string|null;messageCount:number;createdAt:string}>>([]);
@@ -137,18 +140,27 @@ export default function AdminMembersPage() {
   async function generateInvite() {
     setGeneratingInvite(true);
     setGeneratedCode(null);
+    setGeneratedExpiry(null);
     try {
       const res = await fetch("/api/admin/members", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: inviteEmail.trim() || undefined,
+          code: customCode.trim() || undefined,
+          expiryHours,
         }),
       });
-      if (!res.ok) throw new Error("Failed");
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || "Failed to generate invite");
+        return;
+      }
       const data = await res.json();
       setGeneratedCode(data.invite.code);
+      setGeneratedExpiry(data.invite.expiresAt);
       setInviteEmail("");
+      setCustomCode("");
       fetchInvites();
     } catch {
       console.error("Failed to generate invite");
@@ -421,11 +433,19 @@ export default function AdminMembersPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex gap-3 items-end">
-                <div className="flex-1 space-y-2">
-                  <Label htmlFor="inviteEmail">
-                    Email (optional — restrict to specific email)
-                  </Label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="customCode">Custom code (optional)</Label>
+                  <Input
+                    id="customCode"
+                    placeholder="e.g. PRNI-VIP"
+                    value={customCode}
+                    onChange={(e) => setCustomCode(e.target.value.toUpperCase())}
+                    maxLength={20}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="inviteEmail">Restrict to email (optional)</Label>
                   <Input
                     id="inviteEmail"
                     type="email"
@@ -433,6 +453,24 @@ export default function AdminMembersPage() {
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                   />
+                </div>
+              </div>
+              <div className="flex gap-3 items-end">
+                <div className="space-y-2">
+                  <Label htmlFor="expiryHours">Expires in</Label>
+                  <select
+                    id="expiryHours"
+                    value={expiryHours}
+                    onChange={(e) => setExpiryHours(parseInt(e.target.value))}
+                    className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value={1}>1 hour</option>
+                    <option value={6}>6 hours</option>
+                    <option value={24}>24 hours</option>
+                    <option value={72}>3 days</option>
+                    <option value={168}>7 days</option>
+                    <option value={720}>30 days</option>
+                  </select>
                 </div>
                 <Button
                   onClick={generateInvite}
@@ -457,7 +495,7 @@ export default function AdminMembersPage() {
                       {generatedCode}
                     </p>
                     <p className="text-xs text-green-400/60 mt-1">
-                      Expires in 7 days
+                      Expires {generatedExpiry ? new Date(generatedExpiry).toLocaleString() : "—"}
                     </p>
                   </div>
                   <Button

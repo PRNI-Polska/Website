@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireMember } from "@/lib/member-auth";
+import { encrypt, decrypt } from "@/lib/encryption";
+
+const SEC = {
+  "Cache-Control": "no-store, no-cache, must-revalidate, private",
+  "Pragma": "no-cache",
+  "X-Content-Type-Options": "nosniff",
+};
 
 export async function GET(
   request: NextRequest,
@@ -51,10 +58,10 @@ export async function GET(
       data: { read: true },
     });
 
-    return NextResponse.json({
-      messages: messages.reverse(),
-      memberId: member.id,
-    });
+    const decrypted = messages.reverse().map((m) => ({ ...m, content: decrypt(m.content) }));
+    const res = NextResponse.json({ messages: decrypted, memberId: member.id });
+    for (const [k, v] of Object.entries(SEC)) res.headers.set(k, v);
+    return res;
   } catch {
     return NextResponse.json(
       { error: "Failed to fetch messages" },
@@ -110,7 +117,7 @@ export async function POST(
 
     const message = await prisma.directMessage.create({
       data: {
-        content,
+        content: encrypt(content),
         senderId: member.id,
         receiverId: memberId,
       },
@@ -124,7 +131,9 @@ export async function POST(
       },
     });
 
-    return NextResponse.json({ message }, { status: 201 });
+    const res = NextResponse.json({ message: { ...message, content } }, { status: 201 });
+    for (const [k, v] of Object.entries(SEC)) res.headers.set(k, v);
+    return res;
   } catch {
     return NextResponse.json(
       { error: "Failed to send message" },

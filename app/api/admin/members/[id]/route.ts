@@ -27,7 +27,7 @@ export async function PATCH(
 
     if (typeof body.isActive === "boolean") {
       data.isActive = body.isActive;
-    } else if (!body.role) {
+    } else if (!body.role && !body.displayName && Object.keys(body).length === 0) {
       data.isActive = !member.isActive;
     }
 

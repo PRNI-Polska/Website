@@ -38,7 +38,6 @@ export default function ChannelsPage() {
   const [sending, setSending] = useState(false);
   const [loadingOlder, setLoadingOlder] = useState(false);
   const [hasOlder, setHasOlder] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const shouldAutoScroll = useRef(true);
@@ -220,25 +219,15 @@ export default function ChannelsPage() {
     );
   }
 
-  return (
-    <div className="flex h-[calc(100vh-120px)] -mx-6 -my-8 border border-[#1a1a1a] rounded-none sm:rounded-xl sm:mx-0 sm:my-0 overflow-hidden bg-[#0a0a0a]">
-      {/* Mobile sidebar toggle */}
-      <button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="sm:hidden fixed bottom-20 left-4 z-50 bg-[#1a1a1a] border border-[#252525] rounded-full p-3 text-[#888] hover:text-[#e8e8e8] transition"
-      >
-        <Hash className="h-5 w-5" />
-      </button>
+  const showChannelOnMobile = !!selectedId;
 
-      {/* Channel Sidebar */}
-      <div
-        className={`${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } sm:translate-x-0 fixed sm:relative z-40 sm:z-auto w-64 shrink-0 border-r border-[#1a1a1a] bg-[#090909] flex flex-col h-full transition-transform duration-200`}
-      >
+  return (
+    <div className="flex h-[calc(100vh-56px)] overflow-hidden bg-[#0a0a0a]">
+      {/* Channel Sidebar — full width on mobile when no channel selected */}
+      <div className={`${showChannelOnMobile ? "hidden sm:flex" : "flex"} sm:w-64 w-full shrink-0 border-r border-[#1a1a1a] bg-[#090909] flex-col h-full`}>
         <div className="px-4 h-12 flex items-center border-b border-[#1a1a1a] shrink-0">
           <h2 className="text-xs font-semibold text-[#888] uppercase tracking-wider">
-            Channels
+            Kanały
           </h2>
         </div>
         <div className="flex-1 overflow-y-auto py-1.5">
@@ -247,9 +236,8 @@ export default function ChannelsPage() {
               key={ch.id}
               onClick={() => {
                 setSelectedId(ch.id);
-                setSidebarOpen(false);
               }}
-              className={`w-full text-left px-3 py-2.5 mx-1.5 rounded-lg transition-colors ${
+              className={`w-full text-left px-3 py-3 mx-1.5 rounded-lg transition-colors active:bg-[#252525] ${
                 ch.id === selectedId
                   ? "bg-[#1a1a1a] text-[#e8e8e8]"
                   : "text-[#999] hover:bg-[#111] hover:text-[#ccc]"
@@ -275,19 +263,14 @@ export default function ChannelsPage() {
         </div>
       </div>
 
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 sm:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Message Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Channel Header */}
+      {/* Message Area — full screen on mobile when channel selected */}
+      <div className={`${showChannelOnMobile ? "flex" : "hidden sm:flex"} flex-1 flex-col min-w-0`}>
+        {/* Channel Header with back button on mobile */}
         {selectedChannel && (
-          <div className="px-4 sm:px-5 h-12 flex items-center gap-2 border-b border-[#1a1a1a] shrink-0 bg-[#090909]/80">
+          <div className="px-4 h-12 flex items-center gap-2 border-b border-[#1a1a1a] shrink-0 bg-[#090909]/80">
+            <button onClick={() => setSelectedId(null)} className="sm:hidden text-[#888] hover:text-[#e8e8e8] transition p-1 -ml-1">
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+            </button>
             <Hash className="h-4 w-4 text-[#555]" />
             <span className="font-semibold text-sm text-[#e8e8e8]">
               {selectedChannel.name}
@@ -397,19 +380,19 @@ export default function ChannelsPage() {
         {selectedId && (
           <form
             onSubmit={sendMessage}
-            className="px-4 sm:px-5 py-3 border-t border-[#1a1a1a] bg-[#090909]/80 shrink-0"
+            className="px-3 sm:px-4 py-2 sm:py-3 border-t border-[#1a1a1a] bg-[#090909]/80 shrink-0"
           >
-            <div className="flex items-center gap-2 bg-[#111] border border-[#1a1a1a] rounded-lg px-3 py-1.5 focus-within:border-[#333] transition-colors">
+            <div className="flex items-center gap-2 bg-[#111] border border-[#1a1a1a] rounded-xl px-3 py-1 focus-within:border-[#333] transition-colors">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value.slice(0, 2000))}
                 placeholder={
                   selectedChannel
-                    ? `Message #${selectedChannel.name}`
-                    : "Type a message..."
+                    ? `Napisz w #${selectedChannel.name}`
+                    : "Napisz wiadomość..."
                 }
-                className="flex-1 bg-transparent text-sm text-[#e8e8e8] placeholder-[#444] outline-none py-1"
+                className="flex-1 bg-transparent text-sm text-[#e8e8e8] placeholder-[#444] outline-none py-2"
                 maxLength={2000}
                 disabled={sending}
                 autoComplete="off"

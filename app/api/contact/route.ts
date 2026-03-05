@@ -1,10 +1,7 @@
 // file: app/api/contact/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { contactFormSchema } from "@/lib/validations";
-import { validateHoneypot } from "@/lib/utils";
-import { escapeHtml, trackHoneypotTrigger } from "@/lib/security-alerts";
-import { rateLimit, getClientIP, validateOrigin, RATE_LIMITS } from "@/lib/rate-limit";
-import { verifyTurnstileToken } from "@/lib/turnstile";
+import { checkRateLimit, validateHoneypot } from "@/lib/utils";
 
 async function sendEmail(data: {
   name: string;
@@ -12,30 +9,20 @@ async function sendEmail(data: {
   subject: string;
   message: string;
 }) {
-  // If no API key configured, log minimally
+  // If no API key configured, just log
   if (!process.env.RESEND_API_KEY) {
-    // SECURITY: In production, don't log full user data to console
-    if (process.env.NODE_ENV === "production") {
-      console.log("Contact form submission received (no email service configured)");
-    } else {
-      console.log("Contact form submission (no email configured):", {
-        from: `${data.name} <${data.email}>`,
-        subject: data.subject,
-        timestamp: new Date().toISOString(),
-      });
-    }
+    console.log("Contact form submission (no email configured):", {
+      from: `${data.name} <${data.email}>`,
+      subject: data.subject,
+      message: data.message,
+      timestamp: new Date().toISOString(),
+    });
     return { success: true };
   }
 
   try {
     const { Resend } = await import("resend");
     const resend = new Resend(process.env.RESEND_API_KEY);
-
-    // Escape all user input before rendering in HTML
-    const safeName = escapeHtml(data.name);
-    const safeEmail = escapeHtml(data.email);
-    const safeSubject = escapeHtml(data.subject);
-    const safeMessage = escapeHtml(data.message).replace(/\n/g, "<br>");
 
     // Send email via Resend
     const { error } = await resend.emails.send({
@@ -45,12 +32,12 @@ async function sendEmail(data: {
       text: `Nowa wiadomość z formularza kontaktowego:\n\nImię: ${data.name}\nEmail: ${data.email}\nTemat: ${data.subject}\n\nWiadomość:\n${data.message}`,
       html: `
         <h2>Nowa wiadomość z formularza kontaktowego</h2>
-        <p><strong>Imię:</strong> ${safeName}</p>
-        <p><strong>Email:</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
-        <p><strong>Temat:</strong> ${safeSubject}</p>
+        <p><strong>Imię:</strong> ${data.name}</p>
+        <p><strong>Email:</strong> <a href="mailto:${data.email}">${data.email}</a></p>
+        <p><strong>Temat:</strong> ${data.subject}</p>
         <hr>
         <p><strong>Wiadomość:</strong></p>
-        <p>${safeMessage}</p>
+        <p>${data.message.replace(/\n/g, "<br>")}</p>
       `,
     });
 
@@ -61,44 +48,34 @@ async function sendEmail(data: {
   } catch (emailError) {
     console.error("Email sending failed:", emailError);
     // Don't throw: still allow the form to succeed
-    if (process.env.NODE_ENV !== "production") {
-      console.log("Contact form submission (email exception):", {
-        from: `${data.name} <${data.email}>`,
-        subject: data.subject,
-        timestamp: new Date().toISOString(),
-      });
-    }
+    console.log("Contact form submission (email exception):", {
+      from: `${data.name} <${data.email}>`,
+      subject: data.subject,
+      timestamp: new Date().toISOString(),
+    });
     return { success: true };
   }
 
   return { success: true };
 }
 
-// SECURITY: Hide this route from browsers — return 404 for non-POST
-export async function GET() {
-  return NextResponse.json(null, { status: 404 });
-}
-
 export async function POST(request: NextRequest) {
   try {
-    // Origin validation (CSRF protection)
-    if (!validateOrigin(request)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
     // Get client IP for rate limiting
-    const ip = getClientIP(request);
+    const ip = request.headers.get("x-forwarded-for") || 
+                request.headers.get("x-real-ip") || 
+                "unknown";
 
-    // Rate limiting: 2 requests per hour per IP (Redis-backed)
-    const rl = await rateLimit(ip, "contact", RATE_LIMITS.contact.maxRequests, RATE_LIMITS.contact.windowMs, RATE_LIMITS.contact.blockDuration);
+    // Rate limiting: 5 requests per 15 minutes per IP
+    const rateLimit = checkRateLimit(`contact:${ip}`, 5, 15 * 60 * 1000);
     
-    if (!rl.allowed) {
+    if (!rateLimit.allowed) {
       return NextResponse.json(
         { error: "Too many requests. Please try again later." },
         { 
           status: 429,
           headers: {
-            "Retry-After": Math.ceil(rl.resetIn / 1000).toString(),
+            "Retry-After": Math.ceil(rateLimit.resetIn / 1000).toString(),
           },
         }
       );
@@ -106,23 +83,11 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // Verify CAPTCHA token
-    const isCaptchaValid = await verifyTurnstileToken(body.turnstileToken, ip);
-    if (!isCaptchaValid) {
-      return NextResponse.json(
-        { error: "CAPTCHA verification failed. Please try again." },
-        { status: 403 }
-      );
-    }
-
     // Validate input
     const parsed = contactFormSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        {
-          error: "Invalid form data",
-          ...(process.env.NODE_ENV !== "production" && { details: parsed.error.flatten() }),
-        },
+        { error: "Invalid form data", details: parsed.error.flatten() },
         { status: 400 }
       );
     }
@@ -131,9 +96,8 @@ export async function POST(request: NextRequest) {
 
     // Check honeypot - if it has a value, it's likely a bot
     if (!validateHoneypot(website)) {
-      // Track in security alert system
-      trackHoneypotTrigger(ip, "/api/contact", email);
       // Silently reject but return success to not give away the honeypot
+      console.log("Honeypot triggered, rejecting submission from:", email);
       return NextResponse.json({ success: true });
     }
 

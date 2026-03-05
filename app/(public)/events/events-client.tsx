@@ -41,7 +41,6 @@ import {
 } from "@/components/ui/dialog";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { cn, formatDateTime } from "@/lib/utils";
-import { useI18n } from "@/lib/i18n";
 
 interface Event {
   id: string;
@@ -60,7 +59,6 @@ interface EventsClientProps {
 }
 
 export function EventsClient({ events }: EventsClientProps) {
-  const { t } = useI18n();
   const searchParams = useSearchParams();
   const selectedEventId = searchParams.get("id");
   
@@ -69,8 +67,6 @@ export function EventsClient({ events }: EventsClientProps) {
     events.find((e) => e.id === selectedEventId) || null
   );
   const [dialogOpen, setDialogOpen] = useState(!!selectedEventId);
-
-  const dayKeys = ["days.sun", "days.mon", "days.tue", "days.wed", "days.thu", "days.fri", "days.sat"];
 
   // Get days for calendar grid
   const calendarDays = useMemo(() => {
@@ -140,11 +136,11 @@ export function EventsClient({ events }: EventsClientProps) {
           <TabsList>
             <TabsTrigger value="calendar" className="gap-2">
               <Calendar className="h-4 w-4" />
-              {t("events.calendar")}
+              Calendar
             </TabsTrigger>
             <TabsTrigger value="list" className="gap-2">
               <List className="h-4 w-4" />
-              {t("events.list")}
+              List
             </TabsTrigger>
           </TabsList>
 
@@ -155,7 +151,7 @@ export function EventsClient({ events }: EventsClientProps) {
             className="text-sm text-muted-foreground hover:text-primary"
           >
             <Download className="inline h-4 w-4 mr-1" />
-            {t("events.subscribe")}
+            Subscribe to Calendar
           </a>
         </div>
 
@@ -179,7 +175,7 @@ export function EventsClient({ events }: EventsClientProps) {
                   size="sm"
                   onClick={() => setCurrentMonth(new Date())}
                 >
-                  {t("events.today")}
+                  Today
                 </Button>
                 <Button
                   variant="outline"
@@ -194,12 +190,12 @@ export function EventsClient({ events }: EventsClientProps) {
               {/* Calendar Grid */}
               <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden">
                 {/* Day headers */}
-                {dayKeys.map((key) => (
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
                   <div
-                    key={key}
+                    key={day}
                     className="bg-muted p-2 text-center text-sm font-medium"
                   >
-                    {t(key)}
+                    {day}
                   </div>
                 ))}
                 
@@ -238,7 +234,7 @@ export function EventsClient({ events }: EventsClientProps) {
                         ))}
                         {dayEvents.length > 3 && (
                           <span className="text-xs text-muted-foreground">
-                            +{dayEvents.length - 3} {t("events.more")}
+                            +{dayEvents.length - 3} more
                           </span>
                         )}
                       </div>
@@ -254,7 +250,7 @@ export function EventsClient({ events }: EventsClientProps) {
         <TabsContent value="list" className="space-y-8">
           {/* Upcoming Events */}
           <section>
-            <h2 className="text-xl font-semibold mb-4">{t("events.upcoming")}</h2>
+            <h2 className="text-xl font-semibold mb-4">Upcoming Events</h2>
             {upcomingEvents.length > 0 ? (
               <div className="space-y-4">
                 {upcomingEvents.map((event) => (
@@ -268,7 +264,7 @@ export function EventsClient({ events }: EventsClientProps) {
             ) : (
               <Card>
                 <CardContent className="py-8 text-center text-muted-foreground">
-                  {t("events.none")}
+                  No upcoming events scheduled.
                 </CardContent>
               </Card>
             )}
@@ -277,7 +273,7 @@ export function EventsClient({ events }: EventsClientProps) {
           {/* Past Events */}
           {pastEvents.length > 0 && (
             <section>
-              <h2 className="text-xl font-semibold mb-4">{t("events.past")}</h2>
+              <h2 className="text-xl font-semibold mb-4">Past Events</h2>
               <div className="space-y-4 opacity-75">
                 {pastEvents.map((event) => (
                   <EventCard
@@ -340,7 +336,7 @@ export function EventsClient({ events }: EventsClientProps) {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    {t("events.rsvp")}
+                    RSVP
                     <ExternalLink className="ml-2 h-4 w-4" />
                   </a>
                 </Button>
@@ -351,14 +347,14 @@ export function EventsClient({ events }: EventsClientProps) {
                   download={`${selectedEvent.title.replace(/\s+/g, "-")}.ics`}
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  {t("events.addToCalendar")}
+                  Add to Calendar
                 </a>
               </Button>
               {selectedEvent.organizerContact && (
                 <Button variant="outline" asChild>
                   <a href={`mailto:${selectedEvent.organizerContact}`}>
                     <Mail className="mr-2 h-4 w-4" />
-                    {t("events.contactOrganizer")}
+                    Contact Organizer
                   </a>
                 </Button>
               )}
@@ -381,7 +377,7 @@ function EventCard({
 }) {
   return (
     <Card
-      className={cn("cursor-pointer transition-all hover:border-primary hover-lift", isPast && "opacity-75")}
+      className={cn("cursor-pointer transition-colors hover:border-primary", isPast && "opacity-75")}
       onClick={onClick}
     >
       <CardContent className="p-6">

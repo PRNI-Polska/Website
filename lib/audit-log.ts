@@ -1,5 +1,5 @@
 // file: lib/audit-log.ts
-// Security audit logging system - persists to database in all environments
+// Security audit logging system
 
 import { prisma } from "./db";
 
@@ -43,64 +43,36 @@ const logBuffer: AuditLogEntry[] = [];
 const BUFFER_FLUSH_INTERVAL = 5000; // 5 seconds
 const BUFFER_MAX_SIZE = 50;
 
-// Flush buffer to database
+// Flush buffer to console/file (in production, send to database or logging service)
 async function flushBuffer() {
   if (logBuffer.length === 0) return;
 
   const entries = [...logBuffer];
   logBuffer.length = 0;
 
-  // Always log to console for real-time visibility
-  for (const entry of entries) {
-    const severity = entry.severity || "low";
-    const icon = {
-      low: "[AUDIT]",
-      medium: "[AUDIT-WARN]",
-      high: "[AUDIT-ALERT]",
-      critical: "[AUDIT-CRITICAL]",
-    }[severity];
-
-    console.log(
-      `${icon} ${new Date().toISOString()} | ${entry.action} | ${entry.resource}${entry.resourceId ? `:${entry.resourceId}` : ""} | IP: ${entry.ipAddress} | User: ${entry.userEmail || "anonymous"}`
-    );
-    
-    if (entry.details && (severity === "high" || severity === "critical")) {
-      console.log(`   Details:`, entry.details);
-    }
-  }
-
-  // Persist to database (all environments)
-  try {
-    // We need a userId for the AuditLog model, so we group entries:
-    // - Those with a userId can be written to the AuditLog table
-    // - Those without (e.g., failed logins for non-existent users) are logged to console only
-    const dbEntries = entries.filter((e) => e.userId);
-    
-    if (dbEntries.length > 0) {
-      await prisma.auditLog.createMany({
-        data: dbEntries.map((e) => ({
-          action: e.action,
-          entityType: e.resource,
-          entityId: e.resourceId || "system",
-          userId: e.userId!,
-          details: JSON.stringify({
-            severity: e.severity || "low",
-            ipAddress: e.ipAddress,
-            userAgent: e.userAgent,
-            userEmail: e.userEmail,
-            ...(e.details || {}),
-            timestamp: new Date().toISOString(),
-          }),
-        })),
-      });
-    }
-  } catch (error) {
-    // Don't lose entries if DB write fails - log them to console as fallback
-    console.error("Failed to persist audit logs to database:", error);
+  // Log to console in development
+  if (process.env.NODE_ENV === "development") {
     for (const entry of entries) {
-      console.log(`[AUDIT-FALLBACK] ${JSON.stringify(entry)}`);
+      const severity = entry.severity || "low";
+      const icon = {
+        low: "📝",
+        medium: "⚠️",
+        high: "🚨",
+        critical: "🔴",
+      }[severity];
+
+      console.log(
+        `${icon} [AUDIT] ${new Date().toISOString()} | ${entry.action} | ${entry.resource}${entry.resourceId ? `:${entry.resourceId}` : ""} | IP: ${entry.ipAddress} | User: ${entry.userEmail || "anonymous"}`
+      );
+      
+      if (entry.details) {
+        console.log(`   Details:`, entry.details);
+      }
     }
   }
+
+  // In production, you would send these to a database or logging service
+  // Example: await prisma.auditLog.createMany({ data: entries.map(e => ({ ...e, timestamp: new Date() })) });
 }
 
 // Start periodic flushing

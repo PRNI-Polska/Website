@@ -1,12 +1,9 @@
 // file: lib/auth.ts
-// SECURITY-HARDENED AUTH FOR POLITICAL WEBSITE
 import { NextAuthOptions, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { prisma } from "./db";
 import { loginSchema } from "./validations";
-import { trackLoginFailure } from "./security-alerts";
-import { getRedis } from "./redis";
 
 // Extend the built-in session types
 declare module "next-auth" {
@@ -32,117 +29,32 @@ declare module "next-auth/jwt" {
     email: string;
     name?: string | null;
     role: string;
-    /** Timestamp (epoch seconds) before which all sessions are revoked. */
-    revokedBefore?: number;
   }
 }
 
-// ============================================
-// STRICT RATE LIMITING FOR LOGIN ATTEMPTS
-// ============================================
-interface LoginAttempt {
-  count: number;
-  lastAttempt: number;
-  blocked: boolean;
-  blockExpiry: number;
-}
+// Rate limiting for login attempts
+const loginAttempts = new Map<string, { count: number; lastAttempt: number }>();
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
 
-const loginAttempts = new Map<string, LoginAttempt>();
-const MAX_LOGIN_ATTEMPTS = 2;             // Only 2 tries before lockout
-const LOCKOUT_DURATION = 15 * 60 * 1000;  // 15 minutes base lockout (was 5)
-const PROGRESSIVE_LOCKOUT = true;          // Doubles each time: 15min → 30min → 60min → 120min (capped)
-const MAX_LOCKOUT = 2 * 60 * 60 * 1000;   // 2-hour cap (was 30 min)
-
-async function checkLoginRateLimit(email: string): Promise<{ allowed: boolean; remainingAttempts: number; lockoutRemaining?: number }> {
+function checkLoginRateLimit(email: string): { allowed: boolean; remainingAttempts: number } {
   const now = Date.now();
-  const normalizedEmail = email.toLowerCase();
-
-  // ── Try Redis first (distributed, serverless-safe) ──
-  const redis = getRedis();
-  if (redis) {
-    try {
-      const attemptsKey = `auth:attempts:${normalizedEmail}`;
-      const blockKey = `auth:blocked:${normalizedEmail}`;
-
-      // Check if currently blocked
-      const blockedUntil = await redis.get<number>(blockKey);
-      if (blockedUntil && now < blockedUntil) {
-        const lockoutRemaining = Math.ceil((blockedUntil - now) / 1000 / 60);
-        return { allowed: false, remainingAttempts: 0, lockoutRemaining };
-      }
-
-      // Get current attempt count
-      const attempts = (await redis.get<number>(attemptsKey)) || 0;
-
-      if (attempts >= MAX_LOGIN_ATTEMPTS) {
-        // Progressive lockout: 15min → 30min → 60min → 120min (capped)
-        const excess = attempts - MAX_LOGIN_ATTEMPTS;
-        const lockoutMultiplier = PROGRESSIVE_LOCKOUT ? Math.pow(2, Math.min(excess, 3)) : 1;
-        const lockoutMs = Math.min(LOCKOUT_DURATION * lockoutMultiplier, MAX_LOCKOUT);
-
-        await redis.set(blockKey, now + lockoutMs, { px: lockoutMs });
-        const lockoutRemaining = Math.ceil(lockoutMs / 1000 / 60);
-
-        logSecurityEvent("LOGIN_LOCKOUT", {
-          email: normalizedEmail,
-          attempts,
-          lockoutMinutes: lockoutRemaining,
-        });
-
-        return { allowed: false, remainingAttempts: 0, lockoutRemaining };
-      }
-
-      return { allowed: true, remainingAttempts: MAX_LOGIN_ATTEMPTS - attempts };
-    } catch (err) {
-      console.error("[AUTH] Redis rate limit error, falling back to in-memory:", err);
-    }
-  }
-
-  // ── In-memory fallback ──
-  const record = loginAttempts.get(normalizedEmail);
+  const record = loginAttempts.get(email);
 
   if (!record) {
-    loginAttempts.set(normalizedEmail, { 
-      count: 1, 
-      lastAttempt: now, 
-      blocked: false, 
-      blockExpiry: 0 
-    });
+    loginAttempts.set(email, { count: 1, lastAttempt: now });
     return { allowed: true, remainingAttempts: MAX_LOGIN_ATTEMPTS - 1 };
   }
 
-  if (record.blocked && now < record.blockExpiry) {
-    const lockoutRemaining = Math.ceil((record.blockExpiry - now) / 1000 / 60);
-    return { allowed: false, remainingAttempts: 0, lockoutRemaining };
-  }
-
-  if (record.blocked && now >= record.blockExpiry) {
-    record.blocked = false;
-    record.count = 1;
-    record.lastAttempt = now;
+  // Reset if lockout duration has passed
+  if (now - record.lastAttempt > LOCKOUT_DURATION) {
+    loginAttempts.set(email, { count: 1, lastAttempt: now });
     return { allowed: true, remainingAttempts: MAX_LOGIN_ATTEMPTS - 1 };
   }
 
-  if (now - record.lastAttempt > 60 * 60 * 1000) {
-    record.count = 1;
-    record.lastAttempt = now;
-    return { allowed: true, remainingAttempts: MAX_LOGIN_ATTEMPTS - 1 };
-  }
-
+  // Check if locked out
   if (record.count >= MAX_LOGIN_ATTEMPTS) {
-    const lockoutMultiplier = PROGRESSIVE_LOCKOUT ? Math.pow(2, Math.min(record.count - MAX_LOGIN_ATTEMPTS, 3)) : 1;
-    const lockoutMs = Math.min(LOCKOUT_DURATION * lockoutMultiplier, MAX_LOCKOUT);
-    record.blocked = true;
-    record.blockExpiry = now + lockoutMs;
-    const lockoutRemaining = Math.ceil((record.blockExpiry - now) / 1000 / 60);
-    
-    logSecurityEvent("LOGIN_LOCKOUT", { 
-      email: normalizedEmail, 
-      attempts: record.count,
-      lockoutMinutes: lockoutRemaining 
-    });
-    
-    return { allowed: false, remainingAttempts: 0, lockoutRemaining };
+    return { allowed: false, remainingAttempts: 0 };
   }
 
   record.count++;
@@ -150,144 +62,10 @@ async function checkLoginRateLimit(email: string): Promise<{ allowed: boolean; r
   return { allowed: true, remainingAttempts: MAX_LOGIN_ATTEMPTS - record.count };
 }
 
-async function resetLoginAttempts(email: string): Promise<void> {
-  const normalizedEmail = email.toLowerCase();
-  loginAttempts.delete(normalizedEmail);
-
-  const redis = getRedis();
-  if (redis) {
-    try {
-      await redis.del(`auth:attempts:${normalizedEmail}`, `auth:blocked:${normalizedEmail}`);
-    } catch (err) {
-      console.error("[AUTH] Redis cleanup error:", err);
-    }
-  }
+function resetLoginAttempts(email: string): void {
+  loginAttempts.delete(email);
 }
 
-async function recordFailedLogin(email: string): Promise<void> {
-  const normalizedEmail = email.toLowerCase();
-
-  // In-memory
-  const record = loginAttempts.get(normalizedEmail);
-  if (record) {
-    record.count++;
-    record.lastAttempt = Date.now();
-  }
-
-  // Redis
-  const redis = getRedis();
-  if (redis) {
-    try {
-      const key = `auth:attempts:${normalizedEmail}`;
-      await redis.incr(key);
-      const ttl = await redis.ttl(key);
-      if (ttl < 0) {
-        await redis.expire(key, 3600); // 1 hour window
-      }
-    } catch (err) {
-      console.error("[AUTH] Redis record login error:", err);
-    }
-  }
-}
-
-// ============================================
-// SECURITY LOGGING
-// ============================================
-function logSecurityEvent(type: string, details: Record<string, unknown>): void {
-  const timestamp = new Date().toISOString();
-  console.log(JSON.stringify({
-    type: `AUTH:${type}`,
-    timestamp,
-    ...details,
-  }));
-}
-
-// ============================================
-// AUDIT LOGGING TO DATABASE (with IP)
-// ============================================
-async function logAuthAudit(
-  action: string,
-  email: string,
-  success: boolean,
-  details?: string,
-  ipAddress?: string,
-): Promise<void> {
-  try {
-    // Find user to get ID (might not exist for failed logins)
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
-      select: { id: true },
-    });
-
-    if (user) {
-      await prisma.auditLog.create({
-        data: {
-          action: `AUTH_${action}`,
-          entityType: "User",
-          entityId: user.id,
-          userId: user.id,
-          details: JSON.stringify({
-            success,
-            email,
-            details,
-            ipAddress: ipAddress || "unknown",
-            timestamp: new Date().toISOString(),
-          }),
-        },
-      });
-    }
-  } catch (error) {
-    // Don't fail auth if audit logging fails
-    console.error("Failed to log auth audit:", error);
-  }
-}
-
-// ============================================
-// SESSION REVOCATION VIA REDIS
-// ============================================
-const SESSION_REVOCATION_KEY = "auth:sessions_revoked_before";
-
-/**
- * Revoke all sessions issued before now.
- * Call this after password change or explicit "log out everywhere".
- */
-export async function revokeAllSessions(): Promise<boolean> {
-  const redis = getRedis();
-  if (!redis) {
-    console.warn("[AUTH] Cannot revoke sessions: Redis not available");
-    return false;
-  }
-
-  try {
-    const now = Math.floor(Date.now() / 1000);
-    await redis.set(SESSION_REVOCATION_KEY, now);
-    logSecurityEvent("SESSIONS_REVOKED", { revokedBefore: now });
-    return true;
-  } catch (err) {
-    console.error("[AUTH] Failed to revoke sessions:", err);
-    return false;
-  }
-}
-
-/**
- * Get the "revoked before" timestamp from Redis.
- * Returns 0 if not set or Redis unavailable.
- */
-async function getRevocationTimestamp(): Promise<number> {
-  const redis = getRedis();
-  if (!redis) return 0;
-
-  try {
-    const val = await redis.get<number>(SESSION_REVOCATION_KEY);
-    return val || 0;
-  } catch {
-    return 0;
-  }
-}
-
-// ============================================
-// AUTH OPTIONS
-// ============================================
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -301,105 +79,41 @@ export const authOptions: NextAuthOptions = {
           // Validate input
           const parsed = loginSchema.safeParse(credentials);
           if (!parsed.success) {
-            logSecurityEvent("INVALID_CREDENTIALS_FORMAT", { 
-              errors: parsed.error.flatten() 
-            });
             throw new Error("Invalid credentials format");
           }
 
           const { email, password } = parsed.data;
-          const normalizedEmail = email.toLowerCase();
 
-          // Check if this is a 2FA challenge token login
-          // (password field contains the challengeToken after 2FA verification)
-          const challengeToken = (credentials as Record<string, string>)?.challengeToken;
-          
-          if (challengeToken) {
-            // Verify the 2FA challenge token
-            const challenge = await prisma.twoFactorCode.findUnique({
-              where: { challengeToken },
-            });
-
-            if (!challenge || !challenge.verified || challenge.used || new Date() > challenge.expiresAt) {
-              throw new Error("Invalid or expired verification. Please log in again.");
-            }
-
-            if (challenge.email !== normalizedEmail) {
-              throw new Error("Invalid verification");
-            }
-
-            // Mark as used
-            await prisma.twoFactorCode.update({
-              where: { id: challenge.id },
-              data: { used: true },
-            });
-
-            // Find the user
-            const user = await prisma.user.findUnique({
-              where: { email: normalizedEmail },
-            });
-
-            if (!user || user.role !== "ADMIN") {
-              throw new Error("Access denied");
-            }
-
-            // Success via 2FA
-            await resetLoginAttempts(normalizedEmail);
-            logSecurityEvent("LOGIN_SUCCESS_2FA", { email: normalizedEmail, userId: user.id });
-            await logAuthAudit("LOGIN_SUCCESS", normalizedEmail, true, "2FA verified");
-
-            return {
-              id: user.id,
-              email: user.email,
-              name: user.name,
-              role: user.role,
-            };
-          }
-
-          // Regular password login (should not be used directly anymore,
-          // but kept as fallback)
-          const rateLimit = await checkLoginRateLimit(normalizedEmail);
+          // Check rate limiting
+          const rateLimit = checkLoginRateLimit(email);
           if (!rateLimit.allowed) {
-            logSecurityEvent("LOGIN_RATE_LIMITED", { 
-              email: normalizedEmail,
-              lockoutRemaining: rateLimit.lockoutRemaining 
-            });
-            throw new Error(`Account temporarily locked. Try again in ${rateLimit.lockoutRemaining} minutes.`);
+            throw new Error("Too many login attempts. Please try again later.");
           }
 
           // Find user
           const user = await prisma.user.findUnique({
-            where: { email: normalizedEmail },
+            where: { email: email.toLowerCase() },
           });
 
           if (!user) {
-            logSecurityEvent("LOGIN_USER_NOT_FOUND", { email: normalizedEmail });
-            await recordFailedLogin(normalizedEmail);
-            await trackLoginFailure("unknown", normalizedEmail);
             throw new Error("Invalid email or password");
           }
 
           // Verify password
           const isValidPassword = await compare(password, user.passwordHash);
           if (!isValidPassword) {
-            logSecurityEvent("LOGIN_INVALID_PASSWORD", { 
-              email: normalizedEmail,
-              remainingAttempts: rateLimit.remainingAttempts - 1 
-            });
-            await recordFailedLogin(normalizedEmail);
-            await trackLoginFailure("unknown", normalizedEmail);
-            await logAuthAudit("LOGIN_FAILED", normalizedEmail, false, "Invalid password");
             throw new Error("Invalid email or password");
           }
 
-          if (user.role !== "ADMIN") {
-            logSecurityEvent("LOGIN_NON_ADMIN", { email: normalizedEmail, role: user.role });
-            await logAuthAudit("LOGIN_DENIED", normalizedEmail, false, "Non-admin user");
-            throw new Error("Access denied");
-          }
+          // Reset rate limit on successful login
+          resetLoginAttempts(email);
 
-          // Direct password login without 2FA - block it, require 2FA
-          throw new Error("Two-factor authentication required");
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          };
         } catch (error) {
           console.error("Auth error:", error);
           throw error;
@@ -415,26 +129,9 @@ export const authOptions: NextAuthOptions = {
         token.name = user.name;
         token.role = user.role;
       }
-
-      // Check session revocation timestamp from Redis
-      // (only on subsequent requests, not on initial login)
-      if (!user && token.iat) {
-        const revokedBefore = await getRevocationTimestamp();
-        if (revokedBefore > 0) {
-          token.revokedBefore = revokedBefore;
-        }
-      }
-
       return token;
     },
     async session({ session, token }) {
-      // If the session was revoked, return an empty session to force re-login
-      const revokedBefore = token.revokedBefore as number | undefined;
-      const issuedAt = token.iat as number | undefined;
-      if (revokedBefore && issuedAt && issuedAt < revokedBefore) {
-        return { ...session, user: undefined as never };
-      }
-
       session.user = {
         id: token.id,
         email: token.email,
@@ -450,24 +147,12 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
-    maxAge: 30 * 60, // 30 minutes (stricter for political site)
+    maxAge: 60 * 60, // 1 hour (security hardening)
   },
   jwt: {
-    maxAge: 30 * 60, // 30 minutes
+    maxAge: 60 * 60, // 1 hour
   },
   secret: process.env.NEXTAUTH_SECRET,
-  // Additional security options
-  cookies: {
-    sessionToken: {
-      name: `__Secure-next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: 'strict',
-        path: '/',
-        secure: true,
-      },
-    },
-  },
 };
 
 /**

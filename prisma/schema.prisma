@@ -225,6 +225,10 @@ model Member {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
+  channelMessages  ChannelMessage[]
+  sentMessages     DirectMessage[]  @relation("SentMessages")
+  receivedMessages DirectMessage[]  @relation("ReceivedMessages")
+  
   @@index([email])
   @@index([isActive])
   @@map("members")
@@ -301,4 +305,53 @@ model PageView {
   @@index([createdAt])
   @@index([sessionId])
   @@map("page_views")
+}
+
+// ============================================================================
+// MEMBER CHANNEL - Group chat channels
+// ============================================================================
+model MemberChannel {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  isDefault   Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  messages    ChannelMessage[]
+  
+  @@map("member_channels")
+}
+
+// ============================================================================
+// CHANNEL MESSAGE - Messages in group channels
+// ============================================================================
+model ChannelMessage {
+  id          String        @id @default(cuid())
+  content     String
+  channelId   String
+  channel     MemberChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  senderId    String
+  sender      Member        @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  createdAt   DateTime      @default(now())
+  
+  @@index([channelId, createdAt])
+  @@index([senderId])
+  @@map("channel_messages")
+}
+
+// ============================================================================
+// DIRECT MESSAGE - Private 1-on-1 messages
+// ============================================================================
+model DirectMessage {
+  id          String   @id @default(cuid())
+  content     String
+  senderId    String
+  sender      Member   @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId  String
+  receiver    Member   @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  
+  @@index([senderId, receiverId, createdAt])
+  @@index([receiverId, read])
+  @@map("direct_messages")
 }

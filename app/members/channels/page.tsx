@@ -222,7 +222,7 @@ export default function ChannelsPage() {
   const showChannelOnMobile = !!selectedId;
 
   return (
-    <div className="flex h-[calc(100vh-56px)] overflow-hidden bg-[#0a0a0a]">
+    <div className="flex overflow-hidden bg-[#0a0a0a]" style={{ height: "calc(100dvh - 56px)" }}>
       {/* Channel Sidebar — full width on mobile when no channel selected */}
       <div className={`${showChannelOnMobile ? "hidden sm:flex" : "flex"} sm:w-64 w-full shrink-0 border-r border-[#1a1a1a] bg-[#090909] flex-col h-full`}>
         <div className="px-4 h-12 flex items-center border-b border-[#1a1a1a] shrink-0">
@@ -392,6 +392,7 @@ export default function ChannelsPage() {
                     ? `Napisz w #${selectedChannel.name}`
                     : "Napisz wiadomość..."
                 }
+                onFocus={() => { setTimeout(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, 300); }}
                 className="flex-1 bg-transparent text-sm text-[#e8e8e8] placeholder-[#444] outline-none py-2"
                 maxLength={2000}
                 disabled={sending}

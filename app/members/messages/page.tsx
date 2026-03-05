@@ -230,7 +230,7 @@ export default function MessagesPage() {
   const showConversationOnMobile = !!selectedMemberId;
 
   return (
-    <div className="flex h-[calc(100vh-56px)] overflow-hidden bg-[#0a0a0a]">
+    <div className="flex overflow-hidden bg-[#0a0a0a]" style={{ height: "calc(100dvh - 56px)" }}>
       {/* Sidebar — full screen on mobile when no conversation selected */}
       <div className={`${showConversationOnMobile ? "hidden sm:flex" : "flex"} sm:w-72 w-full shrink-0 border-r border-[#1a1a1a] bg-[#090909] flex-col h-full`}>
         <div className="px-4 h-12 flex items-center justify-between border-b border-[#1a1a1a] shrink-0">
@@ -435,6 +435,7 @@ export default function MessagesPage() {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value.slice(0, 2000))}
+                  onFocus={() => { setTimeout(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, 300); }}
                   placeholder="Napisz wiadomość..."
                   className="flex-1 bg-transparent text-sm text-[#e8e8e8] placeholder-[#444] outline-none py-2"
                   maxLength={2000}

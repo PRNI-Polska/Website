@@ -78,9 +78,9 @@ export default function MembersLayout({
 
   return (
     <div className="min-h-screen bg-[#090909] text-[#e8e8e8]">
-      {/* Prevent indexing of private member area */}
       <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
       <meta name="googlebot" content="noindex, nofollow" />
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, interactive-widget=resizes-content" />
       <header className="border-b border-[#1a1a1a] bg-[#090909]/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-14">
           <div className="flex items-center gap-6">

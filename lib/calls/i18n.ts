@@ -97,6 +97,16 @@ export const translations = {
   rejoin: { pl: "Dołącz ponownie", en: "Rejoin", de: "Erneut beitreten" },
   connectionError: { pl: "Błąd połączenia", en: "Connection error", de: "Verbindungsfehler" },
   tryAgain: { pl: "Spróbuj ponownie", en: "Try again", de: "Erneut versuchen" },
+
+  captions: { pl: "Napisy", en: "Captions", de: "Untertitel" },
+  captionsOn: { pl: "Napisy włączone", en: "Captions on", de: "Untertitel an" },
+  captionsOff: { pl: "Napisy wyłączone", en: "Captions off", de: "Untertitel aus" },
+  transcript: { pl: "Transkrypcja", en: "Transcript", de: "Transkript" },
+  emailTranscript: { pl: "Wyślij transkrypcję", en: "Email transcript", de: "Transkript senden" },
+  emailPlaceholder: { pl: "Adres email...", en: "Email address...", de: "E-Mail-Adresse..." },
+  sending: { pl: "Wysyłanie...", en: "Sending...", de: "Senden..." },
+  sent: { pl: "Wysłano!", en: "Sent!", de: "Gesendet!" },
+  sendFailed: { pl: "Błąd wysyłania", en: "Send failed", de: "Senden fehlgeschlagen" },
 } as const;
 
 export type TranslationKey = keyof typeof translations;

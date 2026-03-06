@@ -10,6 +10,7 @@ import {
   X,
   ArrowLeft,
 } from "lucide-react";
+import { useMemberLang } from "@/lib/members/LangContext";
 
 interface MemberInfo {
   id: string;
@@ -35,16 +36,18 @@ interface Message {
   read: boolean;
 }
 
-const ROLE_LABELS: Record<string, string> = {
-  ADMIN: "Admin",
-  LEADERSHIP: "Kadra",
-  MAIN_WING: "Główne",
-  INTERNATIONAL: "INT",
-  FEMALE_WING: "Kobiece",
-  MEMBER: "Członek",
-};
-
 export default function MessagesPage() {
+  const { t } = useMemberLang();
+
+  const ROLE_LABELS: Record<string, string> = {
+    ADMIN: t("role.ADMIN"),
+    LEADERSHIP: t("role.LEADERSHIP"),
+    MAIN_WING: t("role.MAIN_WING"),
+    INTERNATIONAL: t("role.INTERNATIONAL"),
+    FEMALE_WING: t("role.FEMALE_WING"),
+    MEMBER: t("role.MEMBER"),
+  };
+
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -166,7 +169,6 @@ export default function MessagesPage() {
     } catch { /* ignore */ }
     finally {
       setSending(false);
-      // Re-focus the input after sending
       requestAnimationFrame(() => inputRef.current?.focus());
     }
   }
@@ -187,7 +189,6 @@ export default function MessagesPage() {
   function selectMember(memberId: string) {
     setSelectedMemberId(memberId);
     setShowPicker(false);
-    // Focus the input after selecting
     requestAnimationFrame(() => inputRef.current?.focus());
   }
 
@@ -201,7 +202,7 @@ export default function MessagesPage() {
     if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
-    if (d.toDateString() === yesterday.toDateString()) return "Wczoraj";
+    if (d.toDateString() === yesterday.toDateString()) return t("messages.yesterday");
     return d.toLocaleDateString("pl-PL", { day: "numeric", month: "short" });
   }
 
@@ -212,10 +213,10 @@ export default function MessagesPage() {
   function formatDaySeparator(iso: string) {
     const d = new Date(iso);
     const now = new Date();
-    if (d.toDateString() === now.toDateString()) return "Dzisiaj";
+    if (d.toDateString() === now.toDateString()) return t("messages.today");
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
-    if (d.toDateString() === yesterday.toDateString()) return "Wczoraj";
+    if (d.toDateString() === yesterday.toDateString()) return t("messages.yesterday");
     return d.toLocaleDateString("pl-PL", { weekday: "long", day: "numeric", month: "long" });
   }
 
@@ -243,7 +244,7 @@ export default function MessagesPage() {
       {/* Sidebar */}
       <div className={`${showConversationOnMobile ? "hidden sm:flex" : "flex"} sm:w-80 w-full shrink-0 border-r border-[#151515] bg-[#080808] flex-col h-full`}>
         <div className="px-5 h-14 flex items-center justify-between border-b border-[#151515] shrink-0">
-          <h2 className="text-base font-semibold text-[#e8e8e8]">Wiadomości</h2>
+          <h2 className="text-base font-semibold text-[#e8e8e8]">{t("messages.title")}</h2>
           <button onClick={openPicker} className="text-[#888] hover:text-white transition p-2.5 rounded-xl hover:bg-[#1a1a1a] active:bg-[#222]">
             <Plus className="h-5 w-5" />
           </button>
@@ -258,7 +259,7 @@ export default function MessagesPage() {
                 type="text"
                 value={memberSearch}
                 onChange={(e) => setMemberSearch(e.target.value)}
-                placeholder="Szukaj..."
+                placeholder={t("messages.search")}
                 className="flex-1 bg-transparent text-sm text-[#e8e8e8] placeholder-[#444] outline-none"
                 autoFocus
               />
@@ -272,7 +273,7 @@ export default function MessagesPage() {
                   <Loader2 className="h-5 w-5 animate-spin text-[#444]" />
                 </div>
               ) : filteredMembers.length === 0 ? (
-                <p className="text-sm text-[#444] text-center py-8">Nie znaleziono</p>
+                <p className="text-sm text-[#444] text-center py-8">{t("messages.notFound")}</p>
               ) : (
                 filteredMembers.map((m) => (
                   <button
@@ -301,10 +302,10 @@ export default function MessagesPage() {
               <div className="w-16 h-16 rounded-full bg-[#111] flex items-center justify-center mb-4">
                 <MessageSquare className="h-7 w-7 text-[#333]" />
               </div>
-              <p className="text-[#555] text-sm font-medium">Brak rozmów</p>
-              <p className="text-[#333] text-xs mt-1">Rozpocznij nową rozmowę</p>
+              <p className="text-[#555] text-sm font-medium">{t("messages.noConversations")}</p>
+              <p className="text-[#333] text-xs mt-1">{t("messages.startNew")}</p>
               <button onClick={openPicker} className="mt-4 text-sm text-[#888] hover:text-white bg-[#151515] hover:bg-[#1a1a1a] px-5 py-2.5 rounded-xl transition active:bg-[#222]">
-                Nowa wiadomość
+                {t("messages.newMessage")}
               </button>
             </div>
           ) : (
@@ -334,7 +335,7 @@ export default function MessagesPage() {
                     {convo.lastMessage && (
                       <div className="flex items-center justify-between gap-2 mt-0.5">
                         <p className={`text-xs truncate ${convo.unreadCount > 0 ? "text-[#999]" : "text-[#555]"}`}>
-                          {convo.lastMessage.isOwn && <span className="text-[#444]">Ty: </span>}
+                          {convo.lastMessage.isOwn && <span className="text-[#444]">{t("messages.you")}: </span>}
                           {truncate(convo.lastMessage.content, 35)}
                         </p>
                         {convo.unreadCount > 0 && (
@@ -359,7 +360,7 @@ export default function MessagesPage() {
             <div className="w-20 h-20 rounded-full bg-[#111] flex items-center justify-center mb-4">
               <MessageSquare className="h-8 w-8 text-[#222]" />
             </div>
-            <p className="text-[#444] text-sm">Wybierz rozmowę</p>
+            <p className="text-[#444] text-sm">{t("messages.selectConversation")}</p>
           </div>
         ) : (
           <>
@@ -392,15 +393,15 @@ export default function MessagesPage() {
                   <div className="text-center mb-4">
                     <button onClick={loadOlder} disabled={loadingOlder} className="text-xs text-[#444] hover:text-[#888] transition disabled:opacity-50">
                       {loadingOlder && <Loader2 className="h-3 w-3 animate-spin inline mr-1" />}
-                      Załaduj starsze
+                      {t("messages.loadOlder")}
                     </button>
                   </div>
                 )}
 
                 {messages.length === 0 && (
                   <div className="flex flex-col items-center justify-center h-full text-center">
-                    <p className="text-[#444] text-sm">Brak wiadomości</p>
-                    <p className="text-[#2a2a2a] text-xs mt-1">Napisz coś!</p>
+                    <p className="text-[#444] text-sm">{t("messages.noMessages")}</p>
+                    <p className="text-[#2a2a2a] text-xs mt-1">{t("messages.sayHello")}</p>
                   </div>
                 )}
 
@@ -449,7 +450,7 @@ export default function MessagesPage() {
                   value={input}
                   onChange={(e) => setInput(e.target.value.slice(0, 2000))}
                   onFocus={() => { setTimeout(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, 300); }}
-                  placeholder="Napisz wiadomość..."
+                  placeholder={t("messages.writeMessage")}
                   className="flex-1 bg-transparent text-[14px] text-[#e8e8e8] placeholder-[#3a3a3a] outline-none py-2.5"
                   maxLength={2000}
                   disabled={sending}

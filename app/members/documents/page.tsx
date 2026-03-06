@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Loader2, Pin, FileText } from "lucide-react";
+import { useMemberLang } from "@/lib/members/LangContext";
 
 interface MemberDocument {
   id: string;
@@ -14,6 +15,7 @@ interface MemberDocument {
 }
 
 export default function DocumentsPage() {
+  const { t } = useMemberLang();
   const [documents, setDocuments] = useState<MemberDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -58,21 +60,21 @@ export default function DocumentsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dokumenty</h1>
-        <p className="text-[#888] text-sm mt-1">Prywatne dokumenty i materiały</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t("documents.title")}</h1>
+        <p className="text-[#888] text-sm mt-1">{t("documents.subtitle")}</p>
       </div>
 
       {documents.length === 0 && (
         <div className="text-center py-16 border border-[#1a1a1a] rounded-xl">
           <FileText className="h-8 w-8 text-[#444] mx-auto mb-3" />
-          <p className="text-[#666] text-sm">Brak dokumentów.</p>
+          <p className="text-[#666] text-sm">{t("documents.noDocs")}</p>
         </div>
       )}
 
       {pinnedDocs.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-sm font-medium text-[#888] uppercase tracking-wider flex items-center gap-2">
-            <Pin className="h-3.5 w-3.5" /> Przypięte
+            <Pin className="h-3.5 w-3.5" /> {t("documents.pinned")}
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {pinnedDocs.map((doc) => (
@@ -101,6 +103,7 @@ export default function DocumentsPage() {
 }
 
 function DocumentCard({ document }: { document: { id: string; title: string; content: string; category: string; pinned: boolean; updatedAt: string } }) {
+  const { t } = useMemberLang();
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -114,7 +117,7 @@ function DocumentCard({ document }: { document: { id: string; title: string; con
       </div>
       {document.content.length > 300 && (
         <button onClick={() => setExpanded(!expanded)} className="text-xs text-[#666] hover:text-[#aaa] mt-2 transition">
-          {expanded ? "Zwiń" : "Czytaj więcej"}
+          {expanded ? t("documents.showLess") : t("documents.readMore")}
         </button>
       )}
       <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#1a1a1a]">

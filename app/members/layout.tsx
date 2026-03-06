@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogOut, Loader2, Shield, Hash, MessageCircle, FileText, Newspaper } from "lucide-react";
+import { LogOut, Loader2, Hash, MessageCircle, FileText, Newspaper } from "lucide-react";
+import { MemberLangProvider, useMemberLang } from "@/lib/members/LangContext";
+import type { MemberLang } from "@/lib/members/i18n";
 
 interface MemberInfo {
   id: string;
@@ -65,7 +67,7 @@ export default function MembersLayout({
   }
 
   if (isPublicPath) {
-    return <>{children}</>;
+    return <MemberLangProvider>{children}</MemberLangProvider>;
   }
 
   if (checking) {
@@ -75,6 +77,16 @@ export default function MembersLayout({
       </div>
     );
   }
+
+  return (
+    <MemberLangProvider>
+    <MembersLayoutInner member={member} loggingOut={loggingOut} handleLogout={handleLogout} pathname={pathname}>{children}</MembersLayoutInner>
+    </MemberLangProvider>
+  );
+}
+
+function MembersLayoutInner({ member, loggingOut, handleLogout, pathname, children }: { member: MemberInfo | null; loggingOut: boolean; handleLogout: () => void; pathname: string; children: React.ReactNode }) {
+  const { t, lang, setLang } = useMemberLang();
 
   return (
     <div className="h-screen flex flex-col bg-[#090909] text-[#e8e8e8]" style={{ height: "100dvh" }}>
@@ -91,10 +103,10 @@ export default function MembersLayout({
             </Link>
             <nav className="flex items-center gap-1">
               {[
-                { href: "/members", icon: Newspaper, label: "Aktualności", exact: true },
-                { href: "/members/channels", icon: Hash, label: "Kanały" },
-                { href: "/members/messages", icon: MessageCircle, label: "Wiadomości" },
-                { href: "/members/documents", icon: FileText, label: "Dokumenty" },
+                { href: "/members", icon: Newspaper, label: t("nav.news"), exact: true },
+                { href: "/members/channels", icon: Hash, label: t("nav.channels") },
+                { href: "/members/messages", icon: MessageCircle, label: t("nav.messages") },
+                { href: "/members/documents", icon: FileText, label: t("nav.documents") },
               ].map((item) => (
                 <Link
                   key={item.href}
@@ -113,7 +125,15 @@ export default function MembersLayout({
           </div>
           {member && (
             <div className="flex items-center gap-4">
-              <span className="text-sm text-[#888]">
+              <div className="flex items-center gap-0 border border-[#1a1a1a] rounded overflow-hidden mr-2">
+                {(["pl", "en", "de"] as MemberLang[]).map((l) => (
+                  <button key={l} onClick={() => setLang(l)}
+                    className={`px-2 py-1 text-[10px] font-semibold transition-all ${lang === l ? "bg-white text-black" : "text-[#555] hover:text-white hover:bg-[#151515]"}`}>
+                    {l.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+              <span className="text-sm text-[#888] hidden sm:inline">
                 {member.displayName}
               </span>
               <button
@@ -122,7 +142,7 @@ export default function MembersLayout({
                 className="flex items-center gap-1.5 text-sm text-[#666] hover:text-[#e8e8e8] transition disabled:opacity-50"
               >
                 <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Logout</span>
+                <span className="hidden sm:inline">{t("nav.logout")}</span>
               </button>
             </div>
           )}

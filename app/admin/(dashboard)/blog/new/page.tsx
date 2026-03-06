@@ -34,11 +34,18 @@ export default function NewBlogPostPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [langTab, setLangTab] = useState<"pl" | "en" | "de">("pl");
   const [form, setForm] = useState({
     title: "",
     slug: "",
     excerpt: "",
     content: "",
+    titleEn: "",
+    titleDe: "",
+    excerptEn: "",
+    excerptDe: "",
+    contentEn: "",
+    contentDe: "",
     authorName: "",
     authorRole: "",
     category: "OPINION",
@@ -104,16 +111,6 @@ export default function NewBlogPostPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Title *</Label>
-                  <Input
-                    id="title"
-                    value={form.title}
-                    onChange={(e) => handleTitleChange(e.target.value)}
-                    placeholder="Post title"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
                   <Label htmlFor="slug">Slug</Label>
                   <Input
                     id="slug"
@@ -124,33 +121,143 @@ export default function NewBlogPostPage() {
                     placeholder="auto-generated-from-title"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="excerpt">Excerpt *</Label>
-                  <Textarea
-                    id="excerpt"
-                    value={form.excerpt}
-                    onChange={(e) =>
-                      setForm((prev) => ({ ...prev, excerpt: e.target.value }))
-                    }
-                    placeholder="Brief summary of the post"
-                    rows={3}
-                    required
-                  />
+
+                <div className="flex gap-1 mb-4">
+                  {(["pl", "en", "de"] as const).map((l) => (
+                    <button
+                      key={l}
+                      type="button"
+                      onClick={() => setLangTab(l)}
+                      className={`px-3 py-1.5 text-xs font-semibold rounded transition ${langTab === l ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+                    >
+                      {l.toUpperCase()}
+                    </button>
+                  ))}
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="content">Content (Markdown) *</Label>
-                  <Textarea
-                    id="content"
-                    value={form.content}
-                    onChange={(e) =>
-                      setForm((prev) => ({ ...prev, content: e.target.value }))
-                    }
-                    placeholder="Write your post content in Markdown..."
-                    rows={16}
-                    className="font-mono text-sm"
-                    required
-                  />
-                </div>
+
+                {langTab === "pl" && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Title *</Label>
+                      <Input
+                        id="title"
+                        value={form.title}
+                        onChange={(e) => handleTitleChange(e.target.value)}
+                        placeholder="Post title"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="excerpt">Excerpt *</Label>
+                      <Textarea
+                        id="excerpt"
+                        value={form.excerpt}
+                        onChange={(e) =>
+                          setForm((prev) => ({ ...prev, excerpt: e.target.value }))
+                        }
+                        placeholder="Brief summary of the post"
+                        rows={3}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="content">Content (Markdown) *</Label>
+                      <Textarea
+                        id="content"
+                        value={form.content}
+                        onChange={(e) =>
+                          setForm((prev) => ({ ...prev, content: e.target.value }))
+                        }
+                        placeholder="Write your post content in Markdown..."
+                        rows={16}
+                        className="font-mono text-sm"
+                        required
+                      />
+                    </div>
+                  </>
+                )}
+
+                {langTab === "en" && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="titleEn">Title (English)</Label>
+                      <Input
+                        id="titleEn"
+                        value={form.titleEn}
+                        onChange={(e) =>
+                          setForm((prev) => ({ ...prev, titleEn: e.target.value }))
+                        }
+                        placeholder="Post title in English"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="excerptEn">Excerpt (English)</Label>
+                      <Textarea
+                        id="excerptEn"
+                        value={form.excerptEn}
+                        onChange={(e) =>
+                          setForm((prev) => ({ ...prev, excerptEn: e.target.value }))
+                        }
+                        placeholder="Brief summary in English"
+                        rows={3}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="contentEn">Content (English, Markdown)</Label>
+                      <Textarea
+                        id="contentEn"
+                        value={form.contentEn}
+                        onChange={(e) =>
+                          setForm((prev) => ({ ...prev, contentEn: e.target.value }))
+                        }
+                        placeholder="Write your post content in English..."
+                        rows={16}
+                        className="font-mono text-sm"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {langTab === "de" && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="titleDe">Title (Deutsch)</Label>
+                      <Input
+                        id="titleDe"
+                        value={form.titleDe}
+                        onChange={(e) =>
+                          setForm((prev) => ({ ...prev, titleDe: e.target.value }))
+                        }
+                        placeholder="Beitragstitel auf Deutsch"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="excerptDe">Excerpt (Deutsch)</Label>
+                      <Textarea
+                        id="excerptDe"
+                        value={form.excerptDe}
+                        onChange={(e) =>
+                          setForm((prev) => ({ ...prev, excerptDe: e.target.value }))
+                        }
+                        placeholder="Kurze Zusammenfassung auf Deutsch"
+                        rows={3}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="contentDe">Content (Deutsch, Markdown)</Label>
+                      <Textarea
+                        id="contentDe"
+                        value={form.contentDe}
+                        onChange={(e) =>
+                          setForm((prev) => ({ ...prev, contentDe: e.target.value }))
+                        }
+                        placeholder="Schreiben Sie Ihren Beitrag auf Deutsch..."
+                        rows={16}
+                        className="font-mono text-sm"
+                      />
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>

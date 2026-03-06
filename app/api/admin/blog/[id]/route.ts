@@ -74,10 +74,18 @@ export async function PATCH(
       publishedAt = null;
     }
 
+    const translationFields: Record<string, string | null> = {};
+    for (const key of ["titleEn", "titleDe", "excerptEn", "excerptDe", "contentEn", "contentDe"] as const) {
+      if (key in body) {
+        translationFields[key] = body[key] || null;
+      }
+    }
+
     const post = await prisma.blogPost.update({
       where: { id },
       data: {
         ...body,
+        ...translationFields,
         featuredImage: body.featuredImage ?? existing.featuredImage,
         publishedAt,
       },

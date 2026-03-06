@@ -177,7 +177,7 @@ export default function ChannelsPage() {
       /* ignore */
     } finally {
       setSending(false);
-      requestAnimationFrame(() => inputRef.current?.focus());
+      setTimeout(() => inputRef.current?.focus(), 50);
     }
   }
 
@@ -408,6 +408,8 @@ export default function ChannelsPage() {
               <button
                 type="submit"
                 disabled={!input.trim() || sending}
+                tabIndex={-1}
+                onMouseDown={(e) => e.preventDefault()}
                 className="text-[#555] hover:text-[#e8e8e8] disabled:text-[#333] disabled:hover:text-[#333] transition p-1"
               >
                 {sending ? (

@@ -169,7 +169,7 @@ export default function MessagesPage() {
     } catch { /* ignore */ }
     finally {
       setSending(false);
-      requestAnimationFrame(() => inputRef.current?.focus());
+      setTimeout(() => inputRef.current?.focus(), 50);
     }
   }
 
@@ -460,6 +460,8 @@ export default function MessagesPage() {
                 <button
                   type="submit"
                   disabled={!input.trim() || sending}
+                  tabIndex={-1}
+                  onMouseDown={(e) => e.preventDefault()}
                   className="text-[#333] hover:text-blue-400 disabled:text-[#222] transition p-2 rounded-xl active:bg-[#1a1a1a]"
                 >
                   {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}

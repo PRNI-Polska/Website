@@ -9,15 +9,15 @@ import { AdminControls } from "./AdminControls";
 import { ChatPanel, type ChatMessage } from "./ChatPanel";
 import { useCallsLang } from "@/lib/calls/LangContext";
 
-interface MeetingRoomProps { session: SessionData; onLeave: () => void; onTranscriptUpdate?: (entries: TranscriptEntry[]) => void; }
+interface MeetingRoomProps { session: SessionData; onLeave: () => void; onTranscriptUpdate?: (entries: TranscriptEntry[]) => void; transcriptLang?: string; }
 interface PeerState { peerId: string; role: Role; isSpeaking: boolean; audioStream: MediaStream | null; }
 export interface TranscriptEntry { peerId: string; role: string; text: string; timestamp: number; }
 function canSpeak(r: Role) { return r === "admin" || r === "speaker"; }
 
 const LANG_MAP: Record<string, string> = { pl: "pl-PL", de: "de-DE", en: "en-US" };
 
-export function MeetingRoom({ session, onLeave, onTranscriptUpdate }: MeetingRoomProps) {
-  const { t, lang } = useCallsLang();
+export function MeetingRoom({ session, onLeave, onTranscriptUpdate, transcriptLang }: MeetingRoomProps) {
+  const { t } = useCallsLang();
   const managerRef = useRef<WebRTCManager | null>(null);
   const [peers, setPeers] = useState<Map<string, PeerState>>(new Map());
   const [myRole, setMyRole] = useState<Role>(session.role);
@@ -100,7 +100,7 @@ export function MeetingRoom({ session, onLeave, onTranscriptUpdate }: MeetingRoo
       const rec = new (SR as any)();
       rec.continuous = true;
       rec.interimResults = true;
-      rec.lang = LANG_MAP[lang] || "pl-PL";
+      rec.lang = transcriptLang || "pl-PL";
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       rec.onresult=(event:any)=>{
         for(let i=event.resultIndex;i<event.results.length;i++){

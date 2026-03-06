@@ -11,9 +11,16 @@ import { createMeeting, type CreatedMeeting } from "@/lib/calls/api";
 
 const ADMIN_KEY = process.env.NEXT_PUBLIC_CALLS_ADMIN_KEY ?? "";
 
+const TRANSCRIPT_LANGS = [
+  { value: "pl-PL", label: "Polski" },
+  { value: "de-DE", label: "Deutsch" },
+  { value: "en-US", label: "English" },
+];
+
 export default function AdminCallsPage() {
   const [title, setTitle] = useState("Spotkanie PRNI");
   const [duration, setDuration] = useState(120);
+  const [transcriptLang, setTranscriptLang] = useState("pl-PL");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<CreatedMeeting | null>(null);
@@ -44,6 +51,8 @@ export default function AdminCallsPage() {
       "",
       `PIN mówcy: ${result.speakerPin}`,
       `PIN admina: ${result.adminPin}`,
+      "",
+      `Dołącz: ${window.location.origin}/calls?lang=${transcriptLang}`,
     ].join("\n");
     navigator.clipboard.writeText(text);
     setCopied("all");
@@ -87,7 +96,7 @@ export default function AdminCallsPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="meetingName">Meeting Name</Label>
                   <Input
@@ -106,6 +115,19 @@ export default function AdminCallsPage() {
                     value={duration}
                     onChange={(e) => setDuration(parseInt(e.target.value) || 60)}
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="transcriptLang">Transcription Language</Label>
+                  <select
+                    id="transcriptLang"
+                    value={transcriptLang}
+                    onChange={(e) => setTranscriptLang(e.target.value)}
+                    className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    {TRANSCRIPT_LANGS.map((l) => (
+                      <option key={l.value} value={l.value}>{l.label}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
               <Button

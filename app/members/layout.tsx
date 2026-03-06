@@ -84,9 +84,10 @@ export default function MembersLayout({
       <header className="border-b border-[#1a1a1a] bg-[#090909] shrink-0 z-50">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 h-12 sm:h-14">
           <div className="flex items-center gap-6">
-            <Link href="/members" className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-[#888]" />
-              <span className="font-semibold text-sm tracking-wide">PRNI</span>
+            <Link href="/members" className="flex items-center gap-2.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="PRNI" className="w-7 h-7 opacity-80" />
+              <span className="font-semibold text-sm tracking-wide hidden sm:inline">PRNI</span>
             </Link>
             <nav className="flex items-center gap-1">
               {[

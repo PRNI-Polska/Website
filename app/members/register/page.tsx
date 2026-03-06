@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Loader2, UserPlus, Check, X } from "lucide-react";
+import { Loader2, Check, X } from "lucide-react";
 
 export default function MemberRegisterPage() {
   const [inviteCode, setInviteCode] = useState("");
@@ -20,229 +20,106 @@ export default function MemberRegisterPage() {
     hasLower: /[a-z]/.test(password),
     hasNumber: /[0-9]/.test(password),
   };
-
   const passwordStrength = Object.values(passwordChecks).filter(Boolean).length;
-
-  const strengthLabel =
-    passwordStrength <= 1
-      ? "Weak"
-      : passwordStrength <= 2
-        ? "Fair"
-        : passwordStrength <= 3
-          ? "Good"
-          : "Strong";
-
-  const strengthColor =
-    passwordStrength <= 1
-      ? "bg-red-500"
-      : passwordStrength <= 2
-        ? "bg-orange-500"
-        : passwordStrength <= 3
-          ? "bg-yellow-500"
-          : "bg-green-500";
+  const strengthLabel = passwordStrength <= 1 ? "Słabe" : passwordStrength <= 2 ? "Średnie" : passwordStrength <= 3 ? "Dobre" : "Silne";
+  const strengthColor = passwordStrength <= 1 ? "bg-red-500" : passwordStrength <= 2 ? "bg-orange-500" : passwordStrength <= 3 ? "bg-yellow-500" : "bg-green-500";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    if (!passwordChecks.length) {
-      setError("Password must be at least 8 characters");
-      return;
-    }
-
+    if (password !== confirmPassword) { setError("Hasła nie są identyczne"); return; }
+    if (!passwordChecks.length) { setError("Hasło musi mieć co najmniej 8 znaków"); return; }
     setLoading(true);
-
     try {
       const res = await fetch("/api/members/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ inviteCode, email, password, displayName }),
       });
-
       const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error || "Registration failed");
-        return;
-      }
-
+      if (!res.ok) { setError(data.error || "Rejestracja nie powiodła się"); return; }
       setSuccess(true);
-    } catch {
-      setError("An error occurred. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    } catch { setError("Wystąpił błąd. Spróbuj ponownie."); }
+    finally { setLoading(false); }
   }
 
   if (success) {
     return (
-      <div className="min-h-screen bg-[#090909] flex items-center justify-center px-4">
-        <div className="w-full max-w-md text-center">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-green-500/10 border border-green-500/20 mb-4">
+      <div className="min-h-screen bg-[#060606] flex items-center justify-center px-4">
+        <div className="w-full max-w-sm text-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="PRNI" className="w-16 h-16 mx-auto mb-5 opacity-80" />
+          <div className="w-14 h-14 rounded-full bg-green-500/10 border border-green-500/20 flex items-center justify-center mx-auto mb-4">
             <Check className="h-7 w-7 text-green-400" />
           </div>
-          <h1 className="text-2xl font-bold text-[#e8e8e8] mb-2">
-            Account Created
-          </h1>
-          <p className="text-[#888] text-sm mb-6">
-            Your account has been created successfully. Please sign in.
-          </p>
-          <Link
-            href="/members/login"
-            className="inline-block bg-white text-black font-medium text-sm rounded-lg px-6 py-2.5 hover:bg-white/90 transition"
-          >
-            Go to Login
+          <h1 className="text-xl font-bold text-[#e8e8e8] mb-2 font-[var(--font-heading)]">Konto utworzone</h1>
+          <p className="text-[#666] text-sm mb-6">Możesz się teraz zalogować.</p>
+          <Link href="/members/login" className="inline-block bg-white text-black font-semibold text-sm rounded-xl px-6 py-3 hover:bg-white/90 transition">
+            Zaloguj się
           </Link>
         </div>
       </div>
     );
   }
 
+  const inputClass = "w-full bg-[#080808] border border-[#1a1a1a] rounded-xl px-4 py-3 text-[#e8e8e8] text-sm placeholder-[#333] focus:outline-none focus:border-[#333] transition";
+
   return (
-    <div className="min-h-screen bg-[#090909] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-[#060606] flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/5 border border-white/10 mb-4">
-            <UserPlus className="h-7 w-7 text-[#e8e8e8]" />
-          </div>
-          <h1 className="text-2xl font-bold text-[#e8e8e8] tracking-tight">
-            Register
-          </h1>
-          <p className="text-[#888] text-sm mt-1">
-            Create your account with an invite code
-          </p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="PRNI" className="w-16 h-16 mx-auto mb-4 opacity-90" />
+          <h1 className="text-xl font-bold text-[#e8e8e8] tracking-wide font-[var(--font-heading)]">Rejestracja</h1>
+          <p className="text-[#555] text-xs mt-2">Utwórz konto za pomocą kodu zaproszenia</p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="bg-[#111] border border-[#222] rounded-xl p-6 space-y-4"
-        >
+        <form onSubmit={handleSubmit} className="bg-[#0c0c0c] border border-[#1a1a1a] rounded-2xl p-6 space-y-4">
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg px-4 py-3">
-              {error}
-            </div>
+            <div className="bg-red-500/10 border border-red-500/15 text-red-400 text-sm rounded-xl px-4 py-3 text-center">{error}</div>
           )}
 
           <div className="space-y-2">
-            <label
-              htmlFor="inviteCode"
-              className="text-sm font-medium text-[#ccc] block"
-            >
-              Invite Code
-            </label>
-            <input
-              id="inviteCode"
-              type="text"
-              value={inviteCode}
-              onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
-              required
-              className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-4 py-2.5 text-[#e8e8e8] text-sm placeholder-[#555] focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent transition font-mono tracking-widest"
-              placeholder="XXXXXXXX"
-              maxLength={8}
-            />
+            <label htmlFor="inviteCode" className="text-xs font-medium text-[#888] block uppercase tracking-wider">Kod zaproszenia</label>
+            <input id="inviteCode" type="text" value={inviteCode} onChange={(e) => setInviteCode(e.target.value.toUpperCase())} required
+              className={`${inputClass} font-mono tracking-[0.3em] text-center`} placeholder="XXXXXXXX" maxLength={20} />
           </div>
 
           <div className="space-y-2">
-            <label
-              htmlFor="displayName"
-              className="text-sm font-medium text-[#ccc] block"
-            >
-              Display Name
-            </label>
-            <input
-              id="displayName"
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              required
-              className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-4 py-2.5 text-[#e8e8e8] text-sm placeholder-[#555] focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent transition"
-              placeholder="Your name"
-            />
+            <label htmlFor="displayName" className="text-xs font-medium text-[#888] block uppercase tracking-wider">Imię / pseudonim</label>
+            <input id="displayName" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} required className={inputClass} placeholder="Twoje imię" />
           </div>
 
           <div className="space-y-2">
-            <label
-              htmlFor="reg-email"
-              className="text-sm font-medium text-[#ccc] block"
-            >
-              Email
-            </label>
-            <input
-              id="reg-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-4 py-2.5 text-[#e8e8e8] text-sm placeholder-[#555] focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent transition"
-              placeholder="your@email.com"
-            />
+            <label htmlFor="reg-email" className="text-xs font-medium text-[#888] block uppercase tracking-wider">Email</label>
+            <input id="reg-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" className={inputClass} placeholder="twoj@email.com" />
           </div>
 
           <div className="space-y-2">
-            <label
-              htmlFor="reg-password"
-              className="text-sm font-medium text-[#ccc] block"
-            >
-              Password
-            </label>
-            <input
-              id="reg-password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="new-password"
-              className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-4 py-2.5 text-[#e8e8e8] text-sm placeholder-[#555] focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent transition"
-              placeholder="Min. 8 characters"
-            />
+            <label htmlFor="reg-password" className="text-xs font-medium text-[#888] block uppercase tracking-wider">Hasło</label>
+            <input id="reg-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="new-password" className={inputClass} placeholder="Min. 8 znaków" />
             {password.length > 0 && (
               <div className="space-y-2 pt-1">
                 <div className="flex gap-1">
                   {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className={`h-1 flex-1 rounded-full transition-colors ${
-                        i <= passwordStrength ? strengthColor : "bg-[#222]"
-                      }`}
-                    />
+                    <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${i <= passwordStrength ? strengthColor : "bg-[#1a1a1a]"}`} />
                   ))}
                 </div>
-                <p className="text-xs text-[#666]">{strengthLabel}</p>
+                <p className="text-[10px] text-[#555]">{strengthLabel}</p>
                 <div className="space-y-1">
                   {[
-                    { key: "length", label: "At least 8 characters" },
-                    { key: "hasUpper", label: "One uppercase letter" },
-                    { key: "hasLower", label: "One lowercase letter" },
-                    { key: "hasNumber", label: "One number" },
+                    { key: "length", label: "Min. 8 znaków" },
+                    { key: "hasUpper", label: "Wielka litera" },
+                    { key: "hasLower", label: "Mała litera" },
+                    { key: "hasNumber", label: "Cyfra" },
                   ].map(({ key, label }) => (
-                    <div
-                      key={key}
-                      className="flex items-center gap-2 text-xs"
-                    >
-                      {passwordChecks[
-                        key as keyof typeof passwordChecks
-                      ] ? (
+                    <div key={key} className="flex items-center gap-2 text-[11px]">
+                      {passwordChecks[key as keyof typeof passwordChecks] ? (
                         <Check className="h-3 w-3 text-green-400" />
                       ) : (
-                        <X className="h-3 w-3 text-[#555]" />
+                        <X className="h-3 w-3 text-[#333]" />
                       )}
-                      <span
-                        className={
-                          passwordChecks[
-                            key as keyof typeof passwordChecks
-                          ]
-                            ? "text-[#888]"
-                            : "text-[#555]"
-                        }
-                      >
-                        {label}
-                      </span>
+                      <span className={passwordChecks[key as keyof typeof passwordChecks] ? "text-[#888]" : "text-[#444]"}>{label}</span>
                     </div>
                   ))}
                 </div>
@@ -251,45 +128,23 @@ export default function MemberRegisterPage() {
           </div>
 
           <div className="space-y-2">
-            <label
-              htmlFor="confirmPassword"
-              className="text-sm font-medium text-[#ccc] block"
-            >
-              Confirm Password
-            </label>
-            <input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              autoComplete="new-password"
-              className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg px-4 py-2.5 text-[#e8e8e8] text-sm placeholder-[#555] focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent transition"
-              placeholder="Repeat password"
-            />
+            <label htmlFor="confirmPassword" className="text-xs font-medium text-[#888] block uppercase tracking-wider">Potwierdź hasło</label>
+            <input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required autoComplete="new-password" className={inputClass} placeholder="Powtórz hasło" />
             {confirmPassword.length > 0 && password !== confirmPassword && (
-              <p className="text-xs text-red-400">Passwords do not match</p>
+              <p className="text-[11px] text-red-400">Hasła nie są identyczne</p>
             )}
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-white text-black font-medium text-sm rounded-lg px-4 py-2.5 hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
-          >
+          <button type="submit" disabled={loading}
+            className="w-full bg-white text-black font-semibold text-sm rounded-xl px-4 py-3 hover:bg-white/90 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center justify-center gap-2">
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {loading ? "Creating account..." : "Create Account"}
+            {loading ? "Tworzenie konta..." : "Utwórz konto"}
           </button>
         </form>
 
-        <p className="text-center text-[#555] text-sm mt-6">
-          Already have an account?{" "}
-          <Link
-            href="/members/login"
-            className="text-[#aaa] hover:text-white transition"
-          >
-            Sign in
-          </Link>
+        <p className="text-center text-[#444] text-xs mt-8">
+          Masz już konto?{" "}
+          <Link href="/members/login" className="text-[#888] hover:text-white transition">Zaloguj się</Link>
         </p>
       </div>
     </div>

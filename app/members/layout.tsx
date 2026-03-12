@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogOut, Loader2, Hash, MessageCircle, FileText, Newspaper } from "lucide-react";
+import { LogOut, Loader2, Hash, MessageCircle, FileText, Newspaper, Bell, BellOff } from "lucide-react";
 import { MemberLangProvider, useMemberLang } from "@/lib/members/LangContext";
 import type { MemberLang } from "@/lib/members/i18n";
 
@@ -87,6 +87,42 @@ export default function MembersLayout({
 
 function MembersLayoutInner({ member, loggingOut, handleLogout, pathname, children }: { member: MemberInfo | null; loggingOut: boolean; handleLogout: () => void; pathname: string; children: React.ReactNode }) {
   const { t, lang, setLang } = useMemberLang();
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushLoading, setPushLoading] = useState(false);
+
+  useEffect(() => {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+    navigator.serviceWorker.ready.then(async (reg) => {
+      const sub = await reg.pushManager.getSubscription();
+      setPushEnabled(!!sub);
+    }).catch(() => {});
+  }, []);
+
+  async function togglePush() {
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    setPushLoading(true);
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      if (pushEnabled) {
+        const sub = await reg.pushManager.getSubscription();
+        if (sub) { await sub.unsubscribe(); await fetch("/api/members/push/subscribe", { method: "DELETE" }); }
+        setPushEnabled(false);
+      } else {
+        const sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: process.env.NEXT_PUBLIC_VAPID_KEY,
+        });
+        await fetch("/api/members/push/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subscription: sub.toJSON() }),
+        });
+        setPushEnabled(true);
+      }
+    } catch { /* ignore */ }
+    finally { setPushLoading(false); }
+  }
 
   return (
     <div className="h-screen flex flex-col bg-[#090909] text-[#e8e8e8]" style={{ height: "100dvh" }}>
@@ -125,6 +161,10 @@ function MembersLayoutInner({ member, loggingOut, handleLogout, pathname, childr
           </div>
           {member && (
             <div className="flex items-center gap-4">
+              <button onClick={togglePush} disabled={pushLoading} title={pushEnabled ? "Disable notifications" : "Enable notifications"}
+                className={`p-1.5 rounded-lg transition mr-1 ${pushEnabled ? "text-[#e8e8e8] hover:bg-[#1a1a1a]" : "text-[#444] hover:text-[#888] hover:bg-[#1a1a1a]"}`}>
+                {pushLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : pushEnabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
+              </button>
               <div className="flex items-center gap-0 border border-[#1a1a1a] rounded overflow-hidden mr-2">
                 {(["pl", "en", "de"] as MemberLang[]).map((l) => (
                   <button key={l} onClick={() => setLang(l)}
@@ -133,9 +173,9 @@ function MembersLayoutInner({ member, loggingOut, handleLogout, pathname, childr
                   </button>
                 ))}
               </div>
-              <span className="text-sm text-[#888] hidden sm:inline">
+              <Link href="/members/profile" className="text-sm text-[#888] hover:text-white hidden sm:inline transition">
                 {member.displayName}
-              </span>
+              </Link>
               <button
                 onClick={handleLogout}
                 disabled={loggingOut}

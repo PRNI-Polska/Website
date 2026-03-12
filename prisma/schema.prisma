@@ -215,6 +215,8 @@ model Member {
   email         String    @unique
   passwordHash  String
   displayName   String
+  bio           String?
+  photoUrl      String?
   role          String    @default("MEMBER")
   isActive      Boolean   @default(true)
   inviteCode    String?
@@ -222,16 +224,33 @@ model Member {
   lastLoginIp   String?
   failedLogins  Int       @default(0)
   lockedUntil   DateTime?
+  pushSubscription String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
   channelMessages  ChannelMessage[]
   sentMessages     DirectMessage[]  @relation("SentMessages")
   receivedMessages DirectMessage[]  @relation("ReceivedMessages")
+  postViews        PostView[]
   
   @@index([email])
   @@index([isActive])
   @@map("members")
+}
+
+// ============================================================================
+// POST VIEW TRACKING - Who saw which blog post
+// ============================================================================
+model PostView {
+  id        String   @id @default(cuid())
+  postId    String
+  memberId  String
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  viewedAt  DateTime @default(now())
+  
+  @@unique([postId, memberId])
+  @@index([postId])
+  @@map("post_views")
 }
 
 // ============================================================================

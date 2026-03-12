@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireMember } from "@/lib/member-auth";
 import { encrypt, decrypt } from "@/lib/encryption";
+import { sendPushToMembers } from "@/lib/push";
 
 const SECURITY_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate, private",
@@ -124,6 +125,21 @@ export async function POST(
         },
       },
     });
+
+    // Push notification to all channel members except sender
+    const allMembers = await prisma.member.findMany({
+      where: { isActive: true, id: { not: member.id }, pushSubscription: { not: null } },
+      select: { id: true, role: true },
+    });
+    const eligible = channel.allowedRoles
+      ? allMembers.filter((m) => m.role === "ADMIN" || channel.allowedRoles!.split(",").map((r) => r.trim()).includes(m.role))
+      : allMembers;
+    sendPushToMembers(eligible.map((m) => m.id), {
+      title: `#${channel.name}`,
+      body: `${member.displayName}: ${content.length > 80 ? content.slice(0, 80) + "…" : content}`,
+      url: "/members/channels",
+      tag: `channel-${channelId}`,
+    }).catch(() => {});
 
     const res = NextResponse.json({ message: { ...message, content } }, { status: 201 });
     for (const [k, v] of Object.entries(SECURITY_HEADERS)) res.headers.set(k, v);

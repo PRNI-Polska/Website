@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireMember } from "@/lib/member-auth";
 import { encrypt, decrypt } from "@/lib/encryption";
+import { sendPushToMember } from "@/lib/push";
 
 const SEC = {
   "Cache-Control": "no-store, no-cache, must-revalidate, private",
@@ -135,6 +136,14 @@ export async function POST(
         read: true,
       },
     });
+
+    // Push notification (fire and forget)
+    sendPushToMember(memberId, {
+      title: member.displayName,
+      body: content.length > 100 ? content.slice(0, 100) + "…" : content,
+      url: "/members/messages",
+      tag: `dm-${member.id}`,
+    }).catch(() => {});
 
     const res = NextResponse.json({ message: { ...message, content } }, { status: 201 });
     for (const [k, v] of Object.entries(SEC)) res.headers.set(k, v);

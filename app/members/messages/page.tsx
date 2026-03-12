@@ -429,9 +429,14 @@ export default function MessagesPage() {
                             : grouped ? "rounded-2xl rounded-bl-lg bg-[#151515] border border-[#1a1a1a]" : "rounded-2xl bg-[#151515] border border-[#1a1a1a]"
                         }`}>
                           <p className="text-[13.5px] text-[#e4e4e4] whitespace-pre-wrap break-words leading-relaxed">{msg.content}</p>
-                          <p className={`text-[10px] mt-1 text-right leading-none ${isOwn ? "text-blue-400/40" : "text-[#3a3a3a]"}`}>
-                            {formatMsgTime(msg.createdAt)}
-                          </p>
+                          <div className={`flex items-center gap-1.5 mt-1 justify-end leading-none ${isOwn ? "text-blue-400/40" : "text-[#3a3a3a]"}`}>
+                            <span className="text-[10px]">{formatMsgTime(msg.createdAt)}</span>
+                            {isOwn && (
+                              <span className={`text-[10px] font-medium ${msg.read ? "text-blue-400/50" : "text-[#333]"}`} title={msg.read ? t("messages.seen") : t("messages.delivered")}>
+                                {msg.read ? "✓✓" : "✓"}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>

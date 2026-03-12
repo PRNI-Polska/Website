@@ -206,14 +206,14 @@ export default function HomePage() {
       {/* Call to Action */}
       <section className="py-24 md:py-32 bg-primary text-primary-foreground relative overflow-hidden">
         <div
-          className="absolute inset-0 opacity-15"
+          className="absolute inset-0"
           style={{
             backgroundImage: "url('/balcony-flag.png')",
             backgroundSize: "cover",
             backgroundPosition: "center 20%",
           }}
         />
-        <div className="absolute inset-0 bg-primary/70" />
+        <div className="absolute inset-0 bg-primary/60" />
         <div className="absolute top-0 left-0 right-0 h-1 bg-white/20" />
         
         <div className="container-custom text-center relative">

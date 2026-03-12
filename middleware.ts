@@ -3,14 +3,8 @@ import { NextResponse, NextRequest } from "next/server";
 import type { NextRequestWithAuth } from "next-auth/middleware";
 
 // ============================================
-// CSP NONCE + SECURITY HEADERS
+// CSP + SECURITY HEADERS
 // ============================================
-function generateNonce(): string {
-  const array = new Uint8Array(16);
-  crypto.getRandomValues(array);
-  return btoa(String.fromCharCode(...array));
-}
-
 const staticSecurityHeaders: Record<string, string> = {
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
   "X-Content-Type-Options": "nosniff",
@@ -20,10 +14,10 @@ const staticSecurityHeaders: Record<string, string> = {
   "X-DNS-Prefetch-Control": "on",
 };
 
-function buildCsp(nonce: string): string {
+function buildCsp(): string {
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self' data:",
@@ -38,12 +32,11 @@ function buildCsp(nonce: string): string {
   ].join("; ");
 }
 
-function applySecurityHeaders(response: NextResponse, nonce: string): NextResponse {
+function applySecurityHeaders(response: NextResponse): NextResponse {
   for (const [key, value] of Object.entries(staticSecurityHeaders)) {
     response.headers.set(key, value);
   }
-  response.headers.set("Content-Security-Policy", buildCsp(nonce));
-  response.headers.set("x-nonce", nonce);
+  response.headers.set("Content-Security-Policy", buildCsp());
   return response;
 }
 
@@ -124,7 +117,6 @@ export default withAuth(
   function middleware(req: NextRequestWithAuth) {
     const { pathname } = req.nextUrl;
     const ip = getClientIP(req);
-    const nonce = generateNonce();
 
     const isAdminRoute = pathname.startsWith("/admin");
     const isAdminApiRoute = pathname.startsWith("/api/admin");
@@ -161,7 +153,7 @@ export default withAuth(
         { status: 429 }
       );
       response.headers.set("Retry-After", Math.ceil(rateLimit.resetIn / 1000).toString());
-      return applySecurityHeaders(response, nonce);
+      return applySecurityHeaders(response);
     }
 
     // ============================================
@@ -174,7 +166,7 @@ export default withAuth(
           { error: "Access denied" },
           { status: 403 }
         );
-        return applySecurityHeaders(response, nonce);
+        return applySecurityHeaders(response);
       }
     }
 
@@ -186,21 +178,21 @@ export default withAuth(
     if (isLoginPage) {
       if (token) {
         const response = NextResponse.redirect(new URL("/admin", req.url));
-        return applySecurityHeaders(response, nonce);
+        return applySecurityHeaders(response);
       }
       const response = NextResponse.next();
-      return applySecurityHeaders(response, nonce);
+      return applySecurityHeaders(response);
     }
 
     if ((isAdminRoute || isAdminApiRoute) && !token) {
       const response = NextResponse.redirect(new URL("/admin/login", req.url));
-      return applySecurityHeaders(response, nonce);
+      return applySecurityHeaders(response);
     }
 
     if ((isAdminRoute || isAdminApiRoute) && token?.role !== "ADMIN") {
       console.warn("[SECURITY] Non-admin user attempted admin access");
       const response = NextResponse.redirect(new URL("/admin/login", req.url));
-      return applySecurityHeaders(response, nonce);
+      return applySecurityHeaders(response);
     }
 
     const response = NextResponse.next();
@@ -210,7 +202,7 @@ export default withAuth(
       response.headers.set("X-RateLimit-Reset", Math.ceil(rateLimit.resetIn / 1000).toString());
     }
 
-    return applySecurityHeaders(response, nonce);
+    return applySecurityHeaders(response);
   },
   {
     callbacks: {

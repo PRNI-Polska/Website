@@ -314,10 +314,6 @@ export const translations: Translations = {
     de: "Bereit, die nationale Bewegung von innen mitzugestalten? Tritt dem Hauptflügel bei und trage direkt zur Kernmission von PRNI in Polen bei.",
   },
   
-  // Wings - Female
-  "wings.female.title": { en: "Female Wing", pl: "Skrzydło Kobiece", de: "Frauenabteilung" },
-  "wings.female.tagline": { en: "The strength of the nation in women's unity", pl: "Siła narodu w jedności kobiet", de: "Die Stärke der Nation in der Einheit der Frauen" },
-
   // Wings - International
   "wings.international.title": { en: "International Wing", pl: "Skrzydło Międzynarodowe", de: "Internationale Abteilung" },
   "wings.international.tagline": { en: "Poland's voice abroad", pl: "Głos Polski za granicą", de: "Polens Stimme im Ausland" },

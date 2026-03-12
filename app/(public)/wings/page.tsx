@@ -7,7 +7,6 @@ import { ArrowRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-// Wing panel data - Main in center, International left, Female right
 const wings = [
   {
     id: "international",
@@ -24,14 +23,6 @@ const wings = [
     taglineKey: "wings.main.tagline",
     disabled: false,
     isMain: true,
-  },
-  {
-    id: "female",
-    href: "/wings/female",
-    titleKey: "wings.female.title",
-    taglineKey: "wings.female.tagline",
-    disabled: false,
-    isMain: false,
   },
 ];
 
@@ -56,10 +47,10 @@ export default function WingsPage() {
   const gatewayText = {
     title: locale === "pl" ? "Skrzydła" : locale === "de" ? "Flügel" : "Wings",
     subtitle: locale === "pl" 
-      ? "Trzy ramiona. Jeden ruch." 
+      ? "Dwa ramiona. Jeden ruch." 
       : locale === "de" 
-      ? "Drei Arme. Eine Bewegung." 
-      : "Three branches. One movement.",
+      ? "Zwei Arme. Eine Bewegung." 
+      : "Two branches. One movement.",
     enter: locale === "pl" ? "Wejdź" : locale === "de" ? "Eintreten" : "Enter",
   };
 
@@ -93,10 +84,9 @@ export default function WingsPage() {
                   className={cn(
                     "wing-panel text-left flex flex-col",
                     `panel-entrance panel-entrance-${index + 1}`,
-                    isMainPanel ? "md:col-span-6 wing-panel-main" : "md:col-span-3 wing-panel-side",
+                    isMainPanel ? "md:col-span-7 wing-panel-main" : "md:col-span-5 wing-panel-side",
                     wing.id === "international" && "wing-panel-international",
                     wing.id === "main" && "wing-panel-poland",
-                    wing.id === "female" && "wing-panel-female",
                     isSelected && "is-selected",
                     isFading && (index === 0 ? "is-fading-left" : "is-fading-right")
                   )}
@@ -105,42 +95,29 @@ export default function WingsPage() {
                   {/* Title */}
                   <h2 className={cn(
                     "wing-panel-title",
-                    isMainPanel ? "text-xl md:text-2xl" : "text-lg md:text-xl",
-                    wing.id === "female" && "text-white drop-shadow-md"
+                    isMainPanel ? "text-xl md:text-2xl" : "text-lg md:text-xl"
                   )}>
                     {t(wing.titleKey)}
                   </h2>
                   
-                  {/* Description */}
                   <p className={cn(
                     "wing-panel-desc",
-                    isMainPanel ? "text-sm md:text-base" : "text-[13px] md:text-sm",
-                    wing.id === "female" && "text-white/90 drop-shadow-sm"
+                    isMainPanel ? "text-sm md:text-base" : "text-[13px] md:text-sm"
                   )}>
                     {t(wing.taglineKey)}
                   </p>
                   
-                  {/* Spacer */}
                   <div className="flex-grow" />
                   
-                  {/* Divider */}
-                  <div className={cn(
-                    "wing-panel-divider",
-                    wing.id === "female" && "bg-white/30"
-                  )} />
+                  <div className="wing-panel-divider" />
                   
-                  {/* Footer with CTA */}
                   <div className="wing-panel-footer">
                     <span className={cn(
                       "wing-panel-cta",
-                      isMainPanel && "text-[15px]",
-                      wing.id === "female" && "text-white"
+                      isMainPanel && "text-[15px]"
                     )}>
                       {gatewayText.enter}
-                      <ArrowRight className={cn(
-                        "wing-panel-cta-arrow",
-                        wing.id === "female" && "text-white"
-                      )} />
+                      <ArrowRight className="wing-panel-cta-arrow" />
                     </span>
                   </div>
                 </button>

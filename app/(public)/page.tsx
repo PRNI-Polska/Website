@@ -210,10 +210,10 @@ export default function HomePage() {
           style={{
             backgroundImage: "url('/balcony-flag.png')",
             backgroundSize: "cover",
-            backgroundPosition: "center 20%",
+            backgroundPosition: "center 40%",
           }}
         />
-        <div className="absolute inset-0 bg-primary/60" />
+        <div className="absolute inset-0 bg-primary/50 md:bg-primary/40" />
         <div className="absolute top-0 left-0 right-0 h-1 bg-white/20" />
         
         <div className="container-custom text-center relative">

@@ -56,15 +56,15 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
         </div>
 
         {/* Photo banner */}
-        <div className="max-w-4xl mx-auto mb-16 relative rounded-lg overflow-hidden aspect-[21/9]">
+        <div className="max-w-4xl mx-auto mb-16 relative rounded-lg overflow-hidden aspect-[16/9] md:aspect-[21/9]">
           <Image
             src="/members-flag.png"
             alt="PRNI members"
             fill
-            className="object-cover object-center"
+            className="object-cover object-[center_40%]"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/30" />
         </div>
 
         {/* Mission & Vision */}

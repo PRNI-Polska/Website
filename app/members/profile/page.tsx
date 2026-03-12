@@ -31,7 +31,7 @@ export default function ProfilePage() {
     LEADERSHIP: t("role.LEADERSHIP"),
     MAIN_WING: t("role.MAIN_WING"),
     INTERNATIONAL: t("role.INTERNATIONAL"),
-    FEMALE_WING: t("role.FEMALE_WING"),
+
     MEMBER: t("role.MEMBER"),
   };
 

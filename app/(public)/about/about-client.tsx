@@ -121,6 +121,17 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
           </div>
         </section>
 
+        {/* Activity photo */}
+        <div className="max-w-xs mx-auto mb-16 relative rounded-lg overflow-hidden aspect-[3/4]">
+          <Image
+            src="/balcony-flag.png"
+            alt="PRNI activity"
+            fill
+            className="object-cover object-[center_30%]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
+        </div>
+
         <Separator className="my-16" />
 
         {/* Leadership Team */}

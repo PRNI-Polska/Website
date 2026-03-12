@@ -2,19 +2,28 @@
 import webPush from "web-push";
 import { prisma } from "./db";
 
-const VAPID_PUBLIC = process.env.NEXT_PUBLIC_VAPID_KEY || "";
-const VAPID_PRIVATE = process.env.VAPID_PRIVATE_KEY || "";
-const VAPID_EMAIL = process.env.CONTACT_EMAIL || "mailto:admin@prni.org.pl";
+let vapidConfigured = false;
 
-if (VAPID_PUBLIC && VAPID_PRIVATE) {
-  webPush.setVapidDetails(`mailto:${VAPID_EMAIL}`, VAPID_PUBLIC, VAPID_PRIVATE);
+function ensureVapid() {
+  if (vapidConfigured) return true;
+  const pub = process.env.NEXT_PUBLIC_VAPID_KEY;
+  const priv = process.env.VAPID_PRIVATE_KEY;
+  const email = process.env.CONTACT_EMAIL || "admin@prni.org.pl";
+  if (!pub || !priv) return false;
+  try {
+    webPush.setVapidDetails(`mailto:${email}`, pub, priv);
+    vapidConfigured = true;
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function sendPushToMember(
   memberId: string,
   payload: { title: string; body: string; url?: string; tag?: string }
 ) {
-  if (!VAPID_PUBLIC || !VAPID_PRIVATE) return;
+  if (!ensureVapid()) return;
 
   try {
     const member = await prisma.member.findUnique({

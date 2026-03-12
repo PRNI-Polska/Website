@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Loader2, Lock } from "lucide-react";
@@ -15,15 +15,8 @@ import { cn } from "@/lib/utils";
 
 export default function AdminLoginClient() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const rawCallback = searchParams.get("callbackUrl") || "/admin";
-  const callbackUrl = rawCallback.startsWith("http") ? "/admin" : rawCallback;
-  const error = searchParams.get("error");
-
   const [isLoading, setIsLoading] = useState(false);
-  const [loginError, setLoginError] = useState<string | null>(
-    error === "CredentialsSignin" ? "Invalid email or password" : null
-  );
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   const {
     register,
@@ -49,7 +42,7 @@ export default function AdminLoginClient() {
           result.error === "CredentialsSignin" ? "Invalid email or password" : result.error
         );
       } else {
-        router.push(callbackUrl);
+        router.push("/admin");
         router.refresh();
       }
     } catch {
@@ -122,4 +115,3 @@ export default function AdminLoginClient() {
     </div>
   );
 }
-

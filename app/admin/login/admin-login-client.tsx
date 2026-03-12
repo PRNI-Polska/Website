@@ -32,20 +32,30 @@ export default function AdminLoginClient() {
       const csrfRes = await fetch("/api/auth/csrf");
       const { csrfToken } = await csrfRes.json();
 
+      const params = new URLSearchParams();
+      params.append("email", email);
+      params.append("password", password);
+      params.append("csrfToken", csrfToken);
+      params.append("callbackUrl", "/admin");
+      params.append("json", "true");
+
       const res = await fetch("/api/auth/callback/credentials", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, csrfToken }),
-        redirect: "manual",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: params.toString(),
       });
 
-      if (res.type === "opaqueredirect" || res.ok || res.status === 302 || res.status === 200) {
-        router.push("/admin");
-        router.refresh();
+      const data = await res.json().catch(() => null);
+
+      if (data?.url) {
+        window.location.href = "/admin";
+      } else if (res.ok) {
+        window.location.href = "/admin";
       } else {
         setLoginError("Invalid email or password");
       }
-    } catch {
+    } catch (err) {
+      console.error("Login error:", err);
       setLoginError("An unexpected error occurred");
     } finally {
       setIsLoading(false);

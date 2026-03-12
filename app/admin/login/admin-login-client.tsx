@@ -16,7 +16,8 @@ import { cn } from "@/lib/utils";
 export default function AdminLoginClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/admin";
+  const rawCallback = searchParams.get("callbackUrl") || "/admin";
+  const callbackUrl = rawCallback.startsWith("http") ? "/admin" : rawCallback;
   const error = searchParams.get("error");
 
   const [isLoading, setIsLoading] = useState(false);

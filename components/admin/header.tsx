@@ -2,7 +2,7 @@
 "use client";
 
 import { signOut } from "next-auth/react";
-import { LogOut, User } from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,16 +19,22 @@ interface AdminHeaderProps {
     email: string;
     name?: string | null;
   };
+  onMenuToggle?: () => void;
 }
 
-export function AdminHeader({ user }: AdminHeaderProps) {
+export function AdminHeader({ user, onMenuToggle }: AdminHeaderProps) {
   const initials = user.name
     ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase()
     : user.email[0].toUpperCase();
 
   return (
-    <header className="h-16 border-b bg-background flex items-center justify-between px-6">
-      <h1 className="text-lg font-semibold">Admin Dashboard</h1>
+    <header className="h-16 border-b bg-background flex items-center justify-between px-4 md:px-6">
+      <div className="flex items-center gap-3">
+        <button onClick={onMenuToggle} className="md:hidden p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors">
+          <Menu className="h-5 w-5" />
+        </button>
+        <h1 className="text-lg font-semibold">Admin Dashboard</h1>
+      </div>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

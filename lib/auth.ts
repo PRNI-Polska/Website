@@ -35,8 +35,8 @@ declare module "next-auth/jwt" {
 
 // Rate limiting for login attempts
 const loginAttempts = new Map<string, { count: number; lastAttempt: number }>();
-const MAX_LOGIN_ATTEMPTS = 5;
-const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
+const MAX_LOGIN_ATTEMPTS = 10;
+const LOCKOUT_DURATION = 10 * 60 * 1000; // 10 minutes
 
 function checkLoginRateLimit(email: string): { allowed: boolean; remainingAttempts: number } {
   const now = Date.now();

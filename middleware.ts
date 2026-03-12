@@ -100,7 +100,7 @@ function checkRateLimit(
 }
 
 const RATE_LIMITS = {
-  auth: { maxRequests: 5, interval: 60 * 1000 },
+  auth: { maxRequests: 20, interval: 60 * 1000 },
   contact: { maxRequests: 5, interval: 60 * 60 * 1000 },
   admin: { maxRequests: 100, interval: 60 * 1000 },
   members: { maxRequests: 120, interval: 60 * 1000 },
@@ -139,7 +139,7 @@ export default withAuth(
     // ============================================
     let rateLimit: RateLimitResult | null = null;
 
-    if (isAuthApi || isLoginPage) {
+    if (isAuthApi) {
       rateLimit = checkRateLimit(`auth:${ip}`, RATE_LIMITS.auth.maxRequests, RATE_LIMITS.auth.interval);
     } else if (isContactApi) {
       rateLimit = checkRateLimit(`contact:${ip}`, RATE_LIMITS.contact.maxRequests, RATE_LIMITS.contact.interval);

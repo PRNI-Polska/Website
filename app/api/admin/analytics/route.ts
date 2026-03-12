@@ -42,95 +42,95 @@ export async function GET(request: NextRequest) {
       whereClause.country = filterCountry;
     }
 
-    const totalViews = await prisma.pageView.count({
-      where: whereClause,
-    });
-
-    const uniqueVisitors = await prisma.pageView.groupBy({
-      by: ["sessionId"],
-      where: {
-        ...whereClause,
-        sessionId: { not: null },
-      },
-    });
-
     const baseWhereClause: Prisma.PageViewWhereInput =
       period === "all" ? {} : { createdAt: { gte: startDate } };
 
-    const viewsByCountry = await prisma.pageView.groupBy({
-      by: ["country"],
-      where: baseWhereClause,
-      _count: { country: true },
-      orderBy: { _count: { country: "desc" } },
-      take: 20,
-    });
-
-    const viewsByCity = await prisma.pageView.groupBy({
-      by: ["city", "country"],
-      where: whereClause,
-      _count: { city: true },
-      orderBy: { _count: { city: "desc" } },
-      take: 15,
-    });
-
-    const viewsByRegion = await prisma.pageView.groupBy({
-      by: ["region"],
-      where: whereClause,
-      _count: { region: true },
-      orderBy: { _count: { region: "desc" } },
-      take: 10,
-    });
-
-    const viewsByPage = await prisma.pageView.groupBy({
-      by: ["path"],
-      where: whereClause,
-      _count: { path: true },
-      orderBy: { _count: { path: "desc" } },
-      take: 10,
-    });
-
-    const viewsByDevice = await prisma.pageView.groupBy({
-      by: ["device"],
-      where: whereClause,
-      _count: { device: true },
-      orderBy: { _count: { device: "desc" } },
-    });
-
-    const viewsByBrowser = await prisma.pageView.groupBy({
-      by: ["browser"],
-      where: whereClause,
-      _count: { browser: true },
-      orderBy: { _count: { browser: "desc" } },
-    });
-
-    const viewsByOS = await prisma.pageView.groupBy({
-      by: ["os"],
-      where: whereClause,
-      _count: { os: true },
-      orderBy: { _count: { os: "desc" } },
-    });
-
-    const viewsOverTime = await getViewsOverTime(period, startDate, filterCountry);
-
-    const recentViews = await prisma.pageView.findMany({
-      where: whereClause,
-      orderBy: { createdAt: "desc" },
-      take: 20,
-      select: {
-        id: true,
-        path: true,
-        country: true,
-        city: true,
-        region: true,
-        device: true,
-        browser: true,
-        createdAt: true,
-      },
-    });
+    const [
+      totalViews,
+      uniqueVisitorResult,
+      viewsByCountry,
+      viewsByCity,
+      viewsByRegion,
+      viewsByPage,
+      viewsByDevice,
+      viewsByBrowser,
+      viewsByOS,
+      viewsOverTime,
+      recentViews,
+    ] = await Promise.all([
+      prisma.pageView.count({ where: whereClause }),
+      prisma.pageView.findMany({
+        where: { ...whereClause, sessionId: { not: null } },
+        distinct: ["sessionId"],
+        select: { sessionId: true },
+      }),
+      prisma.pageView.groupBy({
+        by: ["country"],
+        where: baseWhereClause,
+        _count: { country: true },
+        orderBy: { _count: { country: "desc" } },
+        take: 20,
+      }),
+      prisma.pageView.groupBy({
+        by: ["city", "country"],
+        where: whereClause,
+        _count: { city: true },
+        orderBy: { _count: { city: "desc" } },
+        take: 15,
+      }),
+      prisma.pageView.groupBy({
+        by: ["region"],
+        where: whereClause,
+        _count: { region: true },
+        orderBy: { _count: { region: "desc" } },
+        take: 10,
+      }),
+      prisma.pageView.groupBy({
+        by: ["path"],
+        where: whereClause,
+        _count: { path: true },
+        orderBy: { _count: { path: "desc" } },
+        take: 10,
+      }),
+      prisma.pageView.groupBy({
+        by: ["device"],
+        where: whereClause,
+        _count: { device: true },
+        orderBy: { _count: { device: "desc" } },
+      }),
+      prisma.pageView.groupBy({
+        by: ["browser"],
+        where: whereClause,
+        _count: { browser: true },
+        orderBy: { _count: { browser: "desc" } },
+      }),
+      prisma.pageView.groupBy({
+        by: ["os"],
+        where: whereClause,
+        _count: { os: true },
+        orderBy: { _count: { os: "desc" } },
+      }),
+      getViewsOverTime(period, startDate, filterCountry),
+      prisma.pageView.findMany({
+        where: whereClause,
+        orderBy: { createdAt: "desc" },
+        take: 20,
+        select: {
+          id: true,
+          path: true,
+          country: true,
+          city: true,
+          region: true,
+          device: true,
+          browser: true,
+          createdAt: true,
+        },
+      }),
+    ]);
 
     return NextResponse.json({
       totalViews,
-      uniqueVisitors: uniqueVisitors.length,
+      uniqueVisitors: uniqueVisitorResult.length,
       viewsByCountry: viewsByCountry.map((v) => ({
         country: v.country || "Unknown",
         count: v._count.country,
@@ -184,17 +184,15 @@ async function getViewsOverTime(period: string, startDate: Date, filterCountry?:
     where: whereClause,
     select: { createdAt: true },
     orderBy: { createdAt: "asc" },
+    take: 10000,
   });
 
   const grouped: Record<string, number> = {};
 
   for (const view of views) {
-    let key: string;
-    if (period === "24h") {
-      key = view.createdAt.toISOString().slice(0, 13);
-    } else {
-      key = view.createdAt.toISOString().slice(0, 10);
-    }
+    const key = period === "24h"
+      ? view.createdAt.toISOString().slice(0, 13)
+      : view.createdAt.toISOString().slice(0, 10);
     grouped[key] = (grouped[key] || 0) + 1;
   }
 

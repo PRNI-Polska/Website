@@ -39,6 +39,7 @@ const statusColors: Record<ContentStatus, string> = {
 async function getAnnouncements() {
   return prisma.announcement.findMany({
     orderBy: { updatedAt: "desc" },
+    take: 100,
     include: {
       author: {
         select: { name: true },

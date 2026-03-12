@@ -10,6 +10,7 @@ export async function GET() {
 
     const posts = await prisma.blogPost.findMany({
       orderBy: { updatedAt: "desc" },
+      take: 100,
     });
 
     return NextResponse.json(posts);

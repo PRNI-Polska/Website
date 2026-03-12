@@ -13,6 +13,8 @@ export default function MemberRegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [location, setLocation] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -37,7 +39,7 @@ export default function MemberRegisterPage() {
       const res = await fetch("/api/members/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ inviteCode, email, password, displayName }),
+        body: JSON.stringify({ inviteCode, email, password, displayName, fullName, location }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || t("register.error")); return; }
@@ -101,6 +103,16 @@ export default function MemberRegisterPage() {
           <div className="space-y-2">
             <label htmlFor="displayName" className="text-xs font-medium text-[#888] block uppercase tracking-wider">{t("register.displayName")}</label>
             <input id="displayName" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} required className={inputClass} placeholder={t("register.yourName")} />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="fullName" className="text-xs font-medium text-[#888] block uppercase tracking-wider">{t("register.fullName")}</label>
+            <input id="fullName" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} required className={inputClass} placeholder={t("register.fullNamePlaceholder")} />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="location" className="text-xs font-medium text-[#888] block uppercase tracking-wider">{t("register.location")}</label>
+            <input id="location" type="text" value={location} onChange={(e) => setLocation(e.target.value)} required className={inputClass} placeholder={t("register.locationPlaceholder")} />
           </div>
 
           <div className="space-y-2">

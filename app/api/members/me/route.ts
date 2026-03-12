@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getMemberFromRequest } from "@/lib/member-auth";
+import { getMemberFromRequest, applySessionRefresh } from "@/lib/member-auth";
 
 export async function GET(request: NextRequest) {
   const member = await getMemberFromRequest(request);
@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ authenticated: false }, { status: 401 });
   }
 
-  return NextResponse.json({
+  const response = NextResponse.json({
     authenticated: true,
     member: {
       id: member.id,
@@ -17,4 +17,6 @@ export async function GET(request: NextRequest) {
       role: member.role,
     },
   });
+
+  return applySessionRefresh(member, response);
 }

@@ -22,8 +22,19 @@ async function main() {
   console.log("🌱 Starting database seed...\n");
 
   // 1. Create Admin User
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@prni.org";
-  const adminPassword = process.env.ADMIN_PASSWORD || "admin123!";
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (!adminEmail || !adminPassword) {
+    throw new Error(
+      "ADMIN_EMAIL and ADMIN_PASSWORD environment variables are required.\n" +
+      "Set them before running the seed script."
+    );
+  }
+
+  if (adminPassword.length < 12) {
+    throw new Error("ADMIN_PASSWORD must be at least 12 characters long.");
+  }
   
   console.log("Creating admin user...");
   const passwordHash = await hash(adminPassword, 12);
@@ -352,10 +363,7 @@ We believe in:
   console.log("✅ Site settings configured");
 
   console.log("\n🎉 Database seeding completed successfully!");
-  console.log(`\n📋 Admin Login Credentials:`);
-  console.log(`   Email: ${adminEmail}`);
-  console.log(`   Password: ${adminPassword}`);
-  console.log(`\n⚠️  Remember to change the admin password in production!`);
+  console.log(`\n📋 Admin user created for: ${adminEmail.replace(/(.{2})(.*)(@.*)/, "$1***$3")}`);
 }
 
 main()

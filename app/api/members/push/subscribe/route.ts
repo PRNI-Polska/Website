@@ -9,7 +9,24 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const subscription = JSON.stringify(body.subscription);
+    const sub = body.subscription;
+
+    if (
+      !sub ||
+      typeof sub !== "object" ||
+      typeof sub.endpoint !== "string" ||
+      !sub.endpoint.startsWith("https://") ||
+      !sub.keys ||
+      typeof sub.keys.p256dh !== "string" ||
+      typeof sub.keys.auth !== "string"
+    ) {
+      return NextResponse.json({ error: "Invalid subscription" }, { status: 400 });
+    }
+
+    const subscription = JSON.stringify({
+      endpoint: sub.endpoint,
+      keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth },
+    });
 
     await prisma.member.update({
       where: { id: member.id },

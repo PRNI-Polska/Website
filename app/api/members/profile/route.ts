@@ -60,7 +60,16 @@ export async function PATCH(request: NextRequest) {
       if (body.photoUrl === null || body.photoUrl === "") {
         data.photoUrl = null;
       } else if (typeof body.photoUrl === "string") {
-        data.photoUrl = body.photoUrl.trim();
+        const trimmedUrl = body.photoUrl.trim();
+        if (!trimmedUrl.startsWith("https://")) {
+          return NextResponse.json({ error: "Photo URL must use HTTPS" }, { status: 400 });
+        }
+        try {
+          new URL(trimmedUrl);
+        } catch {
+          return NextResponse.json({ error: "Invalid photo URL" }, { status: 400 });
+        }
+        data.photoUrl = trimmedUrl;
       }
     }
 

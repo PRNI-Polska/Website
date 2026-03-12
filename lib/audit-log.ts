@@ -43,36 +43,49 @@ const logBuffer: AuditLogEntry[] = [];
 const BUFFER_FLUSH_INTERVAL = 5000; // 5 seconds
 const BUFFER_MAX_SIZE = 50;
 
-// Flush buffer to console/file (in production, send to database or logging service)
 async function flushBuffer() {
   if (logBuffer.length === 0) return;
 
   const entries = [...logBuffer];
   logBuffer.length = 0;
 
-  // Log to console in development
-  if (process.env.NODE_ENV === "development") {
-    for (const entry of entries) {
-      const severity = entry.severity || "low";
-      const icon = {
-        low: "📝",
-        medium: "⚠️",
-        high: "🚨",
-        critical: "🔴",
-      }[severity];
+  for (const entry of entries) {
+    const severity = entry.severity || "low";
 
+    if (process.env.NODE_ENV === "development") {
+      const icon = { low: "📝", medium: "⚠️", high: "🚨", critical: "🔴" }[severity];
       console.log(
         `${icon} [AUDIT] ${new Date().toISOString()} | ${entry.action} | ${entry.resource}${entry.resourceId ? `:${entry.resourceId}` : ""} | IP: ${entry.ipAddress} | User: ${entry.userEmail || "anonymous"}`
       );
-      
       if (entry.details) {
         console.log(`   Details:`, entry.details);
       }
     }
   }
 
-  // In production, you would send these to a database or logging service
-  // Example: await prisma.auditLog.createMany({ data: entries.map(e => ({ ...e, timestamp: new Date() })) });
+  try {
+    if (entries.some((e) => e.userId)) {
+      await prisma.auditLog.createMany({
+        data: entries
+          .filter((e) => e.userId)
+          .map((e) => ({
+            action: e.action,
+            entityType: e.resource,
+            entityId: e.resourceId || "system",
+            userId: e.userId!,
+            details: JSON.stringify({
+              severity: e.severity,
+              ipAddress: e.ipAddress,
+              userAgent: e.userAgent,
+              ...e.details,
+            }),
+          })),
+        skipDuplicates: true,
+      });
+    }
+  } catch (dbError) {
+    console.error("[AUDIT] Failed to persist audit logs:", dbError instanceof Error ? dbError.message : "Unknown error");
+  }
 }
 
 // Start periodic flushing

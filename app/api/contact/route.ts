@@ -3,18 +3,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { contactFormSchema } from "@/lib/validations";
 import { checkRateLimit, validateHoneypot } from "@/lib/utils";
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 async function sendEmail(data: {
   name: string;
   email: string;
   subject: string;
   message: string;
 }) {
-  // If no API key configured, just log
   if (!process.env.RESEND_API_KEY) {
-    console.log("Contact form submission (no email configured):", {
-      from: `${data.name} <${data.email}>`,
-      subject: data.subject,
-      message: data.message,
+    console.log("Contact form submission received (no email configured)", {
       timestamp: new Date().toISOString(),
     });
     return { success: true };
@@ -24,7 +29,6 @@ async function sendEmail(data: {
     const { Resend } = await import("resend");
     const resend = new Resend(process.env.RESEND_API_KEY);
 
-    // Send email via Resend
     const { error } = await resend.emails.send({
       from: "PRNI Website <noreply@prni.org.pl>",
       to: process.env.CONTACT_EMAIL || "prni.official@gmail.com",
@@ -32,27 +36,21 @@ async function sendEmail(data: {
       text: `Nowa wiadomość z formularza kontaktowego:\n\nImię: ${data.name}\nEmail: ${data.email}\nTemat: ${data.subject}\n\nWiadomość:\n${data.message}`,
       html: `
         <h2>Nowa wiadomość z formularza kontaktowego</h2>
-        <p><strong>Imię:</strong> ${data.name}</p>
-        <p><strong>Email:</strong> <a href="mailto:${data.email}">${data.email}</a></p>
-        <p><strong>Temat:</strong> ${data.subject}</p>
+        <p><strong>Imię:</strong> ${escapeHtml(data.name)}</p>
+        <p><strong>Email:</strong> <a href="mailto:${escapeHtml(data.email)}">${escapeHtml(data.email)}</a></p>
+        <p><strong>Temat:</strong> ${escapeHtml(data.subject)}</p>
         <hr>
         <p><strong>Wiadomość:</strong></p>
-        <p>${data.message.replace(/\n/g, "<br>")}</p>
+        <p>${escapeHtml(data.message).replace(/\n/g, "<br>")}</p>
       `,
     });
 
     if (error) {
-      console.error("Failed to send email:", error);
+      console.error("Failed to send contact email");
       throw new Error("Failed to send email");
     }
   } catch (emailError) {
-    console.error("Email sending failed:", emailError);
-    // Don't throw: still allow the form to succeed
-    console.log("Contact form submission (email exception):", {
-      from: `${data.name} <${data.email}>`,
-      subject: data.subject,
-      timestamp: new Date().toISOString(),
-    });
+    console.error("Contact email sending failed:", emailError instanceof Error ? emailError.message : "Unknown error");
     return { success: true };
   }
 
@@ -94,10 +92,8 @@ export async function POST(request: NextRequest) {
 
     const { name, email, subject, message, website } = parsed.data;
 
-    // Check honeypot - if it has a value, it's likely a bot
     if (!validateHoneypot(website)) {
-      // Silently reject but return success to not give away the honeypot
-      console.log("Honeypot triggered, rejecting submission from:", email);
+      console.log("Honeypot triggered, rejecting submission");
       return NextResponse.json({ success: true });
     }
 

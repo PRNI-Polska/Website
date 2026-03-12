@@ -5,6 +5,7 @@ import {
   createMemberSession,
   memberSessionCookieOptions,
 } from "@/lib/member-auth";
+import { recordSecurityEvent } from "@/lib/security-monitor";
 
 const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
 const MAX_ATTEMPTS_PER_IP = 5;
@@ -51,6 +52,12 @@ export async function POST(request: NextRequest) {
     const ip = getClientIp(request);
 
     if (!checkIpRateLimit(ip)) {
+      recordSecurityEvent({
+        type: "brute_force",
+        ip,
+        details: "Member login rate limit exceeded",
+        severity: "high",
+      });
       return NextResponse.json(
         { error: GENERIC_ERROR },
         { status: 401 }
@@ -64,7 +71,9 @@ export async function POST(request: NextRequest) {
       !email ||
       !password ||
       typeof email !== "string" ||
-      typeof password !== "string"
+      typeof password !== "string" ||
+      email.length > 254 ||
+      password.length > 128
     ) {
       return NextResponse.json(
         { error: GENERIC_ERROR },
@@ -100,6 +109,19 @@ export async function POST(request: NextRequest) {
 
       if (newFailedCount >= 5) {
         updateData.lockedUntil = new Date(Date.now() + LOCKOUT_DURATION);
+        recordSecurityEvent({
+          type: "brute_force",
+          ip,
+          details: `Member account locked after ${newFailedCount} failed attempts`,
+          severity: "high",
+        });
+      } else {
+        recordSecurityEvent({
+          type: "auth_failure",
+          ip,
+          details: `Member login failed (attempt ${newFailedCount})`,
+          severity: "medium",
+        });
       }
 
       await prisma.member.update({

@@ -26,7 +26,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section with Polish Flag Background */}
-      <section className="relative py-20 md:py-32 overflow-hidden hero-flag-bg">
+      <section className="relative py-28 md:py-40 overflow-hidden hero-flag-bg">
         <div className="container-custom relative z-10">
           <div className="max-w-4xl mx-auto text-center">
             {/* Logo */}
@@ -47,10 +47,10 @@ export default function HomePage() {
               </h2>
             </div>
             
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-bold tracking-tight mb-6 animate-fade-in animation-delay-200">
+            <h1 className="text-display-hero font-heading font-bold tracking-tight mb-6 animate-fade-in animation-delay-200">
               {t("hero.title")}
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8 animate-fade-in animation-delay-300">
+            <p className="text-xl md:text-2xl text-muted-foreground mb-10 animate-fade-in animation-delay-300">
               {t("hero.subtitle")}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in animation-delay-400">
@@ -68,10 +68,13 @@ export default function HomePage() {
         </div>
       </section>
 
+      <div className="section-divider my-0" />
+
       {/* Mission Statement */}
-      <section className="py-16 bg-muted/30">
+      <section className="section-gap bg-muted/30">
         <div className="container-custom">
           <div className="max-w-4xl mx-auto text-center">
+            <div className="section-divider mb-8" />
             <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-6">
               {t("mission.title")}
             </h2>
@@ -83,7 +86,7 @@ export default function HomePage() {
       </section>
 
       {/* Ideology Declaration */}
-      <section className="section-spacing">
+      <section className="section-gap">
         <div className="container-custom">
           <div className="text-center mb-12">
             <Badge variant="secondary" className="mb-4">
@@ -94,7 +97,7 @@ export default function HomePage() {
             </h2>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-5 md:grid-cols-2">
             {ideologySections.map((section, index) => (
               <Card 
                 key={section.id} 
@@ -152,8 +155,10 @@ export default function HomePage() {
         </div>
       </section>
 
+      <div className="section-divider my-0" />
+
       {/* Manifesto CTA */}
-      <section className="section-spacing bg-muted/30">
+      <section className="section-gap bg-muted/30">
         <div className="container-custom">
           <div className="text-center mb-8">
             <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-4">
@@ -175,8 +180,10 @@ export default function HomePage() {
         </div>
       </section>
 
+      <div className="section-divider my-0" />
+
       {/* Call to Action */}
-      <section className="py-20 bg-primary text-primary-foreground relative overflow-hidden">
+      <section className="py-24 md:py-32 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
         <div className="absolute bottom-0 right-0 w-96 h-96 bg-white/5 rounded-full translate-x-1/2 translate-y-1/2" />
         <div className="absolute top-0 left-0 right-0 h-1 bg-white/20" />

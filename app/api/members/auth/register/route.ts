@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/db";
+import { checkRateLimit, getClientIP, RATE_LIMITS, rateLimitResponse } from "@/lib/rate-limit";
 
 const BCRYPT_ROUNDS = 12;
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIP(request);
+    const rateCheck = checkRateLimit(`member-register:${ip}`, RATE_LIMITS.auth);
+    if (!rateCheck.allowed) {
+      return rateLimitResponse(rateCheck.resetIn);
+    }
+
     const body = await request.json();
     const { inviteCode, email, password, displayName, fullName, location } = body;
 
@@ -33,9 +40,16 @@ export async function POST(request: NextRequest) {
     const trimmedName = displayName.trim();
     const trimmedCode = inviteCode.trim().toUpperCase();
 
-    if (password.length < 8) {
+    if (password.length < 10) {
       return NextResponse.json(
-        { error: "Password must be at least 8 characters" },
+        { error: "Password must be at least 10 characters" },
+        { status: 400 }
+      );
+    }
+
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+      return NextResponse.json(
+        { error: "Password must contain uppercase, lowercase, and a number" },
         { status: 400 }
       );
     }

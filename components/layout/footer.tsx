@@ -22,8 +22,8 @@ export function Footer() {
   const { t } = useI18n();
 
   return (
-    <footer className="bg-black border-t border-neutral-800" role="contentinfo">
-      <div className="container-custom py-12">
+    <footer className="bg-black border-t border-white/[0.06]" role="contentinfo">
+      <div className="container-custom py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="md:col-span-2">
@@ -88,7 +88,7 @@ export function Footer() {
 
         {/* Bottom */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs text-muted-foreground/70">
             &copy; {currentYear} PRNI — {t("party.name.full")}. {t("footer.rights")}
           </p>
         </div>

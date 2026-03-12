@@ -7,11 +7,11 @@ import { z } from "zod";
 
 // Patterns to detect potential XSS/injection attempts
 const DANGEROUS_PATTERNS = [
-  /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-  /javascript:/gi,
-  /on\w+\s*=/gi, // onclick=, onerror=, etc.
-  /data:\s*text\/html/gi,
-  /vbscript:/gi,
+  /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/i,
+  /javascript:/i,
+  /on\w+\s*=/i,
+  /data:\s*text\/html/i,
+  /vbscript:/i,
 ];
 
 // Check for dangerous content
@@ -272,6 +272,38 @@ export const recruitmentFormSchema = z.object({
 export type RecruitmentFormInput = z.infer<typeof recruitmentFormSchema>;
 
 // ============================================================================
+// BLOG POST SCHEMAS
+// ============================================================================
+export const blogCategoryEnum = z.enum([
+  "OPINION", "ANALYSIS", "INTERVIEW", "REPORT", "OTHER",
+]);
+
+export const createBlogPostSchema = z.object({
+  title: z.string().min(1, "Title is required").max(300),
+  slug: z.string().max(300).regex(/^[a-z0-9-]*$/, "Slug must be lowercase alphanumeric with hyphens").optional().or(z.literal("")),
+  excerpt: z.string().min(1, "Excerpt is required").max(500),
+  content: z.string().min(1, "Content is required"),
+  authorName: z.string().min(1, "Author name is required").max(100),
+  authorRole: z.string().max(100).optional().or(z.literal("")),
+  category: blogCategoryEnum.optional(),
+  status: contentStatusEnum.optional(),
+  featuredImage: z.string().url().optional().or(z.literal("")),
+  titleEn: z.string().max(300).optional().nullable(),
+  titleDe: z.string().max(300).optional().nullable(),
+  excerptEn: z.string().max(500).optional().nullable(),
+  excerptDe: z.string().max(500).optional().nullable(),
+  contentEn: z.string().optional().nullable(),
+  contentDe: z.string().optional().nullable(),
+});
+
+export const updateBlogPostSchema = createBlogPostSchema.partial().extend({
+  id: z.string().cuid().optional(),
+});
+
+export type CreateBlogPostInput = z.infer<typeof createBlogPostSchema>;
+export type UpdateBlogPostInput = z.infer<typeof updateBlogPostSchema>;
+
+// ============================================================================
 // AUTH SCHEMAS
 // ============================================================================
 export const loginSchema = z.object({
@@ -306,3 +338,68 @@ export const passwordChangeSchema = z.object({
 });
 
 export type PasswordChangeInput = z.infer<typeof passwordChangeSchema>;
+
+// ============================================================================
+// INTERNATIONAL JOIN FORM SCHEMA
+// ============================================================================
+const VALID_INTERESTS = ["translation", "outreach", "events", "research", "other"] as const;
+
+export const internationalJoinSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(200, "Name must be less than 200 characters")
+    .transform((val) => val.trim())
+    .refine((val) => !containsDangerousContent(val), {
+      message: "Name contains invalid content",
+    }),
+  email: z
+    .string()
+    .email("Invalid email address")
+    .max(320, "Email too long")
+    .transform((val) => val.toLowerCase().trim())
+    .refine(
+      (email) => {
+        const domain = email.split("@")[1];
+        return !BLOCKED_EMAIL_DOMAINS.includes(domain);
+      },
+      { message: "Please use a valid email address" }
+    ),
+  country: z
+    .string()
+    .min(1, "Country is required")
+    .max(200, "Country must be less than 200 characters")
+    .transform((val) => val.trim())
+    .refine((val) => !containsDangerousContent(val), {
+      message: "Country contains invalid content",
+    }),
+  languages: z
+    .string()
+    .max(500, "Languages must be less than 500 characters")
+    .optional()
+    .transform((val) => (val ?? "").trim())
+    .refine((val) => !containsDangerousContent(val), {
+      message: "Languages contains invalid content",
+    }),
+  interest: z
+    .string()
+    .min(1, "Area of interest is required")
+    .max(200, "Interest must be less than 200 characters")
+    .refine((val) => VALID_INTERESTS.includes(val as typeof VALID_INTERESTS[number]), {
+      message: "Invalid area of interest",
+    }),
+  message: z
+    .string()
+    .max(2000, "Message must be less than 2000 characters")
+    .optional()
+    .transform((val) => (val ?? "").trim())
+    .refine((val) => !containsDangerousContent(val), {
+      message: "Message contains invalid content",
+    }),
+  consent: z.literal(true, {
+    errorMap: () => ({ message: "Consent is required" }),
+  }),
+  website: z.string().optional(),
+});
+
+export type InternationalJoinInput = z.infer<typeof internationalJoinSchema>;

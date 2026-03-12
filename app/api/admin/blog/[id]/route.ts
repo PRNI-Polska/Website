@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
+import { updateBlogPostSchema } from "@/lib/validations";
+import { validateCsrf, csrfErrorResponse } from "@/lib/csrf";
 
 export async function GET(
   request: NextRequest,
@@ -42,8 +44,20 @@ export async function PATCH(
 ) {
   try {
     const user = await requireAdmin();
+
+    if (!validateCsrf(request)) return csrfErrorResponse();
+
     const { id } = await params;
-    const body = await request.json();
+    const rawBody = await request.json();
+
+    const parsed = updateBlogPostSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid form data", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+    const body = parsed.data;
 
     const existing = await prisma.blogPost.findUnique({
       where: { id },
@@ -74,18 +88,23 @@ export async function PATCH(
       publishedAt = null;
     }
 
-    const translationFields: Record<string, string | null> = {};
-    for (const key of ["titleEn", "titleDe", "excerptEn", "excerptDe", "contentEn", "contentDe"] as const) {
+    const ALLOWED_FIELDS = [
+      "title", "slug", "excerpt", "content", "authorName", "authorRole",
+      "category", "status", "featuredImage",
+      "titleEn", "titleDe", "excerptEn", "excerptDe", "contentEn", "contentDe",
+    ] as const;
+
+    const sanitizedData: Record<string, unknown> = {};
+    for (const key of ALLOWED_FIELDS) {
       if (key in body) {
-        translationFields[key] = body[key] || null;
+        sanitizedData[key] = body[key] ?? null;
       }
     }
 
     const post = await prisma.blogPost.update({
       where: { id },
       data: {
-        ...body,
-        ...translationFields,
+        ...sanitizedData,
         featuredImage: body.featuredImage ?? existing.featuredImage,
         publishedAt,
       },
@@ -122,6 +141,9 @@ export async function DELETE(
 ) {
   try {
     const user = await requireAdmin();
+
+    if (!validateCsrf(request)) return csrfErrorResponse();
+
     const { id } = await params;
 
     const post = await prisma.blogPost.findUnique({

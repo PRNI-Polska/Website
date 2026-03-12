@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { createAnnouncementSchema } from "@/lib/validations";
+import { validateCsrf, csrfErrorResponse } from "@/lib/csrf";
 import { slugify } from "@/lib/utils";
 
 // GET - List all announcements
@@ -41,6 +42,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAdmin();
+
+    if (!validateCsrf(request)) return csrfErrorResponse();
+
     const body = await request.json();
 
     // Validate input

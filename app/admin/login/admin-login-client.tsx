@@ -1,56 +1,56 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { loginSchema, type LoginInput } from "@/lib/validations";
-import { cn } from "@/lib/utils";
 
 export default function AdminLoginClient() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
-  });
-
-  const onSubmit = async (data: LoginInput) => {
+  async function handleLogin(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setIsLoading(true);
     setLoginError(null);
 
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    if (!email || !password) {
+      setLoginError("Email and password are required");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const result = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false,
+      const csrfRes = await fetch("/api/auth/csrf");
+      const { csrfToken } = await csrfRes.json();
+
+      const res = await fetch("/api/auth/callback/credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, csrfToken }),
+        redirect: "manual",
       });
 
-      if (result?.error) {
-        setLoginError(
-          result.error === "CredentialsSignin" ? "Invalid email or password" : result.error
-        );
-      } else {
+      if (res.type === "opaqueredirect" || res.ok || res.status === 302 || res.status === 200) {
         router.push("/admin");
         router.refresh();
+      } else {
+        setLoginError("Invalid email or password");
       }
     } catch {
       setLoginError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30 p-4">
@@ -70,33 +70,29 @@ export default function AdminLoginClient() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="admin@example.com"
                 autoComplete="email"
-                {...register("email")}
-                className={cn(errors.email && "border-destructive")}
+                required
               />
-              {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
+                name="password"
                 type="password"
                 placeholder="••••••••"
                 autoComplete="current-password"
-                {...register("password")}
-                className={cn(errors.password && "border-destructive")}
+                required
               />
-              {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
-              )}
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>

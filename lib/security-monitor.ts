@@ -114,84 +114,100 @@ async function triggerAlert(event: SecurityEventInput, count: number): Promise<v
   }
 }
 
+const EMPTY_DASHBOARD = {
+  stats: { events24h: 0, events7d: 0, unresolvedCount: 0, criticalCount: 0 },
+  recentEvents: [] as Array<{ id: string; type: string; severity: string; ip: string; details: string; resolved: boolean; createdAt: Date }>,
+  eventsByType: [] as Array<{ type: string; count: number }>,
+  topIPs: [] as Array<{ ip: string; count: number }>,
+};
+
 export async function getSecurityDashboardData() {
   const now = new Date();
   const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-  const [
-    events24h,
-    events7d,
-    unresolvedCount,
-    criticalCount,
-    recentEvents,
-    eventsByType,
-    topIPs,
-  ] = await Promise.all([
-    prisma.securityEvent.count({ where: { createdAt: { gte: last24h } } }),
-    prisma.securityEvent.count({ where: { createdAt: { gte: last7d } } }),
-    prisma.securityEvent.count({ where: { resolved: false } }),
-    prisma.securityEvent.count({
-      where: { severity: "critical", resolved: false },
-    }),
-    prisma.securityEvent.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 50,
-      select: {
-        id: true,
-        type: true,
-        severity: true,
-        ip: true,
-        details: true,
-        resolved: true,
-        createdAt: true,
-      },
-    }),
-    prisma.securityEvent.groupBy({
-      by: ["type"],
-      where: { createdAt: { gte: last7d } },
-      _count: { type: true },
-      orderBy: { _count: { type: "desc" } },
-    }),
-    prisma.securityEvent.groupBy({
-      by: ["ip"],
-      where: { createdAt: { gte: last24h } },
-      _count: { ip: true },
-      orderBy: { _count: { ip: "desc" } },
-      take: 10,
-    }),
-  ]);
-
-  return {
-    stats: {
+  try {
+    const [
       events24h,
       events7d,
       unresolvedCount,
       criticalCount,
-    },
-    recentEvents,
-    eventsByType: eventsByType.map((e) => ({
-      type: e.type,
-      count: e._count.type,
-    })),
-    topIPs: topIPs.map((e) => ({
-      ip: e.ip,
-      count: e._count.ip,
-    })),
-  };
+      recentEvents,
+      eventsByType,
+      topIPs,
+    ] = await Promise.all([
+      prisma.securityEvent.count({ where: { createdAt: { gte: last24h } } }),
+      prisma.securityEvent.count({ where: { createdAt: { gte: last7d } } }),
+      prisma.securityEvent.count({ where: { resolved: false } }),
+      prisma.securityEvent.count({
+        where: { severity: "critical", resolved: false },
+      }),
+      prisma.securityEvent.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 50,
+        select: {
+          id: true,
+          type: true,
+          severity: true,
+          ip: true,
+          details: true,
+          resolved: true,
+          createdAt: true,
+        },
+      }),
+      prisma.securityEvent.groupBy({
+        by: ["type"],
+        where: { createdAt: { gte: last7d } },
+        _count: { type: true },
+        orderBy: { _count: { type: "desc" } },
+      }),
+      prisma.securityEvent.groupBy({
+        by: ["ip"],
+        where: { createdAt: { gte: last24h } },
+        _count: { ip: true },
+        orderBy: { _count: { ip: "desc" } },
+        take: 10,
+      }),
+    ]);
+
+    return {
+      stats: { events24h, events7d, unresolvedCount, criticalCount },
+      recentEvents,
+      eventsByType: eventsByType.map((e) => ({
+        type: e.type,
+        count: e._count.type,
+      })),
+      topIPs: topIPs.map((e) => ({
+        ip: e.ip,
+        count: e._count.ip,
+      })),
+    };
+  } catch (error) {
+    console.error("SecurityEvent table may not exist yet — run `prisma db push`:", error);
+    return EMPTY_DASHBOARD;
+  }
 }
 
 export async function resolveSecurityEvent(id: string): Promise<void> {
-  await prisma.securityEvent.update({
-    where: { id },
-    data: { resolved: true },
-  });
+  try {
+    await prisma.securityEvent.update({
+      where: { id },
+      data: { resolved: true },
+    });
+  } catch {
+    console.error("Failed to resolve security event — table may not exist");
+  }
 }
 
 export async function resolveAllSecurityEvents(): Promise<number> {
-  const result = await prisma.securityEvent.updateMany({
-    where: { resolved: false },
-    data: { resolved: true },
-  });
-  return result.count;
+  try {
+    const result = await prisma.securityEvent.updateMany({
+      where: { resolved: false },
+      data: { resolved: true },
+    });
+    return result.count;
+  } catch {
+    console.error("Failed to resolve security events — table may not exist");
+    return 0;
+  }
 }

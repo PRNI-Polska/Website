@@ -85,13 +85,14 @@ export function MeetingRoom({ session, onLeave, onTranscriptUpdate, transcriptLa
           break;
         case "kicked": managerRef.current?.destroy(); onLeave(); break;
         case "reconnecting": setIsConnected(false); setError(null); notify(t("reconnecting")); break;
+        case "reconnected": setIsConnected(true); setError(null); notify(t("connected")); break;
         case "error": setError(ev.message); break;
       }
     });
     mgr.start();
 
     let lci:ReturnType<typeof setInterval>|null=null;
-    if(canSpeak(session.role)){lci=setInterval(()=>{const s=mgr.getLocalStream();if(!s)return;try{const ac=new AudioContext();const src=ac.createMediaStreamSource(s);const an=ac.createAnalyser();an.fftSize=512;src.connect(an);const d=new Uint8Array(an.frequencyBinCount);const pi=setInterval(()=>{an.getByteFrequencyData(d);let sum=0;for(let i=0;i<d.length;i++)sum+=d[i];setLocalSpeaking(sum/d.length>15);},100);localAnalyserRef.current={interval:pi,ctx:ac};if(lci)clearInterval(lci);}catch{}},500);}
+    if(canSpeak(session.role)){lci=setInterval(()=>{const s=mgr.getLocalStream();if(!s||localAnalyserRef.current)return;try{const ac=new AudioContext();if(ac.state==="suspended")ac.resume().catch(()=>{});const src=ac.createMediaStreamSource(s);const an=ac.createAnalyser();an.fftSize=512;src.connect(an);const d=new Uint8Array(an.frequencyBinCount);const pi=setInterval(()=>{if(ac.state==="suspended"){ac.resume().catch(()=>{});return;}an.getByteFrequencyData(d);let sum=0;for(let i=0;i<d.length;i++)sum+=d[i];setLocalSpeaking(sum/d.length>15);},100);localAnalyserRef.current={interval:pi,ctx:ac};if(lci)clearInterval(lci);}catch{}},500);}
 
     // Auto-start Speech Recognition for speakers (always on)
     const SR = (window as unknown as Record<string,unknown>).SpeechRecognition || (window as unknown as Record<string,unknown>).webkitSpeechRecognition;

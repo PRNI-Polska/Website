@@ -41,9 +41,11 @@ export class SignalingClient {
   private session: string | null = null;
   private intentionalClose = false;
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 10;
+  private maxReconnectAttempts = 15;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private pingInterval: ReturnType<typeof setInterval> | null = null;
+  private lastPongTime = 0;
+  private pongCheckInterval: ReturnType<typeof setInterval> | null = null;
 
   connect(session: string): void {
     this.session = session;
@@ -55,6 +57,8 @@ export class SignalingClient {
   private doConnect(): void {
     if (!this.session) return;
 
+    try { this.ws?.close(); } catch { /* safe close */ }
+
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = process.env.NEXT_PUBLIC_CALLS_WS_URL ?? `${protocol}//${window.location.host}/ws`;
     const fullUrl = wsUrl.startsWith("/") ? `${protocol}//${window.location.host}${wsUrl}` : wsUrl;
@@ -63,6 +67,10 @@ export class SignalingClient {
 
     this.ws.onopen = () => {
       this.send({ type: "join", session: this.session });
+      this.lastPongTime = Date.now();
+      if (this.reconnectAttempts > 0) {
+        this.emit("reconnected", {});
+      }
       this.reconnectAttempts = 0;
       this.startPing();
     };
@@ -70,7 +78,7 @@ export class SignalingClient {
     this.ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (data.type === "pong") return;
+        if (data.type === "pong") { this.lastPongTime = Date.now(); return; }
         this.emit(data.type, data);
       } catch { /* ignore */ }
     };
@@ -86,7 +94,7 @@ export class SignalingClient {
       if (this.intentionalClose) return;
 
       if (this.reconnectAttempts < this.maxReconnectAttempts) {
-        const delay = Math.min(1000 * Math.pow(1.5, this.reconnectAttempts), 15000);
+        const delay = Math.min(1000 * Math.pow(1.5, this.reconnectAttempts), 10000);
         this.reconnectAttempts++;
         this.emit("reconnecting", {});
         this.reconnectTimer = setTimeout(() => this.doConnect(), delay);
@@ -102,11 +110,19 @@ export class SignalingClient {
     this.stopPing();
     this.pingInterval = setInterval(() => {
       this.send({ type: "ping" });
-    }, 20_000);
+    }, 12_000);
+
+    // Detect dead connections where the socket appears open but is actually dead
+    this.pongCheckInterval = setInterval(() => {
+      if (Date.now() - this.lastPongTime > 30_000 && this.ws?.readyState === WebSocket.OPEN) {
+        this.ws?.close();
+      }
+    }, 15_000);
   }
 
   private stopPing(): void {
     if (this.pingInterval) { clearInterval(this.pingInterval); this.pingInterval = null; }
+    if (this.pongCheckInterval) { clearInterval(this.pongCheckInterval); this.pongCheckInterval = null; }
   }
 
   on<K extends keyof SignalingEventMap>(event: K, handler: EventHandler<K>): () => void {

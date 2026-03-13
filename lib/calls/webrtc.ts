@@ -46,7 +46,8 @@ export class WebRTCManager {
   private myRole: Role;
   private eventHandlers = new Set<(event: WebRTCEvent) => void>();
   private cleanupFns: Array<() => void> = [];
-  private audioAnalysers = new Map<string, { analyser: AnalyserNode; interval: ReturnType<typeof setInterval> }>();
+  private audioAnalysers = new Map<string, { analyser: AnalyserNode; ctx: AudioContext; interval: ReturnType<typeof setInterval> }>();
+  private iceRestartTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
   constructor(session: SessionData) {
     this.session = session;
@@ -80,7 +81,14 @@ export class WebRTCManager {
 
     this.cleanupFns.push(
       this.signaling.on("joined", (data) => {
+        const isReconnect = this.myPeerId !== null && this.myPeerId !== data.peerId;
         this.myPeerId = data.peerId;
+
+        if (isReconnect) {
+          // Clean up stale peer connections from the old session
+          for (const [peerId] of this.peers) this.removePeer(peerId);
+        }
+
         this.emit({
           type: "connected",
           activePolls: data.activePolls,
@@ -89,8 +97,10 @@ export class WebRTCManager {
 
         const iAmSpeaker = canSpeak(this.myRole);
         for (const peer of data.peers) {
-          this.createPeerConnection(peer.peerId, peer.role, iAmSpeaker);
-          this.emit({ type: "peer-added", peerId: peer.peerId, role: peer.role });
+          if (!this.peers.has(peer.peerId)) {
+            this.createPeerConnection(peer.peerId, peer.role, iAmSpeaker);
+            this.emit({ type: "peer-added", peerId: peer.peerId, role: peer.role });
+          }
         }
       })
     );
@@ -183,6 +193,11 @@ export class WebRTCManager {
     this.cleanupFns.push(this.signaling.on("speak-request-resolved", (data) => this.emit({ type: "speak-request-resolved", peerId: data.peerId })));
     this.cleanupFns.push(this.signaling.on("you-were-kicked", () => this.emit({ type: "kicked" })));
     this.cleanupFns.push(this.signaling.on("reconnecting", () => this.emit({ type: "reconnecting" })));
+
+    this.cleanupFns.push(this.signaling.on("reconnected", () => {
+      this.emit({ type: "reconnected" });
+    }));
+
     this.cleanupFns.push(this.signaling.on("chat-message", (data) => this.emit({ type: "chat-message", ...data })));
     this.cleanupFns.push(this.signaling.on("chat-cooldown", (data) => this.emit({ type: "chat-cooldown", ...data })));
     this.cleanupFns.push(this.signaling.on("transcription", (data) => this.emit({ type: "transcription", ...data })));
@@ -191,8 +206,12 @@ export class WebRTCManager {
   }
 
   private createPeerConnection(remotePeerId: string, remoteRole: Role, isInitiator: boolean): void {
+    // Clean up any existing connection for this peer first
+    if (this.peers.has(remotePeerId)) this.removePeer(remotePeerId);
+
     const iceServers: RTCIceServer[] = [
       { urls: "stun:stun.l.google.com:19302" },
+      { urls: "stun:stun1.l.google.com:19302" },
       { urls: this.session.turn.urls, username: this.session.turn.username, credential: this.session.turn.credential },
     ];
 
@@ -209,11 +228,30 @@ export class WebRTCManager {
       if (!stream) stream = new MediaStream([event.track]);
       peerConn.audioStream = stream;
       this.emit({ type: "remote-stream", peerId: remotePeerId, stream });
+      this.stopSpeakingDetection(remotePeerId);
       this.startSpeakingDetection(remotePeerId, stream);
     };
 
     pc.onicecandidate = (event) => {
       if (event.candidate) this.signaling.sendIceCandidate(remotePeerId, event.candidate.toJSON());
+    };
+
+    pc.oniceconnectionstatechange = () => {
+      const state = pc.iceConnectionState;
+      if (state === "disconnected") {
+        // Wait briefly then attempt ICE restart — disconnected can be transient
+        const timer = setTimeout(() => {
+          if (pc.iceConnectionState === "disconnected" || pc.iceConnectionState === "failed") {
+            this.attemptIceRestart(remotePeerId);
+          }
+        }, 3000);
+        this.iceRestartTimers.set(remotePeerId, timer);
+      } else if (state === "failed") {
+        this.attemptIceRestart(remotePeerId);
+      } else if (state === "connected" || state === "completed") {
+        const timer = this.iceRestartTimers.get(remotePeerId);
+        if (timer) { clearTimeout(timer); this.iceRestartTimers.delete(remotePeerId); }
+      }
     };
 
     if (isInitiator && canSpeak(this.myRole)) {
@@ -224,17 +262,29 @@ export class WebRTCManager {
     }
   }
 
+  private attemptIceRestart(peerId: string): void {
+    const peerConn = this.peers.get(peerId);
+    if (!peerConn || !canSpeak(this.myRole)) return;
+
+    peerConn.pc.createOffer({ iceRestart: true })
+      .then((offer) => peerConn.pc.setLocalDescription(offer))
+      .then(() => { if (peerConn.pc.localDescription) this.signaling.sendOffer(peerId, peerConn.pc.localDescription); })
+      .catch((err) => console.error("[webrtc] ICE restart failed:", err));
+  }
+
   private startSpeakingDetection(peerId: string, stream: MediaStream): void {
     try {
-      const audioCtx = new AudioContext();
-      const source = audioCtx.createMediaStreamSource(stream);
-      const analyser = audioCtx.createAnalyser();
+      const ctx = new AudioContext();
+      if (ctx.state === "suspended") ctx.resume().catch(() => {});
+      const source = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
       analyser.fftSize = 512;
       analyser.smoothingTimeConstant = 0.4;
       source.connect(analyser);
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
       const interval = setInterval(() => {
+        if (ctx.state === "suspended") { ctx.resume().catch(() => {}); return; }
         analyser.getByteFrequencyData(dataArray);
         let sum = 0;
         for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
@@ -246,15 +296,25 @@ export class WebRTCManager {
         }
       }, 100);
 
-      this.audioAnalysers.set(peerId, { analyser, interval });
+      this.audioAnalysers.set(peerId, { analyser, ctx, interval });
     } catch { /* non-critical */ }
+  }
+
+  private stopSpeakingDetection(peerId: string): void {
+    const a = this.audioAnalysers.get(peerId);
+    if (a) {
+      clearInterval(a.interval);
+      a.ctx.close().catch(() => {});
+      this.audioAnalysers.delete(peerId);
+    }
   }
 
   private removePeer(peerId: string): void {
     const peerConn = this.peers.get(peerId);
     if (peerConn) { peerConn.pc.close(); this.peers.delete(peerId); }
-    const a = this.audioAnalysers.get(peerId);
-    if (a) { clearInterval(a.interval); this.audioAnalysers.delete(peerId); }
+    this.stopSpeakingDetection(peerId);
+    const timer = this.iceRestartTimers.get(peerId);
+    if (timer) { clearTimeout(timer); this.iceRestartTimers.delete(peerId); }
   }
 
   getLocalStream(): MediaStream | null { return this.localStream; }
@@ -270,6 +330,8 @@ export class WebRTCManager {
 
   destroy(): void {
     for (const [peerId] of this.peers) this.removePeer(peerId);
+    for (const [, timer] of this.iceRestartTimers) clearTimeout(timer);
+    this.iceRestartTimers.clear();
     if (this.localStream) { for (const track of this.localStream.getTracks()) track.stop(); this.localStream = null; }
     for (const fn of this.cleanupFns) fn();
     this.cleanupFns = [];

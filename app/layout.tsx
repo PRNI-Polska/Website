@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     default: "PRNI — Polski Ruch Narodowo-Integralistyczny",
     template: "%s | PRNI",
   },
-  description: "Polski Ruch Narodowo-Integralistyczny — Naród Ponad Wszystkim. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
+  description: "Naród Ponad Wszystkim — ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
   keywords: [
     "PRNI", "Polski Ruch Narodowo-Integralistyczny", "narodowy integralizm",
     "ruch narodowy", "polska polityka", "suwerenność", "tradycja", "naród",
@@ -52,20 +52,29 @@ export const metadata: Metadata = {
   authors: [{ name: "PRNI" }],
   creator: "PRNI",
   publisher: "PRNI",
+  icons: {
+    icon: [
+      { url: "/icon-32.png", type: "image/png", sizes: "32x32" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+      { url: "/logo.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180" }],
+    shortcut: "/icon-32.png",
+  },
   openGraph: {
     type: "website",
     locale: "pl_PL",
     alternateLocale: ["en_US", "de_DE"],
     url: "https://prni.org.pl",
-    siteName: "PRNI — Polski Ruch Narodowo-Integralistyczny",
-    title: "PRNI — Naród Ponad Wszystkim",
-    description: "Polski Ruch Narodowo-Integralistyczny — ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej.",
-    images: [{ url: "/logo.png", width: 512, height: 512, alt: "PRNI Logo" }],
+    siteName: "PRNI",
+    title: "PRNI — Polski Ruch Narodowo-Integralistyczny",
+    description: "Naród Ponad Wszystkim — ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
+    images: [{ url: "/logo.png", width: 512, height: 512, alt: "PRNI — Polski Ruch Narodowo-Integralistyczny" }],
   },
   twitter: {
     card: "summary",
     title: "PRNI — Polski Ruch Narodowo-Integralistyczny",
-    description: "Naród Ponad Wszystkim — ruch polityczny na rzecz suwerenności i tradycji.",
+    description: "Naród Ponad Wszystkim — ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
     images: ["/logo.png"],
   },
   robots: {

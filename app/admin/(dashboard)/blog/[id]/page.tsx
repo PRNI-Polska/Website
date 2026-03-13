@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Loader2, Trash2 } from "lucide-react";
+import { adminFetch } from "@/lib/admin-fetch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -89,9 +90,8 @@ export default function EditBlogPostPage() {
     setError("");
 
     try {
-      const res = await fetch(`/api/admin/blog/${id}`, {
+      const res = await adminFetch(`/api/admin/blog/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
 
@@ -116,7 +116,7 @@ export default function EditBlogPostPage() {
     setError("");
 
     try {
-      const res = await fetch(`/api/admin/blog/${id}`, {
+      const res = await adminFetch(`/api/admin/blog/${id}`, {
         method: "DELETE",
       });
 

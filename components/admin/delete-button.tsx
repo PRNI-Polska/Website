@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, Loader2 } from "lucide-react";
+import { adminFetch } from "@/lib/admin-fetch";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,7 +34,7 @@ export function DeleteButton({ id, title, endpoint }: DeleteButtonProps) {
     setIsDeleting(true);
 
     try {
-      const response = await fetch(`${endpoint}/${id}`, {
+      const response = await adminFetch(`${endpoint}/${id}`, {
         method: "DELETE",
       });
 

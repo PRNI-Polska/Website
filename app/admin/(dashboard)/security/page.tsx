@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Shield, AlertTriangle, CheckCircle, RefreshCw, Clock, Activity } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { adminFetch } from "@/lib/admin-fetch";
 
 interface SecurityEvent {
   id: string;
@@ -70,18 +71,16 @@ export default function SecurityDashboardPage() {
   }, [fetchData]);
 
   async function resolveEvent(eventId: string) {
-    await fetch("/api/admin/security", {
+    await adminFetch("/api/admin/security", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "resolve", eventId }),
     });
     fetchData();
   }
 
   async function resolveAll() {
-    await fetch("/api/admin/security", {
+    await adminFetch("/api/admin/security", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "resolve_all" }),
     });
     fetchData();

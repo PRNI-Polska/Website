@@ -51,7 +51,14 @@ export const memberTranslations = {
   "nav.channels": { pl: "Kanały", en: "Channels", de: "Kanäle" },
   "nav.messages": { pl: "Wiadomości", en: "Messages", de: "Nachrichten" },
   "nav.documents": { pl: "Dokumenty", en: "Documents", de: "Dokumente" },
+  "nav.merch": { pl: "Merch", en: "Merch", de: "Merch" },
   "nav.logout": { pl: "Wyloguj", en: "Logout", de: "Abmelden" },
+
+  // Merch
+  "merch.title": { pl: "Merch", en: "Merch", de: "Merch" },
+  "merch.subtitle": { pl: "Oficjalny merch PRNI — dostępny wyłącznie dla członków.", en: "Official PRNI merchandise — available exclusively for members.", de: "Offizielles PRNI-Merchandise — exklusiv für Mitglieder." },
+  "merch.comingSoon": { pl: "Wkrótce", en: "Coming soon", de: "Kommt bald" },
+  "merch.comingSoonDesc": { pl: "Merch jest obecnie w przygotowaniu. Członkowie zostaną powiadomieni gdy będzie dostępny.", en: "Merchandise is currently in development. Members will be notified when available.", de: "Merchandise ist derzeit in Arbeit. Mitglieder werden benachrichtigt, sobald es verfügbar ist." },
 
   // Home / News
   "home.title": { pl: "Aktualności", en: "News", de: "Neuigkeiten" },

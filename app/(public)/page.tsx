@@ -141,41 +141,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Merch */}
-      <section className="section-spacing">
-        <div className="container-custom">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-heading font-semibold mb-3">
-              {t("merch.title")}
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              {t("merch.subtitle")}
-            </p>
-          </div>
-
-          <div className="max-w-3xl mx-auto">
-            <Card className="card-hover">
-              <CardContent className="py-8 md:py-10 text-center">
-                <Badge variant="secondary" className="mb-4">
-                  {t("merch.comingSoon")}
-                </Badge>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Button asChild>
-                    <Link href="/merch">
-                      {t("merch.title")}
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button variant="outline" asChild>
-                    <Link href="/contact">{t("nav.contact")}</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
       <div className="section-divider my-0" />
 
       {/* Manifesto CTA */}

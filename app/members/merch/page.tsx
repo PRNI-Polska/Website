@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { ShoppingBag, Loader2, AlertCircle, ArrowLeft, ShoppingCart, X, Minus, Plus, Check } from "lucide-react";
 import Image from "next/image";
 import { useMemberLang } from "@/lib/members/LangContext";
+import type { MemberTranslationKey } from "@/lib/members/i18n";
 
 interface ProductFile {
   type: string;
@@ -415,7 +416,7 @@ function CartDrawer({
   orderState: "idle" | "loading" | "success" | "error";
   setOrderState: (v: "idle" | "loading" | "success" | "error") => void;
   handleCheckout: () => void;
-  t: (key: string) => string;
+  t: (key: MemberTranslationKey) => string;
 }) {
   if (!cartOpen) return null;
 

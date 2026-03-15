@@ -85,9 +85,18 @@ export function getPreviewImage(variant: PrintfulVariant): string {
   return variant.product.image;
 }
 
+const CURRENCY_LOCALES: Record<string, string> = {
+  PLN: "pl-PL",
+  EUR: "de-DE",
+  USD: "en-US",
+  GBP: "en-GB",
+  CHF: "de-CH",
+};
+
 export function formatPrice(price: string, currency: string): string {
+  const locale = CURRENCY_LOCALES[currency] || "pl-PL";
   const num = parseFloat(price);
-  return new Intl.NumberFormat("en-CH", {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
     minimumFractionDigits: 2,

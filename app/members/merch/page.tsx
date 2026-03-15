@@ -30,6 +30,9 @@ interface Product {
   name: string;
   variants: number;
   thumbnail_url: string;
+  preview_image?: string;
+  price_from?: string | null;
+  currency?: string;
 }
 
 interface ProductDetail {
@@ -57,8 +60,17 @@ function getVariantImage(variant: ProductVariant): string {
   return variant.product.image;
 }
 
+const CURRENCY_LOCALES: Record<string, string> = {
+  PLN: "pl-PL",
+  EUR: "de-DE",
+  USD: "en-US",
+  GBP: "en-GB",
+  CHF: "de-CH",
+};
+
 function formatPrice(price: string, currency: string): string {
-  return new Intl.NumberFormat("en-CH", {
+  const locale = CURRENCY_LOCALES[currency] || "pl-PL";
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
     minimumFractionDigits: 2,
@@ -205,8 +217,8 @@ export default function MembersMerchPage() {
                   src={mainImage}
                   alt={detail.sync_product.name}
                   fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-contain p-4"
-                  unoptimized
                 />
               )}
             </div>
@@ -279,7 +291,7 @@ export default function MembersMerchPage() {
                           selectedVariant === v.id ? "border-white" : "border-[#333]"
                         }`}
                       >
-                        <Image src={img} alt={v.name} fill className="object-contain p-1" unoptimized />
+                        <Image src={img} alt={v.name} fill sizes="64px" className="object-contain p-1" />
                       </button>
                     );
                   })}
@@ -358,18 +370,25 @@ export default function MembersMerchPage() {
             >
               <div className="relative aspect-square bg-[#111]">
                 <Image
-                  src={product.thumbnail_url}
+                  src={product.preview_image || product.thumbnail_url}
                   alt={product.name}
                   fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   className="object-contain p-6 group-hover:scale-105 transition-transform duration-300"
-                  unoptimized
                 />
               </div>
               <div className="p-4 border-t border-[#1a1a1a]">
                 <h3 className="font-medium text-sm mb-1">{product.name}</h3>
-                <p className="text-xs text-[#666]">
-                  {product.variants} {product.variants === 1 ? t("merch.variant") : t("merch.variants")}
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-[#666]">
+                    {product.variants} {product.variants === 1 ? t("merch.variant") : t("merch.variants")}
+                  </p>
+                  {product.price_from && (
+                    <p className="text-sm font-medium">
+                      {t("merch.from")} {formatPrice(product.price_from, product.currency || "PLN")}
+                    </p>
+                  )}
+                </div>
               </div>
             </button>
           ))}
@@ -458,7 +477,7 @@ function CartDrawer({
               {cart.map((item) => (
                 <div key={item.variantId} className="flex gap-3 p-3 bg-[#111] rounded-lg border border-[#1a1a1a]">
                   <div className="relative w-16 h-16 bg-[#0a0a0a] rounded overflow-hidden shrink-0">
-                    <Image src={item.image} alt={item.variantName} fill className="object-contain p-1" unoptimized />
+                    <Image src={item.image} alt={item.variantName} fill sizes="64px" className="object-contain p-1" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{item.productName}</p>

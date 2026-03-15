@@ -52,6 +52,40 @@ interface CartItem {
   image: string;
 }
 
+interface ShippingAddress {
+  name: string;
+  address1: string;
+  address2: string;
+  city: string;
+  state_code: string;
+  country_code: string;
+  zip: string;
+  phone: string;
+  email: string;
+}
+
+const EMPTY_ADDRESS: ShippingAddress = {
+  name: "", address1: "", address2: "", city: "",
+  state_code: "", country_code: "PL", zip: "", phone: "", email: "",
+};
+
+const COUNTRIES = [
+  { code: "PL", name: "Poland" }, { code: "DE", name: "Germany" },
+  { code: "AT", name: "Austria" }, { code: "CH", name: "Switzerland" },
+  { code: "CZ", name: "Czech Republic" }, { code: "SK", name: "Slovakia" },
+  { code: "LT", name: "Lithuania" }, { code: "LV", name: "Latvia" },
+  { code: "EE", name: "Estonia" }, { code: "HU", name: "Hungary" },
+  { code: "FR", name: "France" }, { code: "NL", name: "Netherlands" },
+  { code: "BE", name: "Belgium" }, { code: "SE", name: "Sweden" },
+  { code: "NO", name: "Norway" }, { code: "DK", name: "Denmark" },
+  { code: "FI", name: "Finland" }, { code: "IT", name: "Italy" },
+  { code: "ES", name: "Spain" }, { code: "PT", name: "Portugal" },
+  { code: "GB", name: "United Kingdom" }, { code: "IE", name: "Ireland" },
+  { code: "US", name: "United States" }, { code: "CA", name: "Canada" },
+  { code: "RO", name: "Romania" }, { code: "BG", name: "Bulgaria" },
+  { code: "HR", name: "Croatia" }, { code: "SI", name: "Slovenia" },
+];
+
 function getVariantImage(variant: ProductVariant): string {
   const preview = variant.files.find((f) => f.type === "preview");
   if (preview) return preview.preview_url;
@@ -61,56 +95,52 @@ function getVariantImage(variant: ProductVariant): string {
 }
 
 const CURRENCY_LOCALES: Record<string, string> = {
-  PLN: "pl-PL",
-  EUR: "de-DE",
-  USD: "en-US",
-  GBP: "en-GB",
-  CHF: "de-CH",
-  CZK: "cs-CZ",
-  SEK: "sv-SE",
-  NOK: "nb-NO",
-  DKK: "da-DK",
-  HUF: "hu-HU",
+  PLN: "pl-PL", EUR: "de-DE", USD: "en-US", GBP: "en-GB", CHF: "de-CH",
+  CZK: "cs-CZ", SEK: "sv-SE", NOK: "nb-NO", DKK: "da-DK", HUF: "hu-HU",
 };
 
 const CURRENCY_OPTIONS = [
-  { code: "PLN", label: "PLN (zł)" },
-  { code: "EUR", label: "EUR (€)" },
-  { code: "USD", label: "USD ($)" },
-  { code: "GBP", label: "GBP (£)" },
-  { code: "CHF", label: "CHF (Fr)" },
-  { code: "CZK", label: "CZK (Kč)" },
-  { code: "SEK", label: "SEK (kr)" },
-  { code: "NOK", label: "NOK (kr)" },
-  { code: "DKK", label: "DKK (kr)" },
-  { code: "HUF", label: "HUF (Ft)" },
+  { code: "PLN", label: "PLN (zł)" }, { code: "EUR", label: "EUR (€)" },
+  { code: "USD", label: "USD ($)" }, { code: "GBP", label: "GBP (£)" },
+  { code: "CHF", label: "CHF (Fr)" }, { code: "CZK", label: "CZK (Kč)" },
+  { code: "SEK", label: "SEK (kr)" }, { code: "NOK", label: "NOK (kr)" },
+  { code: "DKK", label: "DKK (kr)" }, { code: "HUF", label: "HUF (Ft)" },
 ];
 
 function formatPrice(price: string | number, currency: string): string {
   const locale = CURRENCY_LOCALES[currency] || "en-US";
   const num = typeof price === "string" ? parseFloat(price) : price;
   return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 2,
+    style: "currency", currency, minimumFractionDigits: 2,
   }).format(num);
 }
 
 function convertPrice(
-  price: string | number,
-  fromCurrency: string,
-  toCurrency: string,
-  rates: Record<string, number> | null,
-  baseCurrency: string
+  price: string | number, fromCurrency: string, toCurrency: string,
+  rates: Record<string, number> | null, baseCurrency: string
 ): number {
   const num = typeof price === "string" ? parseFloat(price) : price;
   if (!rates || fromCurrency === toCurrency) return num;
-
-  if (fromCurrency === baseCurrency) {
-    return num * (rates[toCurrency] || 1);
-  }
+  if (fromCurrency === baseCurrency) return num * (rates[toCurrency] || 1);
   const inBase = num / (rates[fromCurrency] || 1);
   return inBase * (rates[toCurrency] || 1);
+}
+
+function CurrencySelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="relative">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="appearance-none bg-[#111] border border-[#333] rounded-lg px-3 py-2 pr-8 text-sm text-white hover:border-[#555] transition cursor-pointer focus:outline-none focus:border-[#555]"
+      >
+        {CURRENCY_OPTIONS.map((c) => (
+          <option key={c.code} value={c.code}>{c.label}</option>
+        ))}
+      </select>
+      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#666] pointer-events-none" />
+    </div>
+  );
 }
 
 export default function MembersMerchPage() {
@@ -126,6 +156,10 @@ export default function MembersMerchPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
   const [orderState, setOrderState] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [orderError, setOrderError] = useState("");
+
+  const [checkoutStep, setCheckoutStep] = useState<"cart" | "shipping">("cart");
+  const [address, setAddress] = useState<ShippingAddress>(EMPTY_ADDRESS);
 
   const [displayCurrency, setDisplayCurrency] = useState<string>("PLN");
   const [rates, setRates] = useState<Record<string, number> | null>(null);
@@ -135,6 +169,10 @@ export default function MembersMerchPage() {
     const saved = localStorage.getItem("merch-currency");
     if (saved && CURRENCY_OPTIONS.some((c) => c.code === saved)) {
       setDisplayCurrency(saved);
+    }
+    const savedAddr = localStorage.getItem("merch-address");
+    if (savedAddr) {
+      try { setAddress(JSON.parse(savedAddr)); } catch { /* ignore */ }
     }
   }, []);
 
@@ -156,10 +194,8 @@ export default function MembersMerchPage() {
       if (!res.ok) throw new Error();
       const data = await res.json();
       setProducts(data.products);
-
       const storeBase = data.products[0]?.currency || "CHF";
       setBaseCurrency(storeBase);
-
       const ratesRes = await fetch(`/api/members/merch/rates?base=${storeBase}`);
       if (ratesRes.ok) {
         const ratesData = await ratesRes.json();
@@ -172,9 +208,7 @@ export default function MembersMerchPage() {
     }
   }, [t]);
 
-  useEffect(() => {
-    loadProducts();
-  }, [loadProducts]);
+  useEffect(() => { loadProducts(); }, [loadProducts]);
 
   async function openProduct(id: number) {
     setDetailLoading(true);
@@ -204,31 +238,27 @@ export default function MembersMerchPage() {
           c.variantId === variant.id ? { ...c, qty: c.qty + 1 } : c
         );
       }
-      return [
-        ...prev,
-        {
-          variantId: variant.id,
-          productName: detail.sync_product.name,
-          variantName: variant.name,
-          size: variant.size,
-          color: variant.color,
-          price: variant.retail_price,
-          currency: variant.currency,
-          qty: 1,
-          image: getVariantImage(variant),
-        },
-      ];
+      return [...prev, {
+        variantId: variant.id,
+        productName: detail.sync_product.name,
+        variantName: variant.name,
+        size: variant.size,
+        color: variant.color,
+        price: variant.retail_price,
+        currency: variant.currency,
+        qty: 1,
+        image: getVariantImage(variant),
+      }];
     });
     setCartOpen(true);
+    setCheckoutStep("cart");
   }
 
   function updateQty(variantId: number, delta: number) {
     setCart((prev) =>
-      prev
-        .map((c) =>
-          c.variantId === variantId ? { ...c, qty: Math.max(0, c.qty + delta) } : c
-        )
-        .filter((c) => c.qty > 0)
+      prev.map((c) =>
+        c.variantId === variantId ? { ...c, qty: Math.max(0, c.qty + delta) } : c
+      ).filter((c) => c.qty > 0)
     );
   }
 
@@ -239,23 +269,57 @@ export default function MembersMerchPage() {
   const cartTotal = cart.reduce((sum, c) => sum + parseFloat(c.price) * c.qty, 0);
   const cartCurrency = cart[0]?.currency || "CHF";
 
-  async function handleCheckout() {
+  async function handlePlaceOrder() {
+    if (!address.name || !address.address1 || !address.city || !address.zip || !address.country_code || !address.email) {
+      setOrderError(t("merch.requiredField"));
+      return;
+    }
+
     setOrderState("loading");
+    setOrderError("");
+
+    localStorage.setItem("merch-address", JSON.stringify(address));
+
     try {
       const res = await fetch("/api/members/merch/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: cart }),
+        body: JSON.stringify({
+          items: cart,
+          recipient: {
+            name: address.name,
+            address1: address.address1,
+            address2: address.address2 || undefined,
+            city: address.city,
+            state_code: address.state_code || undefined,
+            country_code: address.country_code,
+            zip: address.zip,
+            phone: address.phone || undefined,
+            email: address.email,
+          },
+        }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Failed");
+      }
       setOrderState("success");
       setCart([]);
-    } catch {
+      setCheckoutStep("cart");
+    } catch (err) {
       setOrderState("error");
+      setOrderError(err instanceof Error ? err.message : t("merch.orderError"));
     }
   }
 
-  // Product detail view
+  const drawerProps = {
+    cart, cartOpen, setCartOpen, updateQty, removeFromCart,
+    cartTotal, cartCurrency, orderState, setOrderState,
+    orderError, t, displayPrice,
+    checkoutStep, setCheckoutStep, address, setAddress,
+    handlePlaceOrder,
+  };
+
   if (detail || detailLoading) {
     const currentVariant = detail?.sync_variants.find((v) => v.id === selectedVariant);
     const mainImage = currentVariant ? getVariantImage(currentVariant) : detail?.sync_product.thumbnail_url;
@@ -270,20 +334,7 @@ export default function MembersMerchPage() {
             <ArrowLeft className="h-4 w-4" />
             {t("merch.backToStore")}
           </button>
-          <div className="relative">
-            <select
-              value={displayCurrency}
-              onChange={(e) => handleCurrencyChange(e.target.value)}
-              className="appearance-none bg-[#111] border border-[#333] rounded-lg px-3 py-2 pr-8 text-sm text-white hover:border-[#555] transition cursor-pointer focus:outline-none focus:border-[#555]"
-            >
-              {CURRENCY_OPTIONS.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#666] pointer-events-none" />
-          </div>
+          <CurrencySelect value={displayCurrency} onChange={handleCurrencyChange} />
         </div>
 
         {detailLoading ? (
@@ -292,20 +343,13 @@ export default function MembersMerchPage() {
           </div>
         ) : detail ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Product image */}
             <div className="relative aspect-square bg-[#111] rounded-lg overflow-hidden border border-[#1a1a1a]">
               {mainImage && (
-                <Image
-                  src={mainImage}
-                  alt={detail.sync_product.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-contain p-4"
-                />
+                <Image src={mainImage} alt={detail.sync_product.name} fill
+                  sizes="(max-width: 768px) 100vw, 50vw" className="object-contain p-4" />
               )}
             </div>
 
-            {/* Product info */}
             <div className="flex flex-col">
               <h1 className="text-2xl font-semibold mb-2">{detail.sync_product.name}</h1>
               {currentVariant && (
@@ -314,29 +358,23 @@ export default function MembersMerchPage() {
                 </p>
               )}
 
-              {/* Variant selector */}
               {detail.sync_variants.length > 1 && (
                 <div className="mb-6">
                   <label className="text-sm text-[#888] mb-2 block">{t("merch.selectVariant")}</label>
                   <div className="flex flex-wrap gap-2">
                     {detail.sync_variants.map((v) => (
-                      <button
-                        key={v.id}
-                        onClick={() => setSelectedVariant(v.id)}
+                      <button key={v.id} onClick={() => setSelectedVariant(v.id)}
                         className={`px-4 py-2 rounded-lg text-sm border transition ${
                           selectedVariant === v.id
                             ? "border-white bg-white text-black"
                             : "border-[#333] text-[#888] hover:border-[#555] hover:text-white"
                         }`}
-                      >
-                        {v.size}
-                      </button>
+                      >{v.size}</button>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Details */}
               {currentVariant && (
                 <div className="space-y-2 mb-8 text-sm">
                   <div className="flex justify-between py-2 border-b border-[#1a1a1a]">
@@ -350,29 +388,22 @@ export default function MembersMerchPage() {
                 </div>
               )}
 
-              {/* Add to cart */}
               {currentVariant && (
-                <button
-                  onClick={() => addToCart(currentVariant)}
-                  className="w-full py-3 bg-white text-black font-semibold rounded-lg hover:bg-[#ddd] transition text-sm"
-                >
+                <button onClick={() => addToCart(currentVariant)}
+                  className="w-full py-3 bg-white text-black font-semibold rounded-lg hover:bg-[#ddd] transition text-sm">
                   {t("merch.addToCart")}
                 </button>
               )}
 
-              {/* Variant images */}
               {detail.sync_variants.length > 1 && (
                 <div className="flex gap-2 mt-6">
                   {detail.sync_variants.map((v) => {
                     const img = getVariantImage(v);
                     return (
-                      <button
-                        key={v.id}
-                        onClick={() => setSelectedVariant(v.id)}
+                      <button key={v.id} onClick={() => setSelectedVariant(v.id)}
                         className={`relative w-16 h-16 rounded border overflow-hidden ${
                           selectedVariant === v.id ? "border-white" : "border-[#333]"
-                        }`}
-                      >
+                        }`}>
                         <Image src={img} alt={v.name} fill sizes="64px" className="object-contain p-1" />
                       </button>
                     );
@@ -383,26 +414,11 @@ export default function MembersMerchPage() {
           </div>
         ) : null}
 
-        <CartDrawer
-          cart={cart}
-          cartOpen={cartOpen}
-          setCartOpen={setCartOpen}
-          updateQty={updateQty}
-          removeFromCart={removeFromCart}
-          cartTotal={cartTotal}
-          cartCurrency={cartCurrency}
-          orderState={orderState}
-          setOrderState={setOrderState}
-          handleCheckout={handleCheckout}
-          t={t}
-          displayPrice={displayPrice}
-          displayCurrency={displayCurrency}
-        />
+        <CartDrawer {...drawerProps} />
       </div>
     );
   }
 
-  // Products list
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
       <div className="flex items-center justify-between mb-8">
@@ -411,25 +427,10 @@ export default function MembersMerchPage() {
           <p className="text-[#888] text-sm">{t("merch.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="relative">
-            <select
-              value={displayCurrency}
-              onChange={(e) => handleCurrencyChange(e.target.value)}
-              className="appearance-none bg-[#111] border border-[#333] rounded-lg px-3 py-2 pr-8 text-sm text-white hover:border-[#555] transition cursor-pointer focus:outline-none focus:border-[#555]"
-            >
-              {CURRENCY_OPTIONS.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#666] pointer-events-none" />
-          </div>
+          <CurrencySelect value={displayCurrency} onChange={handleCurrencyChange} />
           {cart.length > 0 && (
-            <button
-              onClick={() => setCartOpen(true)}
-              className="relative p-2 rounded-lg border border-[#333] hover:border-[#555] transition"
-            >
+            <button onClick={() => setCartOpen(true)}
+              className="relative p-2 rounded-lg border border-[#333] hover:border-[#555] transition">
               <ShoppingCart className="h-5 w-5" />
               <span className="absolute -top-1.5 -right-1.5 bg-white text-black text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
                 {cart.reduce((s, c) => s + c.qty, 0)}
@@ -448,10 +449,8 @@ export default function MembersMerchPage() {
         <div className="flex flex-col items-center py-20 text-center">
           <AlertCircle className="h-8 w-8 text-red-500/70 mb-3" />
           <p className="text-sm text-[#888] mb-4">{error}</p>
-          <button
-            onClick={loadProducts}
-            className="px-4 py-2 bg-[#1a1a1a] text-sm rounded-lg hover:bg-[#222] transition"
-          >
+          <button onClick={loadProducts}
+            className="px-4 py-2 bg-[#1a1a1a] text-sm rounded-lg hover:bg-[#222] transition">
             {t("merch.retry")}
           </button>
         </div>
@@ -463,19 +462,12 @@ export default function MembersMerchPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((product) => (
-            <button
-              key={product.id}
-              onClick={() => openProduct(product.id)}
-              className="group text-left border border-[#1a1a1a] rounded-lg overflow-hidden hover:border-[#333] transition bg-[#0d0d0d]"
-            >
+            <button key={product.id} onClick={() => openProduct(product.id)}
+              className="group text-left border border-[#1a1a1a] rounded-lg overflow-hidden hover:border-[#333] transition bg-[#0d0d0d]">
               <div className="relative aspect-square bg-[#111]">
-                <Image
-                  src={product.preview_image || product.thumbnail_url}
-                  alt={product.name}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-contain p-6 group-hover:scale-105 transition-transform duration-300"
-                />
+                <Image src={product.preview_image || product.thumbnail_url} alt={product.name}
+                  fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-contain p-6 group-hover:scale-105 transition-transform duration-300" />
               </div>
               <div className="p-4 border-t border-[#1a1a1a]">
                 <h3 className="font-medium text-sm mb-1">{product.name}</h3>
@@ -495,39 +487,35 @@ export default function MembersMerchPage() {
         </div>
       )}
 
-      <CartDrawer
-        cart={cart}
-        cartOpen={cartOpen}
-        setCartOpen={setCartOpen}
-        updateQty={updateQty}
-        removeFromCart={removeFromCart}
-        cartTotal={cartTotal}
-        cartCurrency={cartCurrency}
-        orderState={orderState}
-        setOrderState={setOrderState}
-        handleCheckout={handleCheckout}
-        t={t}
-        displayPrice={displayPrice}
-        displayCurrency={displayCurrency}
+      <CartDrawer {...drawerProps} />
+    </div>
+  );
+}
+
+function FormInput({ label, value, onChange, required, type = "text", placeholder }: {
+  label: string; value: string; onChange: (v: string) => void;
+  required?: boolean; type?: string; placeholder?: string;
+}) {
+  return (
+    <div>
+      <label className="text-xs text-[#888] mb-1 block">
+        {label}{required && <span className="text-red-400 ml-0.5">*</span>}
+      </label>
+      <input
+        type={type} value={value} onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full bg-[#111] border border-[#333] rounded-lg px-3 py-2 text-sm text-white placeholder-[#555] focus:outline-none focus:border-[#555] transition"
       />
     </div>
   );
 }
 
 function CartDrawer({
-  cart,
-  cartOpen,
-  setCartOpen,
-  updateQty,
-  removeFromCart,
-  cartTotal,
-  cartCurrency,
-  orderState,
-  setOrderState,
-  handleCheckout,
-  t,
-  displayPrice,
-  displayCurrency,
+  cart, cartOpen, setCartOpen, updateQty, removeFromCart,
+  cartTotal, cartCurrency, orderState, setOrderState,
+  orderError, t, displayPrice,
+  checkoutStep, setCheckoutStep, address, setAddress,
+  handlePlaceOrder,
 }: {
   cart: CartItem[];
   cartOpen: boolean;
@@ -538,28 +526,38 @@ function CartDrawer({
   cartCurrency: string;
   orderState: "idle" | "loading" | "success" | "error";
   setOrderState: (v: "idle" | "loading" | "success" | "error") => void;
-  handleCheckout: () => void;
+  orderError: string;
   t: (key: MemberTranslationKey) => string;
   displayPrice: (price: string | number, fromCurrency: string) => string;
-  displayCurrency: string;
+  checkoutStep: "cart" | "shipping";
+  setCheckoutStep: (v: "cart" | "shipping") => void;
+  address: ShippingAddress;
+  setAddress: (v: ShippingAddress) => void;
+  handlePlaceOrder: () => void;
 }) {
   if (!cartOpen) return null;
 
+  function closeDrawer() {
+    setCartOpen(false);
+    if (orderState === "success") {
+      setOrderState("idle");
+      setCheckoutStep("cart");
+    }
+  }
+
+  function updateAddr(field: keyof ShippingAddress, value: string) {
+    setAddress({ ...address, [field]: value });
+  }
+
   return (
     <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90]"
-        onClick={() => { setCartOpen(false); if (orderState === "success") setOrderState("idle"); }}
-      />
-      {/* Drawer */}
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90]" onClick={closeDrawer} />
       <div className="fixed top-0 right-0 h-full w-full max-w-md bg-[#0d0d0d] border-l border-[#1a1a1a] z-[100] flex flex-col">
         <div className="flex items-center justify-between p-4 border-b border-[#1a1a1a]">
-          <h2 className="font-semibold">{t("merch.cart")}</h2>
-          <button
-            onClick={() => { setCartOpen(false); if (orderState === "success") setOrderState("idle"); }}
-            className="p-1 hover:bg-[#1a1a1a] rounded transition"
-          >
+          <h2 className="font-semibold">
+            {checkoutStep === "shipping" ? t("merch.shippingInfo") : t("merch.cart")}
+          </h2>
+          <button onClick={closeDrawer} className="p-1 hover:bg-[#1a1a1a] rounded transition">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -570,13 +568,93 @@ function CartDrawer({
               <Check className="h-7 w-7 text-green-500" />
             </div>
             <h3 className="text-lg font-semibold mb-2">{t("merch.orderPlaced")}</h3>
-            <p className="text-sm text-[#888]">{t("merch.orderPlacedDesc")}</p>
+            <p className="text-sm text-[#888]">{t("merch.orderConfirmed")}</p>
           </div>
-        ) : cart.length === 0 ? (
+        ) : cart.length === 0 && checkoutStep === "cart" ? (
           <div className="flex-1 flex flex-col items-center justify-center text-[#666]">
             <ShoppingCart className="h-8 w-8 mb-3" />
             <p className="text-sm">{t("merch.cartEmpty")}</p>
           </div>
+        ) : checkoutStep === "shipping" ? (
+          <>
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <button
+                onClick={() => setCheckoutStep("cart")}
+                className="flex items-center gap-1.5 text-xs text-[#666] hover:text-white transition mb-2"
+              >
+                <ArrowLeft className="h-3 w-3" />
+                {t("merch.backToCart")}
+              </button>
+
+              <FormInput label={t("merch.fullName")} value={address.name}
+                onChange={(v) => updateAddr("name", v)} required placeholder="Jan Kowalski" />
+              <FormInput label={t("merch.email")} value={address.email}
+                onChange={(v) => updateAddr("email", v)} required type="email" placeholder="jan@email.com" />
+              <FormInput label={t("merch.address")} value={address.address1}
+                onChange={(v) => updateAddr("address1", v)} required placeholder="ul. Marszałkowska 1" />
+              <FormInput label={t("merch.addressLine2")} value={address.address2}
+                onChange={(v) => updateAddr("address2", v)} placeholder="m. 5" />
+
+              <div className="grid grid-cols-2 gap-3">
+                <FormInput label={t("merch.city")} value={address.city}
+                  onChange={(v) => updateAddr("city", v)} required placeholder="Warszawa" />
+                <FormInput label={t("merch.postalCode")} value={address.zip}
+                  onChange={(v) => updateAddr("zip", v)} required placeholder="00-001" />
+              </div>
+
+              <FormInput label={t("merch.stateRegion")} value={address.state_code}
+                onChange={(v) => updateAddr("state_code", v)} placeholder="mazowieckie" />
+
+              <div>
+                <label className="text-xs text-[#888] mb-1 block">
+                  {t("merch.country")}<span className="text-red-400 ml-0.5">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={address.country_code}
+                    onChange={(e) => updateAddr("country_code", e.target.value)}
+                    className="w-full appearance-none bg-[#111] border border-[#333] rounded-lg px-3 py-2 pr-8 text-sm text-white focus:outline-none focus:border-[#555] transition"
+                  >
+                    {COUNTRIES.map((c) => (
+                      <option key={c.code} value={c.code}>{c.name}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#666] pointer-events-none" />
+                </div>
+              </div>
+
+              <FormInput label={t("merch.phone")} value={address.phone}
+                onChange={(v) => updateAddr("phone", v)} type="tel" placeholder="+48 123 456 789" />
+
+              <div className="pt-3 border-t border-[#1a1a1a] space-y-2 text-sm">
+                {cart.map((item) => (
+                  <div key={item.variantId} className="flex justify-between text-[#888]">
+                    <span>{item.productName} ({item.size}) x{item.qty}</span>
+                    <span className="text-white">{displayPrice(parseFloat(item.price) * item.qty, item.currency)}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between font-semibold pt-2 border-t border-[#1a1a1a]">
+                  <span>{t("merch.total")}</span>
+                  <span>{displayPrice(cartTotal, cartCurrency)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-[#1a1a1a] space-y-3">
+              {orderError && (
+                <p className="text-red-400 text-xs text-center">{orderError}</p>
+              )}
+              <button
+                onClick={handlePlaceOrder}
+                disabled={orderState === "loading"}
+                className="w-full py-3 bg-white text-black font-semibold rounded-lg hover:bg-[#ddd] transition text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {orderState === "loading" ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" />{t("merch.ordering")}</>
+                ) : t("merch.placeOrder")}
+              </button>
+            </div>
+          </>
         ) : (
           <>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -613,15 +691,11 @@ function CartDrawer({
                 <span className="text-[#888]">{t("merch.total")}</span>
                 <span className="font-semibold">{displayPrice(cartTotal, cartCurrency)}</span>
               </div>
-              {orderState === "error" && (
-                <p className="text-red-400 text-xs text-center">{t("merch.orderError")}</p>
-              )}
               <button
-                onClick={handleCheckout}
-                disabled={orderState === "loading"}
-                className="w-full py-3 bg-white text-black font-semibold rounded-lg hover:bg-[#ddd] transition text-sm disabled:opacity-50"
+                onClick={() => setCheckoutStep("shipping")}
+                className="w-full py-3 bg-white text-black font-semibold rounded-lg hover:bg-[#ddd] transition text-sm"
               >
-                {orderState === "loading" ? t("merch.ordering") : t("merch.checkout")}
+                {t("merch.checkout")}
               </button>
             </div>
           </>

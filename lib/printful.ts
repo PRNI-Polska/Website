@@ -85,6 +85,80 @@ export function getPreviewImage(variant: PrintfulVariant): string {
   return variant.product.image;
 }
 
+export interface PrintfulRecipient {
+  name: string;
+  address1: string;
+  address2?: string;
+  city: string;
+  state_code?: string;
+  country_code: string;
+  zip: string;
+  phone?: string;
+  email?: string;
+}
+
+export interface PrintfulOrderItem {
+  sync_variant_id: number;
+  quantity: number;
+}
+
+export interface PrintfulOrder {
+  id: number;
+  external_id: string;
+  status: string;
+  shipping: string;
+  created: number;
+  recipient: PrintfulRecipient;
+  items: { id: number; quantity: number; name: string; retail_price: string }[];
+  retail_costs: { subtotal: string; shipping: string; tax: string; total: string };
+}
+
+export async function createOrder(
+  recipient: PrintfulRecipient,
+  items: PrintfulOrderItem[]
+): Promise<PrintfulOrder> {
+  const res = await fetch(`${PRINTFUL_API}/orders`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ recipient, items }),
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error("Printful create order error:", res.status, errorBody);
+    throw new Error(`Printful order error: ${res.status}`);
+  }
+
+  const json = await res.json();
+  return json.result;
+}
+
+export async function estimateOrderCosts(
+  recipient: PrintfulRecipient,
+  items: PrintfulOrderItem[]
+): Promise<{ subtotal: string; shipping: string; tax: string; total: string }> {
+  const res = await fetch(`${PRINTFUL_API}/orders/estimate-costs`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ recipient, items }),
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error("Printful estimate error:", res.status, errorBody);
+    throw new Error(`Printful estimate error: ${res.status}`);
+  }
+
+  const json = await res.json();
+  return json.result.costs;
+}
+
 const CURRENCY_LOCALES: Record<string, string> = {
   PLN: "pl-PL",
   EUR: "de-DE",

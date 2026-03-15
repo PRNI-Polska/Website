@@ -234,6 +234,7 @@ model Member {
   sentMessages     DirectMessage[]  @relation("SentMessages")
   receivedMessages DirectMessage[]  @relation("ReceivedMessages")
   postViews        PostView[]
+  merchOrders      MerchOrder[]
   
   @@index([email])
   @@index([isActive])
@@ -377,6 +378,27 @@ model DirectMessage {
   @@index([senderId, receiverId, createdAt])
   @@index([receiverId, read])
   @@map("direct_messages")
+}
+
+// ============================================================================
+// MERCH ORDER MODEL - Member merchandise orders
+// ============================================================================
+model MerchOrder {
+  id          String   @id @default(cuid())
+  memberId    String
+  member      Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  items       String   // JSON: [{variantId, productName, variantName, size, color, price, currency, qty}]
+  totalAmount String
+  currency    String   @default("CHF")
+  status      String   @default("PENDING") // PENDING, CONFIRMED, SHIPPED, CANCELLED
+  note        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([memberId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("merch_orders")
 }
 
 // ============================================================================

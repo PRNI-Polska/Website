@@ -1,5 +1,6 @@
 const GELATO_ECOMMERCE = "https://ecommerce.gelatoapis.com";
 const GELATO_ORDERS = "https://order.gelatoapis.com";
+const GELATO_CATALOG = "https://product.gelatoapis.com";
 
 function getApiKey(): string {
   const key = process.env.GELATO_API_KEY;
@@ -130,6 +131,76 @@ export async function createOrder(
   }
 
   return res.json();
+}
+
+// ── Catalog Pricing API ──
+
+export interface GelatoCatalogPrice {
+  country: string;
+  currency: string;
+  productUid: string;
+  quantity: number;
+  price: number;
+}
+
+const priceCache = new Map<string, { price: number; ts: number }>();
+const PRICE_TTL = 1000 * 60 * 60; // 1 hour
+
+export async function getCatalogPrice(
+  productUid: string,
+  currency: string = "EUR",
+  country: string = "PL"
+): Promise<number | null> {
+  const cacheKey = `${productUid}:${currency}:${country}`;
+  const cached = priceCache.get(cacheKey);
+  if (cached && Date.now() - cached.ts < PRICE_TTL) return cached.price;
+
+  try {
+    const res = await fetch(
+      `${GELATO_CATALOG}/v3/products/${productUid}/prices?currency=${currency}&country=${country}`,
+      { headers: headers() }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const items = data.value || data;
+    const price = Array.isArray(items) && items.length > 0 ? items[0].price : null;
+    if (price != null) {
+      priceCache.set(cacheKey, { price, ts: Date.now() });
+    }
+    return price;
+  } catch {
+    return null;
+  }
+}
+
+export async function getCatalogPricesBatch(
+  productUids: string[],
+  currency: string = "EUR",
+  country: string = "PL"
+): Promise<Map<string, number>> {
+  const results = new Map<string, number>();
+  const toFetch: string[] = [];
+
+  for (const uid of productUids) {
+    const cacheKey = `${uid}:${currency}:${country}`;
+    const cached = priceCache.get(cacheKey);
+    if (cached && Date.now() - cached.ts < PRICE_TTL) {
+      results.set(uid, cached.price);
+    } else {
+      toFetch.push(uid);
+    }
+  }
+
+  if (toFetch.length > 0) {
+    const fetched = await Promise.all(
+      toFetch.map((uid) => getCatalogPrice(uid, currency, country))
+    );
+    toFetch.forEach((uid, i) => {
+      if (fetched[i] != null) results.set(uid, fetched[i]!);
+    });
+  }
+
+  return results;
 }
 
 export async function getOrderQuote(

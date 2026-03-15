@@ -80,6 +80,7 @@ export const memberTranslations = {
   "merch.orderPlacedDesc": { pl: "Skontaktujemy się z Tobą w sprawie płatności i dostawy.", en: "We'll contact you about payment and delivery.", de: "Wir kontaktieren dich bezüglich Zahlung und Lieferung." },
   "merch.orderError": { pl: "Nie udało się złożyć zamówienia.", en: "Failed to place order.", de: "Bestellung fehlgeschlagen." },
   "merch.ordering": { pl: "Składanie zamówienia...", en: "Placing order...", de: "Bestellung wird aufgegeben..." },
+  "merch.currency": { pl: "Waluta", en: "Currency", de: "Währung" },
 
   // Home / News
   "home.title": { pl: "Aktualności", en: "News", de: "Neuigkeiten" },

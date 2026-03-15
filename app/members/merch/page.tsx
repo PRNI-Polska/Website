@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { ShoppingBag, Loader2, AlertCircle, ArrowLeft, ShoppingCart, X, Minus, Plus, Check } from "lucide-react";
+import { ShoppingBag, Loader2, AlertCircle, ArrowLeft, ShoppingCart, X, Minus, Plus, Check, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import { useMemberLang } from "@/lib/members/LangContext";
 import type { MemberTranslationKey } from "@/lib/members/i18n";
@@ -66,15 +66,51 @@ const CURRENCY_LOCALES: Record<string, string> = {
   USD: "en-US",
   GBP: "en-GB",
   CHF: "de-CH",
+  CZK: "cs-CZ",
+  SEK: "sv-SE",
+  NOK: "nb-NO",
+  DKK: "da-DK",
+  HUF: "hu-HU",
 };
 
-function formatPrice(price: string, currency: string): string {
-  const locale = CURRENCY_LOCALES[currency] || "pl-PL";
+const CURRENCY_OPTIONS = [
+  { code: "PLN", label: "PLN (zł)" },
+  { code: "EUR", label: "EUR (€)" },
+  { code: "USD", label: "USD ($)" },
+  { code: "GBP", label: "GBP (£)" },
+  { code: "CHF", label: "CHF (Fr)" },
+  { code: "CZK", label: "CZK (Kč)" },
+  { code: "SEK", label: "SEK (kr)" },
+  { code: "NOK", label: "NOK (kr)" },
+  { code: "DKK", label: "DKK (kr)" },
+  { code: "HUF", label: "HUF (Ft)" },
+];
+
+function formatPrice(price: string | number, currency: string): string {
+  const locale = CURRENCY_LOCALES[currency] || "en-US";
+  const num = typeof price === "string" ? parseFloat(price) : price;
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
     minimumFractionDigits: 2,
-  }).format(parseFloat(price));
+  }).format(num);
+}
+
+function convertPrice(
+  price: string | number,
+  fromCurrency: string,
+  toCurrency: string,
+  rates: Record<string, number> | null,
+  baseCurrency: string
+): number {
+  const num = typeof price === "string" ? parseFloat(price) : price;
+  if (!rates || fromCurrency === toCurrency) return num;
+
+  if (fromCurrency === baseCurrency) {
+    return num * (rates[toCurrency] || 1);
+  }
+  const inBase = num / (rates[fromCurrency] || 1);
+  return inBase * (rates[toCurrency] || 1);
 }
 
 export default function MembersMerchPage() {
@@ -91,6 +127,27 @@ export default function MembersMerchPage() {
   const [cartOpen, setCartOpen] = useState(false);
   const [orderState, setOrderState] = useState<"idle" | "loading" | "success" | "error">("idle");
 
+  const [displayCurrency, setDisplayCurrency] = useState<string>("PLN");
+  const [rates, setRates] = useState<Record<string, number> | null>(null);
+  const [baseCurrency, setBaseCurrency] = useState<string>("CHF");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("merch-currency");
+    if (saved && CURRENCY_OPTIONS.some((c) => c.code === saved)) {
+      setDisplayCurrency(saved);
+    }
+  }, []);
+
+  function handleCurrencyChange(code: string) {
+    setDisplayCurrency(code);
+    localStorage.setItem("merch-currency", code);
+  }
+
+  function displayPrice(price: string | number, fromCurrency: string): string {
+    const converted = convertPrice(price, fromCurrency, displayCurrency, rates, baseCurrency);
+    return formatPrice(converted, displayCurrency);
+  }
+
   const loadProducts = useCallback(async () => {
     setLoading(true);
     setError("");
@@ -99,6 +156,15 @@ export default function MembersMerchPage() {
       if (!res.ok) throw new Error();
       const data = await res.json();
       setProducts(data.products);
+
+      const storeBase = data.products[0]?.currency || "CHF";
+      setBaseCurrency(storeBase);
+
+      const ratesRes = await fetch(`/api/members/merch/rates?base=${storeBase}`);
+      if (ratesRes.ok) {
+        const ratesData = await ratesRes.json();
+        setRates(ratesData.rates);
+      }
     } catch {
       setError(t("merch.error"));
     } finally {
@@ -228,7 +294,7 @@ export default function MembersMerchPage() {
               <h1 className="text-2xl font-semibold mb-2">{detail.sync_product.name}</h1>
               {currentVariant && (
                 <p className="text-xl text-white font-medium mb-6">
-                  {formatPrice(currentVariant.retail_price, currentVariant.currency)}
+                  {displayPrice(currentVariant.retail_price, currentVariant.currency)}
                 </p>
               )}
 
@@ -313,6 +379,8 @@ export default function MembersMerchPage() {
           setOrderState={setOrderState}
           handleCheckout={handleCheckout}
           t={t}
+          displayPrice={displayPrice}
+          displayCurrency={displayCurrency}
         />
       </div>
     );
@@ -326,17 +394,33 @@ export default function MembersMerchPage() {
           <h1 className="text-2xl font-semibold mb-1">{t("merch.title")}</h1>
           <p className="text-[#888] text-sm">{t("merch.subtitle")}</p>
         </div>
-        {cart.length > 0 && (
-          <button
-            onClick={() => setCartOpen(true)}
-            className="relative p-2 rounded-lg border border-[#333] hover:border-[#555] transition"
-          >
-            <ShoppingCart className="h-5 w-5" />
-            <span className="absolute -top-1.5 -right-1.5 bg-white text-black text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
-              {cart.reduce((s, c) => s + c.qty, 0)}
-            </span>
-          </button>
-        )}
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <select
+              value={displayCurrency}
+              onChange={(e) => handleCurrencyChange(e.target.value)}
+              className="appearance-none bg-[#111] border border-[#333] rounded-lg px-3 py-2 pr-8 text-sm text-white hover:border-[#555] transition cursor-pointer focus:outline-none focus:border-[#555]"
+            >
+              {CURRENCY_OPTIONS.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#666] pointer-events-none" />
+          </div>
+          {cart.length > 0 && (
+            <button
+              onClick={() => setCartOpen(true)}
+              className="relative p-2 rounded-lg border border-[#333] hover:border-[#555] transition"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              <span className="absolute -top-1.5 -right-1.5 bg-white text-black text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {cart.reduce((s, c) => s + c.qty, 0)}
+              </span>
+            </button>
+          )}
+        </div>
       </div>
 
       {loading ? (
@@ -385,7 +469,7 @@ export default function MembersMerchPage() {
                   </p>
                   {product.price_from && (
                     <p className="text-sm font-medium">
-                      {t("merch.from")} {formatPrice(product.price_from, product.currency || "PLN")}
+                      {t("merch.from")} {displayPrice(product.price_from, product.currency || "PLN")}
                     </p>
                   )}
                 </div>
@@ -407,6 +491,8 @@ export default function MembersMerchPage() {
         setOrderState={setOrderState}
         handleCheckout={handleCheckout}
         t={t}
+        displayPrice={displayPrice}
+        displayCurrency={displayCurrency}
       />
     </div>
   );
@@ -424,6 +510,8 @@ function CartDrawer({
   setOrderState,
   handleCheckout,
   t,
+  displayPrice,
+  displayCurrency,
 }: {
   cart: CartItem[];
   cartOpen: boolean;
@@ -436,6 +524,8 @@ function CartDrawer({
   setOrderState: (v: "idle" | "loading" | "success" | "error") => void;
   handleCheckout: () => void;
   t: (key: MemberTranslationKey) => string;
+  displayPrice: (price: string | number, fromCurrency: string) => string;
+  displayCurrency: string;
 }) {
   if (!cartOpen) return null;
 
@@ -482,7 +572,7 @@ function CartDrawer({
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{item.productName}</p>
                     <p className="text-xs text-[#666] truncate">{item.size} / {item.color}</p>
-                    <p className="text-sm mt-1">{formatPrice(item.price, item.currency)}</p>
+                    <p className="text-sm mt-1">{displayPrice(item.price, item.currency)}</p>
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     <button onClick={() => removeFromCart(item.variantId)} className="text-[#555] hover:text-red-400 transition">
@@ -505,7 +595,7 @@ function CartDrawer({
             <div className="p-4 border-t border-[#1a1a1a] space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-[#888]">{t("merch.total")}</span>
-                <span className="font-semibold">{formatPrice(cartTotal.toFixed(2), cartCurrency)}</span>
+                <span className="font-semibold">{displayPrice(cartTotal, cartCurrency)}</span>
               </div>
               {orderState === "error" && (
                 <p className="text-red-400 text-xs text-center">{t("merch.orderError")}</p>

@@ -14,15 +14,16 @@ export interface ProductPricing {
 }
 
 export const gelatoPrices: Record<string, ProductPricing> = {
-  // Example — replace with your real Gelato product IDs:
-  //
-  // "2e856a12-2f83-4a1f-ac50-4d63c57bc233": {
-  //   currency: "PLN",
-  //   defaultPrice: "89.99",
-  //   variantPrices: {
-  //     "70dbc3c5-5ca7-48f9-8b2f-b928b3d7cd19": "89.99",  // Navy - S
-  //     "4c87c248-71d5-451c-810e-a0ecbc1ef04d": "89.99",  // Navy - M
-  //   },
+  // PRNI | Heavyweight Classic T-Shirt
+  "d1d0824f-9400-4312-a871-3264186d7914": {
+    currency: "EUR",
+    defaultPrice: "24.99",
+  },
+
+  // Add more products here as you create them in Gelato:
+  // "gelato-product-id": {
+  //   currency: "EUR",
+  //   defaultPrice: "29.99",
   // },
 };
 

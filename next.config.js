@@ -29,6 +29,7 @@ const securityHeaders = [
 
 const nextConfig = {
   poweredByHeader: false,
+  trailingSlash: false,
   output: process.env.DOCKER_BUILD === '1' ? 'standalone' : undefined,
 
   images: {

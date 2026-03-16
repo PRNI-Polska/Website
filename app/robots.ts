@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin", "/api", "/members", "/calls"],
+        disallow: ["/admin/", "/api/", "/members/", "/calls/"],
       },
     ],
     sitemap: "https://prni.org.pl/sitemap.xml",

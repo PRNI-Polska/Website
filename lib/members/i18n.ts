@@ -126,6 +126,22 @@ export const memberTranslations = {
   "channels.writeMessage": { pl: "Napisz wiadomość...", en: "Write a message...", de: "Nachricht schreiben..." },
   "channels.loadOlder": { pl: "Załaduj starsze", en: "Load older", de: "Ältere laden" },
 
+  // Channel names
+  "channel.Powitanie": { pl: "Powitanie", en: "Welcome", de: "Willkommen" },
+  "channel.Ogólne": { pl: "Ogólne", en: "General", de: "Allgemein" },
+  "channel.Zarząd": { pl: "Zarząd", en: "Board", de: "Vorstand" },
+  "channel.Skrzydło Główne": { pl: "Skrzydło Główne", en: "Main Wing", de: "Hauptflügel" },
+  "channel.Międzynarodowe": { pl: "Międzynarodowe", en: "International", de: "International" },
+  "channel.Ogłoszenia wewnętrzne": { pl: "Ogłoszenia wewnętrzne", en: "Internal Announcements", de: "Interne Ankündigungen" },
+
+  // Channel descriptions
+  "channelDesc.Powitanie": { pl: "Kanał powitalny dla nowych członków", en: "Welcome channel for new members", de: "Willkommenskanal für neue Mitglieder" },
+  "channelDesc.Ogólne": { pl: "Kanał ogólny dla zweryfikowanych członków", en: "General channel for verified members", de: "Allgemeiner Kanal für verifizierte Mitglieder" },
+  "channelDesc.Zarząd": { pl: "Kanał zarządu i kadry kierowniczej", en: "Board and leadership channel", de: "Vorstand- und Leitungskanal" },
+  "channelDesc.Skrzydło Główne": { pl: "Kanał dla członków skrzydła głównego", en: "Channel for main wing members", de: "Kanal für Hauptflügel-Mitglieder" },
+  "channelDesc.Międzynarodowe": { pl: "Kanał dla skrzydła międzynarodowego", en: "Channel for international wing members", de: "Kanal für internationale Mitglieder" },
+  "channelDesc.Ogłoszenia wewnętrzne": { pl: "Ważne ogłoszenia dla zweryfikowanych członków", en: "Important announcements for verified members", de: "Wichtige Ankündigungen für verifizierte Mitglieder" },
+
   // Messages / DMs
   "messages.title": { pl: "Wiadomości", en: "Messages", de: "Nachrichten" },
   "messages.new": { pl: "Nowa wiadomość", en: "New message", de: "Neue Nachricht" },

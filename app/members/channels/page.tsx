@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Loader2, Send, Hash, MessageSquare } from "lucide-react";
 import { useMemberLang } from "@/lib/members/LangContext";
+import type { MemberTranslationKey } from "@/lib/members/i18n";
 
 interface Channel {
   id: string;
@@ -49,6 +50,18 @@ export default function ChannelsPage() {
   const didAutoSelect = useRef(false);
 
   const selectedChannel = channels.find((c) => c.id === selectedId);
+
+  function channelName(name: string): string {
+    const key = `channel.${name}` as MemberTranslationKey;
+    const translated = t(key);
+    return translated !== key ? translated : name;
+  }
+
+  function channelDesc(name: string, fallback: string | null): string {
+    const key = `channelDesc.${name}` as MemberTranslationKey;
+    const translated = t(key);
+    return translated !== key ? translated : fallback || "";
+  }
 
   const fetchChannels = useCallback(async () => {
     try {
@@ -254,7 +267,7 @@ export default function ChannelsPage() {
               <div className="flex items-center gap-2">
                 <Hash className="h-3.5 w-3.5 shrink-0 text-[#555]" />
                 <span className="text-sm font-medium truncate">
-                  {ch.name}
+                  {channelName(ch.name)}
                 </span>
               </div>
               {ch.lastMessage && (
@@ -280,13 +293,13 @@ export default function ChannelsPage() {
             </button>
             <Hash className="h-4 w-4 text-[#555]" />
             <span className="font-semibold text-sm text-[#e8e8e8]">
-              {selectedChannel.name}
+              {channelName(selectedChannel.name)}
             </span>
             {selectedChannel.description && (
               <>
                 <span className="text-[#333] mx-1">|</span>
                 <span className="text-xs text-[#555] truncate">
-                  {selectedChannel.description}
+                  {channelDesc(selectedChannel.name, selectedChannel.description)}
                 </span>
               </>
             )}
@@ -397,7 +410,7 @@ export default function ChannelsPage() {
                 onChange={(e) => setInput(e.target.value.slice(0, 2000))}
                 placeholder={
                   selectedChannel
-                    ? `${t("channels.writeIn")} #${selectedChannel.name}`
+                    ? `${t("channels.writeIn")} #${channelName(selectedChannel.name)}`
                     : t("channels.writeMessage")
                 }
                 onFocus={() => { setTimeout(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, 300); }}

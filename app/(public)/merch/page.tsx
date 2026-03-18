@@ -3,8 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { ShoppingBag, Loader2, AlertCircle, ArrowLeft, ShoppingCart, X, Minus, Plus, Check, ChevronDown } from "lucide-react";
 import Image from "next/image";
-import { useMemberLang } from "@/lib/members/LangContext";
-import type { MemberTranslationKey } from "@/lib/members/i18n";
+import { useI18n } from "@/lib/i18n";
 
 interface ProductVariant {
   id: string;
@@ -58,13 +57,10 @@ interface ShippingAddress {
   email: string;
 }
 
-function defaultAddress(store: "pl" | "int"): ShippingAddress {
-  return {
-    name: "", address1: "", address2: "", city: "",
-    state_code: "", country_code: store === "int" ? "DE" : "PL",
-    zip: "", phone: "", email: "",
-  };
-}
+const EMPTY_ADDRESS: ShippingAddress = {
+  name: "", address1: "", address2: "", city: "",
+  state_code: "", country_code: "PL", zip: "", phone: "", email: "",
+};
 
 const COUNTRIES = [
   { code: "PL", name: "Poland" }, { code: "DE", name: "Germany" },
@@ -132,11 +128,8 @@ function CurrencySelect({ value, onChange }: { value: string; onChange: (v: stri
   );
 }
 
-type StoreTab = "pl" | "int";
-
-export default function MembersMerchPage() {
-  const { t } = useMemberLang();
-  const [storeTab, setStoreTab] = useState<StoreTab>("pl");
+export default function MerchPage() {
+  const { t } = useI18n();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -151,13 +144,14 @@ export default function MembersMerchPage() {
   const [orderError, setOrderError] = useState("");
 
   const [checkoutStep, setCheckoutStep] = useState<"cart" | "shipping" | "review">("cart");
-  const [address, setAddress] = useState<ShippingAddress>(defaultAddress("pl"));
+  const [address, setAddress] = useState<ShippingAddress>(EMPTY_ADDRESS);
   const [shippingCost, setShippingCost] = useState<number | null>(null);
+  const [shippingInfo, setShippingInfo] = useState<string>("");
   const [estimating, setEstimating] = useState(false);
 
-  const [displayCurrency, setDisplayCurrency] = useState<string>("PLN");
+  const [displayCurrency, setDisplayCurrency] = useState<string>("EUR");
   const [rates, setRates] = useState<Record<string, number> | null>(null);
-  const [baseCurrency, setBaseCurrency] = useState<string>("CHF");
+  const [baseCurrency, setBaseCurrency] = useState<string>("EUR");
 
   useEffect(() => {
     const saved = localStorage.getItem("merch-currency");
@@ -174,12 +168,12 @@ export default function MembersMerchPage() {
       setOrderState("success");
       setCartOpen(true);
       setCart([]);
-      window.history.replaceState({}, "", "/members/merch");
+      window.history.replaceState({}, "", "/merch");
     } else if (orderParam === "cancelled") {
       setOrderState("error");
       setOrderError("cancelled");
       setCartOpen(true);
-      window.history.replaceState({}, "", "/members/merch");
+      window.history.replaceState({}, "", "/merch");
     }
   }, []);
 
@@ -193,17 +187,17 @@ export default function MembersMerchPage() {
     return formatPrice(converted, displayCurrency);
   }
 
-  const loadProducts = useCallback(async (store: StoreTab) => {
+  const loadProducts = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`/api/members/merch?store=${store}`);
+      const res = await fetch("/api/merch");
       if (!res.ok) throw new Error();
       const data = await res.json();
       setProducts(data.products);
-      const storeBase = data.products[0]?.currency || "CHF";
+      const storeBase = data.products[0]?.currency || "EUR";
       setBaseCurrency(storeBase);
-      const ratesRes = await fetch(`/api/members/merch/rates?base=${storeBase}`);
+      const ratesRes = await fetch(`/api/merch/rates?base=${storeBase}`);
       if (ratesRes.ok) {
         const ratesData = await ratesRes.json();
         setRates(ratesData.rates);
@@ -215,14 +209,14 @@ export default function MembersMerchPage() {
     }
   }, [t]);
 
-  useEffect(() => { loadProducts(storeTab); }, [loadProducts, storeTab]);
+  useEffect(() => { loadProducts(); }, [loadProducts]);
 
   async function openProduct(id: string) {
     setDetailLoading(true);
     setDetail(null);
     setSelectedVariant(null);
     try {
-      const res = await fetch(`/api/members/merch/${id}?store=${storeTab}`);
+      const res = await fetch(`/api/merch/${id}`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       setDetail(data.product);
@@ -275,7 +269,7 @@ export default function MembersMerchPage() {
   }
 
   const cartTotal = cart.reduce((sum, c) => sum + parseFloat(c.price) * c.qty, 0);
-  const cartCurrency = cart[0]?.currency || "CHF";
+  const cartCurrency = cart[0]?.currency || "EUR";
 
   async function handleEstimateShipping() {
     if (!address.name || !address.address1 || !address.city || !address.zip || !address.country_code || !address.email) {
@@ -288,7 +282,7 @@ export default function MembersMerchPage() {
     localStorage.setItem("merch-address", JSON.stringify(address));
 
     try {
-      const res = await fetch("/api/members/merch/quote", {
+      const res = await fetch("/api/merch/quote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -296,7 +290,9 @@ export default function MembersMerchPage() {
           recipient: {
             name: address.name,
             address1: address.address1,
+            address2: address.address2,
             city: address.city,
+            state_code: address.state_code,
             country_code: address.country_code,
             zip: address.zip,
             email: address.email,
@@ -306,16 +302,20 @@ export default function MembersMerchPage() {
 
       if (!res.ok) throw new Error("Quote failed");
       const data = await res.json();
-      const methods = data.quote?.shipmentMethodUids || data.quote?.shippingMethods || [];
-      const cheapest = Array.isArray(methods) && methods.length > 0
-        ? Math.min(...methods.map((m: { price?: number }) => m.price || 0))
-        : 0;
 
-      setShippingCost(cheapest);
+      if (data.recommended) {
+        setShippingCost(data.recommended.price);
+        const days = data.recommended.minDays === data.recommended.maxDays
+          ? `${data.recommended.minDays}`
+          : `${data.recommended.minDays}–${data.recommended.maxDays}`;
+        setShippingInfo(`${data.recommended.name} (${days} ${t("merch.deliveryDays")})`);
+      } else {
+        setShippingCost(0);
+        setShippingInfo("");
+      }
       setCheckoutStep("review");
     } catch {
-      setShippingCost(0);
-      setCheckoutStep("review");
+      setOrderError(t("merch.error"));
     } finally {
       setEstimating(false);
     }
@@ -326,7 +326,7 @@ export default function MembersMerchPage() {
     setOrderError("");
 
     try {
-      const res = await fetch("/api/members/merch/checkout", {
+      const res = await fetch("/api/merch/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -370,15 +370,7 @@ export default function MembersMerchPage() {
     }
   }
 
-  const drawerProps = {
-    cart, cartOpen, setCartOpen, updateQty, removeFromCart,
-    cartTotal, cartCurrency, orderState, setOrderState,
-    orderError, t, displayPrice,
-    checkoutStep, setCheckoutStep, address, setAddress,
-    handleEstimateShipping, handlePay,
-    shippingCost, estimating,
-  };
-
+  // ── Product Detail View ──
   if (detail || detailLoading) {
     const currentVariant = detail?.variants.find((v) => v.id === selectedVariant);
     const mainImage = detail?.preview_image;
@@ -457,14 +449,25 @@ export default function MembersMerchPage() {
           </div>
         ) : null}
 
-        <CartDrawer {...drawerProps} />
+        <CartDrawer
+          cart={cart} cartOpen={cartOpen} setCartOpen={setCartOpen}
+          updateQty={updateQty} removeFromCart={removeFromCart}
+          cartTotal={cartTotal} cartCurrency={cartCurrency}
+          orderState={orderState} setOrderState={setOrderState}
+          orderError={orderError} t={t} displayPrice={displayPrice}
+          checkoutStep={checkoutStep} setCheckoutStep={setCheckoutStep}
+          address={address} setAddress={setAddress}
+          handleEstimateShipping={handleEstimateShipping} handlePay={handlePay}
+          shippingCost={shippingCost} shippingInfo={shippingInfo} estimating={estimating}
+        />
       </div>
     );
   }
 
+  // ── Product Grid ──
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-semibold mb-1">{t("merch.title")}</h1>
           <p className="text-[#888] text-sm">{t("merch.subtitle")}</p>
@@ -483,25 +486,6 @@ export default function MembersMerchPage() {
         </div>
       </div>
 
-      <div className="flex gap-1 mb-8 border-b border-[#1a1a1a]">
-        {(["pl", "int"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => { setStoreTab(tab); setDetail(null); }}
-            className={`px-4 py-2.5 text-sm font-medium transition-colors relative ${
-              storeTab === tab
-                ? "text-white"
-                : "text-[#666] hover:text-[#aaa]"
-            }`}
-          >
-            {tab === "pl" ? t("merch.storePl") : t("merch.storeInt")}
-            {storeTab === tab && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-t" />
-            )}
-          </button>
-        ))}
-      </div>
-
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 text-[#666]">
           <Loader2 className="h-6 w-6 animate-spin mb-3" />
@@ -511,7 +495,7 @@ export default function MembersMerchPage() {
         <div className="flex flex-col items-center py-20 text-center">
           <AlertCircle className="h-8 w-8 text-red-500/70 mb-3" />
           <p className="text-sm text-[#888] mb-4">{error}</p>
-          <button onClick={() => loadProducts(storeTab)}
+          <button onClick={loadProducts}
             className="px-4 py-2 bg-[#1a1a1a] text-sm rounded-lg hover:bg-[#222] transition">
             {t("merch.retry")}
           </button>
@@ -539,7 +523,7 @@ export default function MembersMerchPage() {
                   </p>
                   {product.price_from && (
                     <p className="text-sm font-medium">
-                      {t("merch.from")} {displayPrice(product.price_from, product.currency || "PLN")}
+                      {t("merch.from")} {displayPrice(product.price_from, product.currency || "EUR")}
                     </p>
                   )}
                 </div>
@@ -549,7 +533,17 @@ export default function MembersMerchPage() {
         </div>
       )}
 
-      <CartDrawer {...drawerProps} />
+      <CartDrawer
+        cart={cart} cartOpen={cartOpen} setCartOpen={setCartOpen}
+        updateQty={updateQty} removeFromCart={removeFromCart}
+        cartTotal={cartTotal} cartCurrency={cartCurrency}
+        orderState={orderState} setOrderState={setOrderState}
+        orderError={orderError} t={t} displayPrice={displayPrice}
+        checkoutStep={checkoutStep} setCheckoutStep={setCheckoutStep}
+        address={address} setAddress={setAddress}
+        handleEstimateShipping={handleEstimateShipping} handlePay={handlePay}
+        shippingCost={shippingCost} shippingInfo={shippingInfo} estimating={estimating}
+      />
     </div>
   );
 }
@@ -578,7 +572,7 @@ function CartDrawer({
   orderError, t, displayPrice,
   checkoutStep, setCheckoutStep, address, setAddress,
   handleEstimateShipping, handlePay,
-  shippingCost, estimating,
+  shippingCost, shippingInfo, estimating,
 }: {
   cart: CartItem[];
   cartOpen: boolean;
@@ -590,7 +584,7 @@ function CartDrawer({
   orderState: "idle" | "loading" | "success" | "error";
   setOrderState: (v: "idle" | "loading" | "success" | "error") => void;
   orderError: string;
-  t: (key: MemberTranslationKey) => string;
+  t: (key: string) => string;
   displayPrice: (price: string | number, fromCurrency: string) => string;
   checkoutStep: "cart" | "shipping" | "review";
   setCheckoutStep: (v: "cart" | "shipping" | "review") => void;
@@ -599,6 +593,7 @@ function CartDrawer({
   handleEstimateShipping: () => void;
   handlePay: () => void;
   shippingCost: number | null;
+  shippingInfo: string;
   estimating: boolean;
 }) {
   if (!cartOpen) return null;
@@ -630,7 +625,6 @@ function CartDrawer({
           </button>
         </div>
 
-        {/* Success after Stripe payment */}
         {orderState === "success" ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
             <div className="w-14 h-14 rounded-full bg-green-500/10 flex items-center justify-center mb-4">
@@ -650,7 +644,6 @@ function CartDrawer({
             </button>
           </div>
 
-        /* Step 3: Review & Pay */
         ) : checkoutStep === "review" ? (
           <>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -677,9 +670,12 @@ function CartDrawer({
                     <span>{t("merch.shippingEstimate")}</span>
                     <span className="text-white">
                       {shippingCost === 0 ? t("merch.freeShipping") :
-                       shippingCost != null ? displayPrice(shippingCost, cartCurrency) : "—"}
+                       shippingCost != null ? displayPrice(shippingCost, "EUR") : "—"}
                     </span>
                   </div>
+                  {shippingInfo && (
+                    <p className="text-xs text-[#555]">{shippingInfo}</p>
+                  )}
                 </div>
 
                 <div className="flex justify-between font-semibold text-base pt-2 border-t border-[#1a1a1a]">
@@ -711,7 +707,6 @@ function CartDrawer({
             </div>
           </>
 
-        /* Step 2: Shipping address */
         ) : checkoutStep === "shipping" ? (
           <>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -774,7 +769,6 @@ function CartDrawer({
             </div>
           </>
 
-        /* Step 1: Cart */
         ) : cart.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-[#666]">
             <ShoppingCart className="h-8 w-8 mb-3" />

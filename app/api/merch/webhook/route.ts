@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
       const gelatoOrder = await createOrder(
         orderRefId,
-        meta.memberId || "unknown",
+        meta.customerEmail || "public",
         shippingAddress,
         gelatoItems,
         currency
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       try {
         await prisma.merchOrder.create({
           data: {
-            memberId: meta.memberId || "unknown",
+            memberId: meta.customerEmail || "public",
             items: JSON.stringify(items),
             totalAmount: totalAmount.toFixed(2),
             currency,

@@ -1,18 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getMemberFromRequest } from "@/lib/member-auth";
-import { getStoreProducts, type GelatoStore } from "@/lib/gelato";
+import { NextResponse } from "next/server";
+import { getStoreProducts } from "@/lib/gelato";
 import { getLowestRetailPrice } from "@/lib/gelato-prices";
 
-export async function GET(request: NextRequest) {
-  const member = await getMemberFromRequest(request);
-  if (!member) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+export async function GET() {
   try {
-    const storeParam = request.nextUrl.searchParams.get("store") as GelatoStore | null;
-    const store: GelatoStore = storeParam === "int" ? "int" : "pl";
-    const products = await getStoreProducts(store);
+    const products = await getStoreProducts();
 
     const enriched = await Promise.all(
       products.map(async (p) => {
@@ -25,7 +17,6 @@ export async function GET(request: NextRequest) {
           description: p.description,
           preview_image: p.previewUrl || p.externalPreviewUrl || p.externalThumbnailUrl,
           variants: p.variants.length,
-          variantOptions: p.productVariantOptions,
           price_from: lowest?.price || null,
           currency: lowest?.currency || "EUR",
         };

@@ -107,7 +107,9 @@ export const memberTranslations = {
   "merch.tax": { pl: "Podatek", en: "Tax", de: "Steuer" },
   "merch.estimating": { pl: "Obliczanie kosztów...", en: "Estimating costs...", de: "Kosten werden berechnet..." },
   "merch.requiredField": { pl: "To pole jest wymagane", en: "This field is required", de: "Dieses Feld ist erforderlich" },
-  "merch.orderConfirmed": { pl: "Zamówienie zostało złożone jako szkic w Printful. Skontaktujemy się w sprawie płatności.", en: "Order submitted as draft to Printful. We'll contact you about payment.", de: "Bestellung als Entwurf an Printful übermittelt. Wir kontaktieren dich zur Zahlung." },
+  "merch.orderConfirmed": { pl: "Zamówienie zostało złożone i przekazane do realizacji.", en: "Order has been submitted for fulfillment.", de: "Bestellung wurde zur Erfüllung übermittelt." },
+  "merch.storePl": { pl: "Sklep PL", en: "Polish Store", de: "Polnischer Shop" },
+  "merch.storeInt": { pl: "Sklep Międzynarodowy", en: "International Store", de: "Internationaler Shop" },
 
   // Home / News
   "home.title": { pl: "Aktualności", en: "News", de: "Neuigkeiten" },

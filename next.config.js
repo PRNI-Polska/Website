@@ -44,10 +44,6 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'files.cdn.printful.com',
-      },
-      {
-        protocol: 'https',
         hostname: '*.gelato.com',
       },
       {

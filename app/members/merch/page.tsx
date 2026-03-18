@@ -58,10 +58,13 @@ interface ShippingAddress {
   email: string;
 }
 
-const EMPTY_ADDRESS: ShippingAddress = {
-  name: "", address1: "", address2: "", city: "",
-  state_code: "", country_code: "PL", zip: "", phone: "", email: "",
-};
+function defaultAddress(store: "pl" | "int"): ShippingAddress {
+  return {
+    name: "", address1: "", address2: "", city: "",
+    state_code: "", country_code: store === "int" ? "DE" : "PL",
+    zip: "", phone: "", email: "",
+  };
+}
 
 const COUNTRIES = [
   { code: "PL", name: "Poland" }, { code: "DE", name: "Germany" },
@@ -129,8 +132,11 @@ function CurrencySelect({ value, onChange }: { value: string; onChange: (v: stri
   );
 }
 
+type StoreTab = "pl" | "int";
+
 export default function MembersMerchPage() {
   const { t } = useMemberLang();
+  const [storeTab, setStoreTab] = useState<StoreTab>("pl");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -145,7 +151,7 @@ export default function MembersMerchPage() {
   const [orderError, setOrderError] = useState("");
 
   const [checkoutStep, setCheckoutStep] = useState<"cart" | "shipping" | "review">("cart");
-  const [address, setAddress] = useState<ShippingAddress>(EMPTY_ADDRESS);
+  const [address, setAddress] = useState<ShippingAddress>(defaultAddress("pl"));
   const [shippingCost, setShippingCost] = useState<number | null>(null);
   const [estimating, setEstimating] = useState(false);
 
@@ -187,11 +193,11 @@ export default function MembersMerchPage() {
     return formatPrice(converted, displayCurrency);
   }
 
-  const loadProducts = useCallback(async () => {
+  const loadProducts = useCallback(async (store: StoreTab) => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/members/merch");
+      const res = await fetch(`/api/members/merch?store=${store}`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       setProducts(data.products);
@@ -209,14 +215,14 @@ export default function MembersMerchPage() {
     }
   }, [t]);
 
-  useEffect(() => { loadProducts(); }, [loadProducts]);
+  useEffect(() => { loadProducts(storeTab); }, [loadProducts, storeTab]);
 
   async function openProduct(id: string) {
     setDetailLoading(true);
     setDetail(null);
     setSelectedVariant(null);
     try {
-      const res = await fetch(`/api/members/merch/${id}`);
+      const res = await fetch(`/api/members/merch/${id}?store=${storeTab}`);
       if (!res.ok) throw new Error();
       const data = await res.json();
       setDetail(data.product);
@@ -458,7 +464,7 @@ export default function MembersMerchPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-semibold mb-1">{t("merch.title")}</h1>
           <p className="text-[#888] text-sm">{t("merch.subtitle")}</p>
@@ -477,6 +483,25 @@ export default function MembersMerchPage() {
         </div>
       </div>
 
+      <div className="flex gap-1 mb-8 border-b border-[#1a1a1a]">
+        {(["pl", "int"] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => { setStoreTab(tab); setDetail(null); }}
+            className={`px-4 py-2.5 text-sm font-medium transition-colors relative ${
+              storeTab === tab
+                ? "text-white"
+                : "text-[#666] hover:text-[#aaa]"
+            }`}
+          >
+            {tab === "pl" ? t("merch.storePl") : t("merch.storeInt")}
+            {storeTab === tab && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-t" />
+            )}
+          </button>
+        ))}
+      </div>
+
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20 text-[#666]">
           <Loader2 className="h-6 w-6 animate-spin mb-3" />
@@ -486,7 +511,7 @@ export default function MembersMerchPage() {
         <div className="flex flex-col items-center py-20 text-center">
           <AlertCircle className="h-8 w-8 text-red-500/70 mb-3" />
           <p className="text-sm text-[#888] mb-4">{error}</p>
-          <button onClick={loadProducts}
+          <button onClick={() => loadProducts(storeTab)}
             className="px-4 py-2 bg-[#1a1a1a] text-sm rounded-lg hover:bg-[#222] transition">
             {t("merch.retry")}
           </button>

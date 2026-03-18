@@ -8,9 +8,19 @@ function getApiKey(): string {
   return key;
 }
 
-function getStoreId(): string {
-  const id = process.env.GELATO_STORE_ID;
-  if (!id) throw new Error("GELATO_STORE_ID is not set");
+export type GelatoStore = "pl" | "int";
+
+function getStoreId(store?: GelatoStore): string {
+  if (store === "int") {
+    const id = process.env.GELATO_STORE_ID_INT;
+    if (id) return id;
+  }
+  if (store === "pl") {
+    const id = process.env.GELATO_STORE_ID_PL;
+    if (id) return id;
+  }
+  const id = process.env.GELATO_STORE_ID_PL || process.env.GELATO_STORE_ID;
+  if (!id) throw new Error("GELATO_STORE_ID_PL (or GELATO_STORE_ID) is not set");
   return id;
 }
 
@@ -52,9 +62,9 @@ export interface GelatoProduct {
   updatedAt: string;
 }
 
-export async function getStoreProducts(): Promise<GelatoProduct[]> {
+export async function getStoreProducts(store?: GelatoStore): Promise<GelatoProduct[]> {
   const res = await fetch(
-    `${GELATO_ECOMMERCE}/v1/stores/${getStoreId()}/products`,
+    `${GELATO_ECOMMERCE}/v1/stores/${getStoreId(store)}/products`,
     { headers: headers(), next: { revalidate: 300 } }
   );
   if (!res.ok) {
@@ -64,9 +74,9 @@ export async function getStoreProducts(): Promise<GelatoProduct[]> {
   return Array.isArray(data) ? data : data.products || [];
 }
 
-export async function getStoreProduct(productId: string): Promise<GelatoProduct> {
+export async function getStoreProduct(productId: string, store?: GelatoStore): Promise<GelatoProduct> {
   const res = await fetch(
-    `${GELATO_ECOMMERCE}/v1/stores/${getStoreId()}/products/${productId}`,
+    `${GELATO_ECOMMERCE}/v1/stores/${getStoreId(store)}/products/${productId}`,
     { headers: headers(), next: { revalidate: 300 } }
   );
   if (!res.ok) {

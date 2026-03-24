@@ -7,8 +7,12 @@ import AboutPageClient from "./about-client";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "O Narodowym Integralizmie | About National Integralism",
-  description: "Budujemy silną i suwerenną przyszłość opartą na odpowiedzialności, porządku oraz lojalności wobec wspólnoty narodowej.",
+  title: "O PRNI — Narodowy Integralizm",
+  description:
+    "O PRNI (Polski Ruch Narodowo-Integralistyczny) — budujemy silną i suwerenną przyszłość. About PRNI — the Polish National-Integralist Movement.",
+  alternates: {
+    canonical: "https://prni.org.pl/about",
+  },
 };
 
 async function getTeamMembers() {

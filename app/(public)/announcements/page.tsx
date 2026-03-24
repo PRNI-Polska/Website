@@ -15,8 +15,12 @@ import type { AnnouncementCategory } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Komunikaty",
-  description: "Bądź na bieżąco z najnowszymi wiadomościami i komunikatami naszej partii.",
+  title: "Komunikaty PRNI",
+  description:
+    "Komunikaty PRNI (Polski Ruch Narodowo-Integralistyczny). Bądź na bieżąco z najnowszymi wiadomościami. PRNI announcements.",
+  alternates: {
+    canonical: "https://prni.org.pl/announcements",
+  },
 };
 
 const ITEMS_PER_PAGE = 9;

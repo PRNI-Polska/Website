@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/auth";
 import { createAnnouncementSchema } from "@/lib/validations";
 import { validateCsrf, csrfErrorResponse } from "@/lib/csrf";
 import { slugify } from "@/lib/utils";
+import { shareToSocials } from "@/lib/social-post";
 
 // GET - List all announcements
 export async function GET(request: NextRequest) {
@@ -98,6 +99,16 @@ export async function POST(request: NextRequest) {
         details: JSON.stringify({ title: announcement.title }),
       },
     });
+
+    // Auto-post to social media if created as published
+    if (data.status === "PUBLISHED") {
+      shareToSocials({
+        title: announcement.title,
+        excerpt: announcement.excerpt || "",
+        slug: announcement.slug,
+        featuredImage: announcement.featuredImage,
+      }).catch((err) => console.error("Social post error:", err));
+    }
 
     return NextResponse.json(announcement, { status: 201 });
   } catch (error) {

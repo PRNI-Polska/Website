@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { updateAnnouncementSchema } from "@/lib/validations";
 import { validateCsrf, csrfErrorResponse } from "@/lib/csrf";
+import { shareToSocials } from "@/lib/social-post";
 
 // GET - Get single announcement
 export async function GET(
@@ -120,6 +121,16 @@ export async function PATCH(
         details: JSON.stringify({ title: announcement.title }),
       },
     });
+
+    // Auto-post to social media when first published
+    if (data.status === "PUBLISHED" && existing.status !== "PUBLISHED") {
+      shareToSocials({
+        title: announcement.title,
+        excerpt: announcement.excerpt || "",
+        slug: announcement.slug,
+        featuredImage: announcement.featuredImage,
+      }).catch((err) => console.error("Social post error:", err));
+    }
 
     return NextResponse.json(announcement);
   } catch (error) {

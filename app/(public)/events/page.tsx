@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description:
     "Wydarzenia PRNI (Polski Ruch Narodowo-Integralistyczny). Dołącz do naszych wydarzeń i bądź częścią zmian. PRNI events.",
   alternates: {
-    canonical: "https://prni.org.pl/events",
+    canonical: "https://www.prni.org.pl/events",
   },
 };
 

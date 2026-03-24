@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description:
     "Skrzydło Główne PRNI (Polski Ruch Narodowo-Integralistyczny). Main Wing of PRNI — the Polish National-Integralist Movement.",
   alternates: {
-    canonical: "https://prni.org.pl/wings/main",
+    canonical: "https://www.prni.org.pl/wings/main",
   },
 };
 

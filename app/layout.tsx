@@ -38,7 +38,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://prni.org.pl"),
+  metadataBase: new URL("https://www.prni.org.pl"),
   title: {
     default: "PRNI — Polski Ruch Narodowo-Integralistyczny",
     template: "%s | PRNI — Polski Ruch Narodowo-Integralistyczny",
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "pl_PL",
     alternateLocale: ["en_US", "de_DE"],
-    url: "https://prni.org.pl",
+    url: "https://www.prni.org.pl",
     siteName: "PRNI",
     title: "PRNI — Polski Ruch Narodowo-Integralistyczny",
     description: "PRNI (Polski Ruch Narodowo-Integralistyczny) — Naród Ponad Wszystkim. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
@@ -93,12 +93,12 @@ export const metadata: Metadata = {
   },
   verification: {},
   alternates: {
-    canonical: "https://prni.org.pl",
+    canonical: "https://www.prni.org.pl",
     languages: {
-      "pl": "https://prni.org.pl",
-      "en": "https://prni.org.pl",
-      "de": "https://prni.org.pl",
-      "x-default": "https://prni.org.pl",
+      "pl": "https://www.prni.org.pl",
+      "en": "https://www.prni.org.pl",
+      "de": "https://www.prni.org.pl",
+      "x-default": "https://www.prni.org.pl",
     },
   },
 };
@@ -137,17 +137,17 @@ export default function RootLayout({
               "@graph": [
                 {
                   "@type": "PoliticalParty",
-                  "@id": "https://prni.org.pl/#organization",
+                  "@id": "https://www.prni.org.pl/#organization",
                   name: "PRNI — Polski Ruch Narodowo-Integralistyczny",
                   alternateName: ["PRNI", "Polski Ruch Narodowo-Integralistyczny", "Polish National-Integralist Movement"],
-                  url: "https://prni.org.pl",
+                  url: "https://www.prni.org.pl",
                   logo: {
                     "@type": "ImageObject",
-                    url: "https://prni.org.pl/logo.png",
+                    url: "https://www.prni.org.pl/logo.png",
                     width: 512,
                     height: 512,
                   },
-                  image: "https://prni.org.pl/logo.png",
+                  image: "https://www.prni.org.pl/logo.png",
                   description: "PRNI (Polski Ruch Narodowo-Integralistyczny) — Naród Ponad Wszystkim. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
                   foundingDate: "2024",
                   slogan: "Naród Ponad Wszystkim",
@@ -156,12 +156,12 @@ export default function RootLayout({
                 },
                 {
                   "@type": "WebSite",
-                  "@id": "https://prni.org.pl/#website",
-                  url: "https://prni.org.pl",
+                  "@id": "https://www.prni.org.pl/#website",
+                  url: "https://www.prni.org.pl",
                   name: "PRNI",
                   alternateName: "Polski Ruch Narodowo-Integralistyczny",
                   description: "Oficjalna strona PRNI — Polskiego Ruchu Narodowo-Integralistycznego",
-                  publisher: { "@id": "https://prni.org.pl/#organization" },
+                  publisher: { "@id": "https://www.prni.org.pl/#organization" },
                   inLanguage: ["pl", "en", "de"],
                 },
               ],

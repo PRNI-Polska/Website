@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description:
     "Skrzydło Międzynarodowe PRNI (Polski Ruch Narodowo-Integralistyczny). International Wing of PRNI — the Polish National-Integralist Movement. Internationale Abteilung der PRNI.",
   alternates: {
-    canonical: "https://prni.org.pl/wings/international",
+    canonical: "https://www.prni.org.pl/wings/international",
   },
 };
 

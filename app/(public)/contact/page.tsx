@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "Skontaktuj się z PRNI (Polski Ruch Narodowo-Integralistyczny). Masz pytanie lub chcesz się zaangażować? Contact PRNI.",
   alternates: {
-    canonical: "https://prni.org.pl/contact",
+    canonical: "https://www.prni.org.pl/contact",
   },
 };
 

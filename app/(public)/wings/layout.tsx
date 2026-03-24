@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description:
     "Skrzydła organizacyjne PRNI (Polski Ruch Narodowo-Integralistyczny). Organizational wings of PRNI — the Polish National-Integralist Movement.",
   alternates: {
-    canonical: "https://prni.org.pl/wings",
+    canonical: "https://www.prni.org.pl/wings",
   },
 };
 

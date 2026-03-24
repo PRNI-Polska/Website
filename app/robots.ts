@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin/", "/api/", "/members/", "/calls/"],
       },
     ],
-    sitemap: "https://prni.org.pl/sitemap.xml",
+    sitemap: "https://www.prni.org.pl/sitemap.xml",
   };
 }

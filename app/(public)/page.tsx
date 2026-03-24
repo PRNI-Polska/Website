@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import Script from "next/script";
+
 import { ArrowRight, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,26 +26,6 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col">
-      <Script
-        id="organization-jsonld"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "PoliticalParty",
-            name: "Polski Ruch Narodowo-Integralistyczny",
-            alternateName: "PRNI",
-            url: "https://prni.org.pl",
-            logo: "https://prni.org.pl/logo.png",
-            description: "Polski Ruch Narodowo-Integralistyczny — Naród Ponad Wszystkim",
-            foundingDate: "2024",
-            slogan: "Naród Ponad Wszystkim",
-            areaServed: { "@type": "Country", name: "Poland" },
-            knowsLanguage: ["Polish", "English", "German"],
-          }),
-        }}
-      />
-
       {/* Hero Section with Polish Flag Background */}
       <section className="relative py-28 md:py-40 overflow-hidden hero-flag-bg">
         <div className="container-custom relative z-10">

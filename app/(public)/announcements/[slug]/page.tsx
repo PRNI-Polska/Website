@@ -68,13 +68,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: announcement.title,
-    description: announcement.excerpt,
+    title: `${announcement.title} — PRNI`,
+    description: `${announcement.excerpt} | PRNI — Polski Ruch Narodowo-Integralistyczny`,
+    alternates: {
+      canonical: `https://www.prni.org.pl/announcements/${slug}`,
+    },
     openGraph: {
-      title: announcement.title,
+      title: `${announcement.title} — PRNI`,
       description: announcement.excerpt,
       type: "article",
       publishedTime: announcement.publishedAt?.toISOString(),
+      siteName: "PRNI",
       ...(announcement.featuredImage && { images: [announcement.featuredImage] }),
     },
   };
@@ -93,8 +97,35 @@ export default async function AnnouncementPage({ params }: PageProps) {
     announcement.id
   );
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: announcement.title,
+    description: announcement.excerpt,
+    author: {
+      "@type": "Organization",
+      name: "PRNI — Polski Ruch Narodowo-Integralistyczny",
+      url: "https://www.prni.org.pl",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "PRNI",
+      logo: { "@type": "ImageObject", url: "https://www.prni.org.pl/logo.png" },
+    },
+    datePublished: announcement.publishedAt?.toISOString(),
+    dateModified: announcement.updatedAt?.toISOString(),
+    mainEntityOfPage: `https://www.prni.org.pl/announcements/${slug}`,
+    ...(announcement.featuredImage && {
+      image: announcement.featuredImage,
+    }),
+  };
+
   return (
     <article className="container-custom py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
       {/* Back link */}
       <Button variant="ghost" size="sm" asChild className="mb-6">
         <Link href="/announcements">

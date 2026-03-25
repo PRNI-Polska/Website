@@ -58,8 +58,8 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
         {/* Photo banner */}
         <div className="max-w-4xl mx-auto mb-16 relative rounded-lg overflow-hidden aspect-[16/9] md:aspect-[21/9]">
           <Image
-            src="/members-flag.png"
-            alt="PRNI members"
+            src="/photos/flag-held.png"
+            alt="PRNI members holding the flag"
             fill
             className="object-cover object-[center_40%]"
             priority
@@ -121,16 +121,51 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
           </div>
         </section>
 
-        {/* Activity photo */}
-        <div className="max-w-xs mx-auto mb-16 relative rounded-lg overflow-hidden aspect-[3/4]">
-          <Image
-            src="/balcony-flag.png"
-            alt="PRNI activity"
-            fill
-            className="object-cover object-[center_30%]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
-        </div>
+        {/* Photo gallery */}
+        <section className="max-w-5xl mx-auto mb-16">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+            <div className="relative rounded-lg overflow-hidden aspect-[3/4]">
+              <Image
+                src="/photos/flag-sea-1.png"
+                alt="PRNI flag by the sea"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="relative rounded-lg overflow-hidden aspect-[3/4]">
+              <Image
+                src="/photos/flag-sea-2.png"
+                alt="PRNI flag at the coast"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="relative rounded-lg overflow-hidden aspect-[3/4]">
+              <Image
+                src="/photos/flag-beach.png"
+                alt="PRNI flag on the beach"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="relative rounded-lg overflow-hidden aspect-[3/4] md:col-span-2">
+              <Image
+                src="/photos/flag-held.png"
+                alt="PRNI members holding the flag"
+                fill
+                className="object-cover"
+              />
+            </div>
+            <div className="relative rounded-lg overflow-hidden aspect-[3/4]">
+              <Image
+                src="/photos/flag-march.png"
+                alt="PRNI march with the flag"
+                fill
+                className="object-cover"
+              />
+            </div>
+          </div>
+        </section>
 
         <Separator className="my-16" />
 

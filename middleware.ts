@@ -236,5 +236,7 @@ export const config = {
     "/api/international-join",
     "/api/analytics/:path*",
     "/api/calls/:path*",
+    "/api/merch/:path*",
+    "/api/indexnow",
   ],
 };

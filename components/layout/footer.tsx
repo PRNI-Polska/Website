@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Separator } from "@/components/ui/separator";
 import { useI18n } from "@/lib/i18n";
+import { NewsletterSignup } from "@/components/newsletter-signup";
 
 const navigationKeys = [
   { key: "nav.home", href: "/" },
@@ -12,6 +13,8 @@ const navigationKeys = [
   { key: "nav.events", href: "/events" },
   { key: "nav.manifesto", href: "/manifesto" },
   { key: "nav.recruitment", href: "/recruitment" },
+  { key: "nav.merch", href: "/merch" },
+  { key: "nav.wings", href: "/wings" },
   { key: "nav.about", href: "/about" },
   { key: "nav.contact", href: "/contact" },
 ];
@@ -68,18 +71,22 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Contact & Newsletter */}
           <div>
             <h3 className="font-heading font-semibold mb-4">
               {t("footer.contact")}
             </h3>
-            <address className="not-italic text-muted-foreground space-y-2">
+            <address className="not-italic text-muted-foreground space-y-2 mb-6">
               <p>
                 <a href="mailto:prni.official@gmail.com" className="hover:text-primary transition-colors">
                   prni.official@gmail.com
                 </a>
               </p>
             </address>
+            <h3 className="font-heading font-semibold mb-3">
+              Newsletter
+            </h3>
+            <NewsletterSignup />
           </div>
         </div>
 
@@ -90,6 +97,12 @@ export function Footer() {
           <p className="text-xs text-muted-foreground/70">
             &copy; {currentYear} PRNI — {t("party.name.full")}. {t("footer.rights")}
           </p>
+          <Link
+            href="/privacy"
+            className="text-xs text-muted-foreground/70 hover:text-primary transition-colors"
+          >
+            Polityka Prywatności
+          </Link>
         </div>
       </div>
     </footer>

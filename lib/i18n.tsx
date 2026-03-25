@@ -23,6 +23,7 @@ export const translations: Translations = {
   "nav.recruitment": { en: "Recruitment", pl: "Rekrutacja", de: "Rekrutierung" },
   "nav.merch": { en: "Merch", pl: "Merch", de: "Merch" },
   "nav.about": { en: "About National Integralism", pl: "O Narodowym Integralizmie", de: "Über den Nationalen Integralismus" },
+  "nav.press": { en: "Press & Media", pl: "Prasa i Media", de: "Presse & Medien" },
   "nav.contact": { en: "Contact", pl: "Kontakt", de: "Kontakt" },
   "nav.join": { en: "Join", pl: "Dołącz", de: "Beitreten" },
   

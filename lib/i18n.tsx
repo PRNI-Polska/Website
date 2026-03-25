@@ -608,7 +608,7 @@ export const translations: Translations = {
     de: "Seien Sie Teil der nationalen Erneuerung. Gemeinsam werden wir ein starkes, geeintes Polen aufbauen.",
   },
   "cta.contact": { en: "Contact Us", pl: "Skontaktuj się", de: "Kontaktieren Sie uns" },
-  "cta.learn": { en: "Learn About Us", pl: "Poznaj Nas", de: "Über uns erfahren" },
+  "cta.learn": { en: "Who We Are", pl: "Kim Jesteśmy", de: "Wer wir sind" },
   
   // Footer
   "footer.quicklinks": { en: "Quick Links", pl: "Szybkie Linki", de: "Schnelllinks" },

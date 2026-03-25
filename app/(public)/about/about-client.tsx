@@ -61,10 +61,11 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
             src="/photos/flag-held.png"
             alt="PRNI members holding the flag"
             fill
-            className="object-cover object-[center_40%]"
+            className="object-cover object-[center_40%] brightness-125 contrast-110"
+            style={{ filter: "brightness(1.25) contrast(1.1)" }}
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-background/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
         </div>
 
         {/* Mission & Vision */}
@@ -124,46 +125,28 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
         {/* Photo gallery */}
         <section className="max-w-5xl mx-auto mb-16">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-            <div className="relative rounded-lg overflow-hidden aspect-[3/4]">
-              <Image
-                src="/photos/flag-sea-1.png"
-                alt="PRNI flag by the sea"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="relative rounded-lg overflow-hidden aspect-[3/4]">
-              <Image
-                src="/photos/flag-sea-2.png"
-                alt="PRNI flag at the coast"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="relative rounded-lg overflow-hidden aspect-[3/4]">
-              <Image
-                src="/photos/flag-beach.png"
-                alt="PRNI flag on the beach"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="relative rounded-lg overflow-hidden aspect-[3/4] md:col-span-2">
-              <Image
-                src="/photos/flag-held.png"
-                alt="PRNI members holding the flag"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="relative rounded-lg overflow-hidden aspect-[3/4]">
-              <Image
-                src="/photos/flag-march.png"
-                alt="PRNI march with the flag"
-                fill
-                className="object-cover"
-              />
-            </div>
+            {[
+              { src: "/photos/flag-sea-1.png", alt: "PRNI flag by the sea" },
+              { src: "/photos/flag-sea-2.png", alt: "PRNI flag at the coast" },
+              { src: "/photos/flag-beach.png", alt: "PRNI flag on the beach" },
+              { src: "/photos/flag-march.png", alt: "PRNI march with the flag" },
+              { src: "/photos/flag-held.png", alt: "PRNI members holding the flag", wide: true },
+            ].map((photo) => (
+              <div
+                key={photo.src}
+                className={`relative rounded-lg overflow-hidden ${
+                  photo.wide ? "col-span-2 aspect-[3/2]" : "aspect-[3/4]"
+                }`}
+              >
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  fill
+                  className="object-cover"
+                  style={{ filter: "brightness(1.3) contrast(1.15)" }}
+                />
+              </div>
+            ))}
           </div>
         </section>
 

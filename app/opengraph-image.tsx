@@ -77,7 +77,7 @@ export default async function OGImage() {
             fontStyle: "italic",
           }}
         >
-          Naród Ponad Wszystkim
+          Przyszłość zaczyna się teraz
         </div>
 
         {/* URL */}

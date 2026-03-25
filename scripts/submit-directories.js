@@ -12,7 +12,7 @@ const SITE = {
   description:
     "PRNI (Polski Ruch Narodowo-Integralistyczny) — Polish National-Integralist Movement. Political movement for national sovereignty, tradition, and integral unity of Poland.",
   descriptionPL:
-    "PRNI (Polski Ruch Narodowo-Integralistyczny) — ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski. Naród Ponad Wszystkim.",
+    "PRNI (Polski Ruch Narodowo-Integralistyczny) — ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski. Przyszłość zaczyna się teraz.",
   sitemap: "https://www.prni.org.pl/sitemap.xml",
   rss: "https://www.prni.org.pl/feed.xml",
 };

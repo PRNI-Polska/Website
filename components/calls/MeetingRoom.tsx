@@ -291,7 +291,7 @@ export function MeetingRoom({ session, onLeave, onTranscriptUpdate, transcriptLa
             <AdminControls speakRequests={speakRequests} peers={Array.from(peers.values()).map(p => ({peerId:p.peerId,role:p.role}))} onCreatePoll={createPoll} onApproveSpeak={appSpeak} onDenySpeak={denSpeak} onRevokeSpeak={revSpeak} onKick={kickPeer} />
           )}
           <div className="pt-4 text-center">
-            <p className="text-xs text-neutral-800 italic font-[var(--font-heading)]">&ldquo;Narod Ponad Wszystkim&rdquo;</p>
+            <p className="text-xs text-neutral-800 italic font-[var(--font-heading)]">&ldquo;Przyszłość zaczyna się teraz&rdquo;</p>
           </div>
         </div>
       </div>

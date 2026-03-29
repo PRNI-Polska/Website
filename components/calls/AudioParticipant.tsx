@@ -13,6 +13,7 @@ interface AudioParticipantProps {
   isLocal?: boolean;
   isMuted?: boolean;
   compact?: boolean;
+  displayName?: string;
 }
 
 function AudioBars({ active }: { active: boolean }) {
@@ -60,6 +61,7 @@ export function AudioParticipant({
   isLocal = false,
   isMuted = false,
   compact = false,
+  displayName,
 }: AudioParticipantProps) {
   const { t } = useCallsLang();
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -100,7 +102,7 @@ export function AudioParticipant({
     };
   }, [audioStream, isLocal]);
 
-  const label = isLocal ? t("you") : peerId.slice(0, 6);
+  const label = displayName || (isLocal ? t("you") : peerId.slice(0, 6));
   const active = isSpeaking && (!isLocal || !isMuted);
 
   if (compact) {

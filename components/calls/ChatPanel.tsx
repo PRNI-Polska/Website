@@ -16,11 +16,12 @@ interface ChatPanelProps {
   messages: ChatMessage[];
   onSend: (text: string) => void;
   cooldownRemaining: number;
+  getName?: (peerId: string) => string;
 }
 
 const COOLDOWN_SECONDS = 5;
 
-export function ChatPanel({ messages, onSend, cooldownRemaining }: ChatPanelProps) {
+export function ChatPanel({ messages, onSend, cooldownRemaining, getName }: ChatPanelProps) {
   const { t } = useCallsLang();
   const [text, setText] = useState("");
   const [localCooldown, setLocalCooldown] = useState(0);
@@ -76,7 +77,7 @@ export function ChatPanel({ messages, onSend, cooldownRemaining }: ChatPanelProp
         {messages.map((msg) => (
           <div key={msg.id} className="calls-animate-fade-in">
             <div className="flex items-baseline gap-1.5">
-              <span className="text-[10px] font-mono text-neutral-500">{msg.fromPeerId.slice(0, 6)}</span>
+              <span className="text-[10px] font-mono text-neutral-500">{getName ? getName(msg.fromPeerId) : msg.fromPeerId.slice(0, 6)}</span>
               {roleLabel(msg.fromRole) && (
                 <span className={`text-[8px] uppercase tracking-wider font-medium ${roleColor(msg.fromRole)}`}>
                   {roleLabel(msg.fromRole)}

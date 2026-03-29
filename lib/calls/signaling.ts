@@ -4,12 +4,13 @@ export type SignalingEventMap = {
   joined: {
     peerId: string;
     role: Role;
-    peers: Array<{ peerId: string; role: Role }>;
+    peers: Array<{ peerId: string; role: Role; name?: string }>;
     activePolls: Array<{ pollId: string; question: string; options: string[]; endsAt: number; currentResults: number[] }>;
     pendingSpeakRequests: Array<{ peerId: string; timestamp: number }>;
   };
-  "peer-joined": { peerId: string; role: Role };
+  "peer-joined": { peerId: string; role: Role; name?: string };
   "peer-left": { peerId: string };
+  "name-announce": { peerId: string; name: string };
   offer: { fromPeerId: string; fromRole: Role; sdp: RTCSessionDescriptionInit };
   answer: { fromPeerId: string; sdp: RTCSessionDescriptionInit };
   "ice-candidate": { fromPeerId: string; candidate: RTCIceCandidateInit };
@@ -39,6 +40,7 @@ export class SignalingClient {
   private ws: WebSocket | null = null;
   private handlers = new Map<string, Set<Function>>();
   private session: string | null = null;
+  private displayName: string | null = null;
   private intentionalClose = false;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 15;
@@ -47,8 +49,9 @@ export class SignalingClient {
   private lastPongTime = 0;
   private pongCheckInterval: ReturnType<typeof setInterval> | null = null;
 
-  connect(session: string): void {
+  connect(session: string, displayName?: string): void {
     this.session = session;
+    this.displayName = displayName || null;
     this.intentionalClose = false;
     this.reconnectAttempts = 0;
     this.doConnect();
@@ -66,7 +69,7 @@ export class SignalingClient {
     this.ws = new WebSocket(fullUrl);
 
     this.ws.onopen = () => {
-      this.send({ type: "join", session: this.session });
+      this.send({ type: "join", session: this.session, name: this.displayName });
       this.lastPongTime = Date.now();
       if (this.reconnectAttempts > 0) {
         this.emit("reconnected", {});

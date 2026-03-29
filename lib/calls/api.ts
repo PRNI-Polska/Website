@@ -6,6 +6,7 @@ export interface SessionData {
   session: string;
   meetingId: string;
   role: Role;
+  displayName?: string;
   turn: {
     username: string;
     credential: string;

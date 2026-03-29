@@ -54,15 +54,24 @@ export function MeetingRoom({ session, displayName, onLeave, onTranscriptUpdate,
   }, [transcript.length]);
 
   useEffect(() => {
-    const mgr = new WebRTCManager(session); managerRef.current = mgr;
+    const sessionWithName = { ...session, displayName };
+    const mgr = new WebRTCManager(sessionWithName); managerRef.current = mgr;
     const unsub = mgr.onEvent((ev) => {
       switch (ev.type) {
         case "connected": setIsConnected(true); setError(null);
           if(ev.activePolls){const m=new Map<string,PollData>();for(const p of ev.activePolls as Array<{pollId:string;question:string;options:string[];endsAt:number;currentResults:number[]}>){m.set(p.pollId,{pollId:p.pollId,question:p.question,options:p.options,results:p.currentResults,totalVotes:p.currentResults.reduce((a:number,b:number)=>a+b,0),endsAt:p.endsAt,ended:false,voted:false});}setPolls(m);}
           if(ev.pendingSpeakRequests)setSpeakRequests(ev.pendingSpeakRequests as Array<{peerId:string}>);
+          if((ev as Record<string,unknown>).peers){
+            const peers = (ev as Record<string,unknown>).peers as Array<{peerId:string;name?:string}>;
+            setNameMap(prev=>{const n=new Map(prev);for(const p of peers){if(p.name)n.set(p.peerId,p.name);}return n;});
+          }
           mgr.getSignaling().send({type:"set-name",name:displayName});
+          if(displayName) mgr.getSignaling().sendChat(`\x01NAME:${displayName}`);
           break;
-        case "peer-added": setPeers(p=>{const n=new Map(p);n.set(ev.peerId,{peerId:ev.peerId,role:ev.role as Role,isSpeaking:false,audioStream:null});return n;}); break;
+        case "peer-added":
+          setPeers(p=>{const n=new Map(p);n.set(ev.peerId,{peerId:ev.peerId,role:ev.role as Role,isSpeaking:false,audioStream:null});return n;});
+          if((ev as Record<string,unknown>).name) setNameMap(prev=>{const n=new Map(prev);n.set(ev.peerId,(ev as Record<string,unknown>).name as string);return n;});
+          break;
         case "peer-removed": setPeers(p=>{const n=new Map(p);n.delete(ev.peerId);return n;}); break;
         case "remote-stream": setPeers(p=>{const n=new Map(p);const x=n.get(ev.peerId);if(x)n.set(ev.peerId,{...x,audioStream:ev.stream});return n;}); break;
         case "speaking-change": setPeers(p=>{const n=new Map(p);const x=n.get(ev.peerId);if(x)n.set(ev.peerId,{...x,isSpeaking:ev.isSpeaking});return n;}); break;
@@ -76,7 +85,14 @@ export function MeetingRoom({ session, displayName, onLeave, onTranscriptUpdate,
         case "speak-request-sent": setSpeakRequestPending(true); notify(t("requestSent")); break;
         case "speak-request-denied": setSpeakRequestPending(false); notify(t("requestDenied")); break;
         case "speak-request-resolved": setSpeakRequests(p=>p.filter(r=>r.peerId!==ev.peerId)); break;
-        case "chat-message": setChatMessages(prev=>[...prev.slice(-200),{id:`${ev.timestamp}-${ev.fromPeerId}`,fromPeerId:ev.fromPeerId,fromRole:ev.fromRole,text:ev.text,timestamp:ev.timestamp}]); break;
+        case "chat-message":
+          if(typeof ev.text==="string" && ev.text.startsWith("\x01NAME:")){
+            const name=ev.text.slice(6);
+            if(name)setNameMap(prev=>{const n=new Map(prev);n.set(ev.fromPeerId,name);return n;});
+          } else {
+            setChatMessages(prev=>[...prev.slice(-200),{id:`${ev.timestamp}-${ev.fromPeerId}`,fromPeerId:ev.fromPeerId,fromRole:ev.fromRole,text:ev.text,timestamp:ev.timestamp}]);
+          }
+          break;
         case "chat-cooldown": setChatCooldown(ev.remainingSeconds); break;
         case "transcription":
           if(ev.isFinal){

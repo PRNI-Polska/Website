@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     default: "PRNI — Polski Ruch Narodowo-Integralistyczny",
     template: "%s | PRNI — Polski Ruch Narodowo-Integralistyczny",
   },
-  description: "PRNI (Polski Ruch Narodowo-Integralistyczny) — Przyszłość zaczyna się teraz. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
+  description: "PRNI (Polski Ruch Narodowo-Integralistyczny) — Naród Ponad Wszystkim. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
   keywords: [
     "PRNI", "Polski Ruch Narodowo-Integralistyczny",
     "PRNI Polska", "PRNI Poland", "PRNI Polen",
@@ -71,13 +71,13 @@ export const metadata: Metadata = {
     url: "https://www.prni.org.pl",
     siteName: "PRNI",
     title: "PRNI — Polski Ruch Narodowo-Integralistyczny",
-    description: "PRNI (Polski Ruch Narodowo-Integralistyczny) — Przyszłość zaczyna się teraz. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
+    description: "PRNI (Polski Ruch Narodowo-Integralistyczny) — Naród Ponad Wszystkim. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
     images: [{ url: "/logo.png", width: 512, height: 512, alt: "PRNI — Polski Ruch Narodowo-Integralistyczny" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "PRNI — Polski Ruch Narodowo-Integralistyczny",
-    description: "PRNI (Polski Ruch Narodowo-Integralistyczny) — Przyszłość zaczyna się teraz. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
+    description: "PRNI (Polski Ruch Narodowo-Integralistyczny) — Naród Ponad Wszystkim. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
     images: ["/logo.png"],
   },
   robots: {
@@ -149,9 +149,9 @@ export default function RootLayout({
                     height: 512,
                   },
                   image: "https://www.prni.org.pl/logo.png",
-                  description: "PRNI (Polski Ruch Narodowo-Integralistyczny) — Przyszłość zaczyna się teraz. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
+                  description: "PRNI (Polski Ruch Narodowo-Integralistyczny) — Naród Ponad Wszystkim. Ruch polityczny na rzecz suwerenności, tradycji i integralności narodowej Polski.",
                   foundingDate: "2024",
-                  slogan: "Przyszłość zaczyna się teraz",
+                  slogan: "Naród Ponad Wszystkim",
                   areaServed: { "@type": "Country", name: "Poland" },
                   knowsLanguage: ["pl", "en", "de"],
                 },
@@ -173,7 +173,7 @@ export default function RootLayout({
                       name: "What is PRNI?",
                       acceptedAnswer: {
                         "@type": "Answer",
-                        text: "PRNI stands for Polski Ruch Narodowo-Integralistyczny (Polish National-Integralist Movement). It is a Polish political movement founded in 2024, dedicated to national sovereignty, tradition, and the integral unity of the Polish nation. Its motto is 'Przyszłość zaczyna się teraz' (The future starts now).",
+                        text: "PRNI stands for Polski Ruch Narodowo-Integralistyczny (Polish National-Integralist Movement). It is a Polish political movement founded in 2024, dedicated to national sovereignty, tradition, and the integral unity of the Polish nation. Its motto is 'Naród Ponad Wszystkim' (Nation above Everything).",
                       },
                     },
                     {
@@ -181,7 +181,7 @@ export default function RootLayout({
                       name: "Co to jest PRNI?",
                       acceptedAnswer: {
                         "@type": "Answer",
-                        text: "PRNI to skrót od Polski Ruch Narodowo-Integralistyczny — ruch polityczny założony w 2024 roku, działający na rzecz suwerenności, tradycji i integralności narodowej Polski. Hasło PRNI to 'Przyszłość zaczyna się teraz'.",
+                        text: "PRNI to skrót od Polski Ruch Narodowo-Integralistyczny — ruch polityczny założony w 2024 roku, działający na rzecz suwerenności, tradycji i integralności narodowej Polski. Hasło PRNI to 'Naród Ponad Wszystkim'.",
                       },
                     },
                     {

@@ -211,17 +211,6 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
           </section>
         )}
 
-        {/* No team members message */}
-        {teamMembers.length === 0 && (
-          <Card className="max-w-xl mx-auto">
-            <CardContent className="py-12 text-center">
-              <Users className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <p className="text-muted-foreground">
-                {t("about.team.coming")}
-              </p>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </div>
   );

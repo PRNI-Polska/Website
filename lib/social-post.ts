@@ -15,13 +15,13 @@ function buildMessage(post: PostContent): string {
     "",
     `🔗 ${HOST}/announcements/${post.slug}`,
     "",
-    "#PRNI #PolskiRuchNarodowoIntegralistyczny #PrzyszłośćZaczynaSięTeraz",
+    "#PRNI #PolskiRuchNarodowoIntegralistyczny #NaródPonadWszystkim",
   ].join("\n");
 }
 
 function buildShortMessage(post: PostContent): string {
   const url = `${HOST}/announcements/${post.slug}`;
-  const tags = " #PRNI #PrzyszłośćZaczynaSięTeraz";
+  const tags = " #PRNI #NaródPonadWszystkim";
   const maxTitle = 280 - url.length - tags.length - 5;
   const title =
     post.title.length > maxTitle

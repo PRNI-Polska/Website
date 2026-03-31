@@ -120,7 +120,7 @@ model AuditLog {
 model SiteSettings {
   id              String    @id @default("default")
   siteName        String    @default("Political Party")
-  siteDescription String    @default("Building a better future together")
+  siteDescription String    @default("Naród Ponad Wszystkim")
   manifestoPdfUrl String?
   contactEmail    String?
   socialLinks     String?

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { ShoppingBag, Loader2, AlertCircle, ArrowLeft, ShoppingCart, X, Minus, Plus, Check, ChevronDown } from "lucide-react";
+import { ShoppingBag, Loader2, AlertCircle, ArrowLeft, ShoppingCart, X, Minus, Plus, Check, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useI18n } from "@/lib/i18n";
 
@@ -29,6 +29,7 @@ interface ProductDetail {
   name: string;
   description: string;
   preview_image: string;
+  images: string[];
   variants: ProductVariant[];
 }
 
@@ -137,6 +138,7 @@ export default function MerchPage() {
   const [detail, setDetail] = useState<ProductDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
+  const [selectedImageIdx, setSelectedImageIdx] = useState(0);
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartOpen, setCartOpen] = useState(false);
@@ -215,6 +217,7 @@ export default function MerchPage() {
     setDetailLoading(true);
     setDetail(null);
     setSelectedVariant(null);
+    setSelectedImageIdx(0);
     try {
       const res = await fetch(`/api/merch/${id}`);
       if (!res.ok) throw new Error();
@@ -373,13 +376,15 @@ export default function MerchPage() {
   // ── Product Detail View ──
   if (detail || detailLoading) {
     const currentVariant = detail?.variants.find((v) => v.id === selectedVariant);
-    const mainImage = detail?.preview_image;
+    const images = detail?.images && detail.images.length > 0 ? detail.images : (detail?.preview_image ? [detail.preview_image] : []);
+    const activeImage = images[selectedImageIdx] || images[0] || null;
+    const hasMultiple = images.length > 1;
 
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
         <div className="flex items-center justify-between mb-6">
           <button
-            onClick={() => { setDetail(null); setSelectedVariant(null); }}
+            onClick={() => { setDetail(null); setSelectedVariant(null); setSelectedImageIdx(0); }}
             className="flex items-center gap-2 text-sm text-[#666] hover:text-white transition"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -394,10 +399,53 @@ export default function MerchPage() {
           </div>
         ) : detail ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="relative aspect-square bg-[#111] rounded-lg overflow-hidden border border-[#1a1a1a]">
-              {mainImage && (
-                <Image src={mainImage} alt={detail.name} fill
-                  sizes="(max-width: 768px) 100vw, 50vw" className="object-contain p-4" />
+            <div className="flex flex-col gap-3">
+              {/* Main image with navigation arrows */}
+              <div className="relative aspect-square bg-[#111] rounded-lg overflow-hidden border border-[#1a1a1a] group">
+                {activeImage && (
+                  <Image src={activeImage} alt={detail.name} fill
+                    sizes="(max-width: 768px) 100vw, 50vw" className="object-contain p-4" />
+                )}
+                {hasMultiple && (
+                  <>
+                    <button
+                      onClick={() => setSelectedImageIdx((prev) => (prev - 1 + images.length) % images.length)}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/60 text-white/80 hover:text-white hover:bg-black/80 transition opacity-0 group-hover:opacity-100"
+                    >
+                      <ChevronLeft className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => setSelectedImageIdx((prev) => (prev + 1) % images.length)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/60 text-white/80 hover:text-white hover:bg-black/80 transition opacity-0 group-hover:opacity-100"
+                    >
+                      <ChevronRight className="h-5 w-5" />
+                    </button>
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                      {images.map((_, i) => (
+                        <button key={i} onClick={() => setSelectedImageIdx(i)}
+                          className={`w-2 h-2 rounded-full transition ${
+                            i === selectedImageIdx ? "bg-white" : "bg-white/30 hover:bg-white/60"
+                          }`} />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+              {/* Thumbnail strip */}
+              {hasMultiple && (
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {images.map((src, i) => (
+                    <button key={i} onClick={() => setSelectedImageIdx(i)}
+                      className={`relative w-16 h-16 shrink-0 rounded-md overflow-hidden border-2 transition ${
+                        i === selectedImageIdx
+                          ? "border-white"
+                          : "border-[#222] hover:border-[#444]"
+                      }`}>
+                      <Image src={src} alt={`${detail.name} ${i + 1}`} fill
+                        sizes="64px" className="object-contain p-1 bg-[#111]" />
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
 

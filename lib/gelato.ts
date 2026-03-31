@@ -40,6 +40,8 @@ export interface GelatoVariant {
   externalId: string;
   connectionStatus: string;
   productUid: string;
+  previewUrl?: string;
+  [key: string]: unknown;
 }
 
 export interface GelatoVariantOption {
@@ -60,6 +62,75 @@ export interface GelatoProduct {
   productVariantOptions: GelatoVariantOption[];
   createdAt: string;
   updatedAt: string;
+  productPreviews?: { url: string; [key: string]: unknown }[];
+  images?: { src: string; [key: string]: unknown }[];
+  mockups?: { url: string; [key: string]: unknown }[];
+  [key: string]: unknown;
+}
+
+/**
+ * Extracts all unique image URLs from a Gelato product response,
+ * checking documented and undocumented fields.
+ */
+export function extractAllProductImages(product: GelatoProduct): string[] {
+  const urls = new Set<string>();
+
+  if (product.previewUrl) urls.add(product.previewUrl);
+  if (product.externalPreviewUrl) urls.add(product.externalPreviewUrl);
+  if (product.externalThumbnailUrl) urls.add(product.externalThumbnailUrl);
+
+  if (Array.isArray(product.productPreviews)) {
+    for (const p of product.productPreviews) {
+      if (typeof p === "string") urls.add(p);
+      else if (p?.url) urls.add(p.url);
+    }
+  }
+
+  if (Array.isArray(product.images)) {
+    for (const img of product.images) {
+      if (typeof img === "string") urls.add(img);
+      else if (img?.src) urls.add(img.src);
+      else if ((img as Record<string, unknown>)?.url) urls.add((img as Record<string, unknown>).url as string);
+    }
+  }
+
+  if (Array.isArray(product.mockups)) {
+    for (const m of product.mockups) {
+      if (typeof m === "string") urls.add(m);
+      else if (m?.url) urls.add(m.url);
+    }
+  }
+
+  for (const v of product.variants) {
+    if (v.previewUrl && typeof v.previewUrl === "string") urls.add(v.previewUrl);
+  }
+
+  for (const [key, value] of Object.entries(product)) {
+    if (
+      typeof value === "string" &&
+      value.startsWith("http") &&
+      /\.(png|jpg|jpeg|webp|gif)/i.test(value) &&
+      !urls.has(value)
+    ) {
+      urls.add(value);
+    }
+    if (Array.isArray(value) && key !== "variants" && key !== "productVariantOptions") {
+      for (const item of value) {
+        if (typeof item === "string" && item.startsWith("http") && /\.(png|jpg|jpeg|webp)/i.test(item)) {
+          urls.add(item);
+        }
+        if (item && typeof item === "object") {
+          for (const v of Object.values(item as Record<string, unknown>)) {
+            if (typeof v === "string" && v.startsWith("http") && /\.(png|jpg|jpeg|webp)/i.test(v)) {
+              urls.add(v);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return Array.from(urls).filter(Boolean);
 }
 
 export async function getStoreProducts(store?: GelatoStore): Promise<GelatoProduct[]> {

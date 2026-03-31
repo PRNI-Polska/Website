@@ -307,39 +307,12 @@ We believe in:
   console.log("\nCreating team members...");
   const teamMembers = [
     {
-      name: "Sarah Mitchell",
-      role: "Party Leader",
-      bio: "Sarah has dedicated her career to public service, serving 12 years in local government before taking on the leadership role. She is passionate about community development and economic opportunity.",
+      name: "Karol Małszycki",
+      role: "Prezes Naczelny Ruchu",
+      bio: "",
+      photoUrl: "/team/karol.png",
       order: 1,
       isLeadership: true,
-    },
-    {
-      name: "James Chen",
-      role: "Deputy Leader",
-      bio: "James brings 20 years of business experience and a commitment to fiscal responsibility. He leads our economic policy development and business outreach efforts.",
-      order: 2,
-      isLeadership: true,
-    },
-    {
-      name: "Maria Rodriguez",
-      role: "Policy Director",
-      bio: "Maria oversees our policy research and development. Her background in public policy and community organizing informs our evidence-based approach to governance.",
-      order: 3,
-      isLeadership: true,
-    },
-    {
-      name: "David Thompson",
-      role: "Communications Director",
-      bio: "David manages our messaging and media relations, ensuring our values and policies are communicated clearly to the public.",
-      order: 4,
-      isLeadership: false,
-    },
-    {
-      name: "Emily Watson",
-      role: "Volunteer Coordinator",
-      bio: "Emily leads our grassroots organizing efforts, connecting passionate volunteers with opportunities to make a difference in their communities.",
-      order: 5,
-      isLeadership: false,
     },
   ];
 

@@ -74,19 +74,6 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
           </p>
         </div>
 
-        {/* Photo banner */}
-        <div className="max-w-4xl mx-auto mb-16 relative rounded-lg overflow-hidden aspect-[16/9] md:aspect-[21/9]">
-          <Image
-            src="/photos/flag-held.png"
-            alt="PRNI members holding the flag"
-            fill
-            className="object-cover object-[center_40%] brightness-125 contrast-110"
-            style={{ filter: "brightness(1.25) contrast(1.1)" }}
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
-        </div>
-
         {/* Mission & Vision */}
         <section className="max-w-4xl mx-auto mb-16">
           <div className="grid md:grid-cols-2 gap-8">
@@ -143,19 +130,16 @@ export default function AboutPageClient({ teamMembers }: AboutPageClientProps) {
 
         {/* Photo gallery */}
         <section className="max-w-5xl mx-auto mb-16">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             {[
               { src: "/photos/flag-sea-1.png", alt: "PRNI flag by the sea" },
               { src: "/photos/flag-sea-2.png", alt: "PRNI flag at the coast" },
               { src: "/photos/flag-beach.png", alt: "PRNI flag on the beach" },
               { src: "/photos/flag-march.png", alt: "PRNI march with the flag" },
-              { src: "/photos/flag-held.png", alt: "PRNI members holding the flag", wide: true },
             ].map((photo) => (
               <div
                 key={photo.src}
-                className={`relative rounded-lg overflow-hidden ${
-                  photo.wide ? "col-span-2 aspect-[3/2]" : "aspect-[3/4]"
-                }`}
+                className="relative rounded-lg overflow-hidden aspect-[3/4]"
               >
                 <Image
                   src={photo.src}

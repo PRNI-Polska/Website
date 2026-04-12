@@ -9,14 +9,13 @@ import {
   endOfMonth,
   eachDayOfInterval,
   isSameMonth,
-  isSameDay,
   addMonths,
   subMonths,
   startOfWeek,
   endOfWeek,
   isToday,
-  parseISO,
 } from "date-fns";
+import { pl, enUS, de } from "date-fns/locale";
 import {
   ChevronLeft,
   ChevronRight,
@@ -41,6 +40,9 @@ import {
 } from "@/components/ui/dialog";
 import { MarkdownRenderer } from "@/components/markdown-renderer";
 import { cn, formatDateTime } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
+
+const DATE_LOCALES = { pl, en: enUS, de } as const;
 
 interface Event {
   id: string;
@@ -59,26 +61,30 @@ interface EventsClientProps {
 }
 
 export function EventsClient({ events }: EventsClientProps) {
+  const { t, locale } = useI18n();
+  const dateFnsLocale = DATE_LOCALES[locale as keyof typeof DATE_LOCALES] || pl;
   const searchParams = useSearchParams();
   const selectedEventId = searchParams.get("id");
-  
+
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(
     events.find((e) => e.id === selectedEventId) || null
   );
   const [dialogOpen, setDialogOpen] = useState(!!selectedEventId);
 
-  // Get days for calendar grid
+  const dayHeaders = [
+    t("events.sun"), t("events.mon"), t("events.tue"), t("events.wed"),
+    t("events.thu"), t("events.fri"), t("events.sat"),
+  ];
+
   const calendarDays = useMemo(() => {
     const monthStart = startOfMonth(currentMonth);
     const monthEnd = endOfMonth(currentMonth);
     const calendarStart = startOfWeek(monthStart);
     const calendarEnd = endOfWeek(monthEnd);
-    
     return eachDayOfInterval({ start: calendarStart, end: calendarEnd });
   }, [currentMonth]);
 
-  // Group events by date
   const eventsByDate = useMemo(() => {
     const map = new Map<string, Event[]>();
     events.forEach((event) => {
@@ -89,7 +95,6 @@ export function EventsClient({ events }: EventsClientProps) {
     return map;
   }, [events]);
 
-  // Get upcoming events for list view
   const upcomingEvents = useMemo(() => {
     const now = new Date();
     return events
@@ -97,7 +102,6 @@ export function EventsClient({ events }: EventsClientProps) {
       .sort((a, b) => new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime());
   }, [events]);
 
-  // Get past events for list view
   const pastEvents = useMemo(() => {
     const now = new Date();
     return events
@@ -125,22 +129,45 @@ export function EventsClient({ events }: EventsClientProps) {
       "END:VEVENT",
       "END:VCALENDAR",
     ].join("\n");
-    
     return `data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`;
   };
 
+  if (events.length === 0) {
+    return (
+      <>
+        <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-heading font-bold mb-2">
+            {t("events.title")}
+          </h1>
+          <p className="text-muted-foreground">{t("events.subtitle")}</p>
+        </div>
+        <div className="text-center py-16">
+          <p className="text-xl text-muted-foreground mb-2">{t("events.noEvents")}</p>
+          <p className="text-muted-foreground">{t("events.checkBack")}</p>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
+      <div className="mb-8">
+        <h1 className="text-3xl md:text-4xl font-heading font-bold mb-2">
+          {t("events.title")}
+        </h1>
+        <p className="text-muted-foreground">{t("events.subtitle")}</p>
+      </div>
+
       <Tabs defaultValue="calendar" className="space-y-6">
         <div className="flex items-center justify-between">
           <TabsList>
             <TabsTrigger value="calendar" className="gap-2">
               <Calendar className="h-4 w-4" />
-              Calendar
+              {t("events.calendar")}
             </TabsTrigger>
             <TabsTrigger value="list" className="gap-2">
               <List className="h-4 w-4" />
-              List
+              {t("events.list")}
             </TabsTrigger>
           </TabsList>
 
@@ -151,7 +178,7 @@ export function EventsClient({ events }: EventsClientProps) {
             className="text-sm text-muted-foreground hover:text-primary"
           >
             <Download className="inline h-4 w-4 mr-1" />
-            Subscribe to Calendar
+            {t("events.subscribe")}
           </a>
         </div>
 
@@ -160,7 +187,7 @@ export function EventsClient({ events }: EventsClientProps) {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
               <CardTitle className="text-xl">
-                {format(currentMonth, "MMMM yyyy")}
+                {format(currentMonth, "LLLL yyyy", { locale: dateFnsLocale })}
               </CardTitle>
               <div className="flex items-center gap-2">
                 <Button
@@ -175,7 +202,7 @@ export function EventsClient({ events }: EventsClientProps) {
                   size="sm"
                   onClick={() => setCurrentMonth(new Date())}
                 >
-                  Today
+                  {t("events.today")}
                 </Button>
                 <Button
                   variant="outline"
@@ -187,24 +214,18 @@ export function EventsClient({ events }: EventsClientProps) {
               </div>
             </CardHeader>
             <CardContent>
-              {/* Calendar Grid */}
               <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden">
-                {/* Day headers */}
-                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                  <div
-                    key={day}
-                    className="bg-muted p-2 text-center text-sm font-medium"
-                  >
+                {dayHeaders.map((day) => (
+                  <div key={day} className="bg-muted p-2 text-center text-sm font-medium">
                     {day}
                   </div>
                 ))}
-                
-                {/* Calendar days */}
+
                 {calendarDays.map((day) => {
                   const dateKey = format(day, "yyyy-MM-dd");
                   const dayEvents = eventsByDate.get(dateKey) || [];
                   const isCurrentMonth = isSameMonth(day, currentMonth);
-                  
+
                   return (
                     <div
                       key={day.toISOString()}
@@ -234,7 +255,7 @@ export function EventsClient({ events }: EventsClientProps) {
                         ))}
                         {dayEvents.length > 3 && (
                           <span className="text-xs text-muted-foreground">
-                            +{dayEvents.length - 3} more
+                            +{dayEvents.length - 3} {t("events.more")}
                           </span>
                         )}
                       </div>
@@ -248,9 +269,8 @@ export function EventsClient({ events }: EventsClientProps) {
 
         {/* List View */}
         <TabsContent value="list" className="space-y-8">
-          {/* Upcoming Events */}
           <section>
-            <h2 className="text-xl font-semibold mb-4">Upcoming Events</h2>
+            <h2 className="text-xl font-semibold mb-4">{t("events.upcoming")}</h2>
             {upcomingEvents.length > 0 ? (
               <div className="space-y-4">
                 {upcomingEvents.map((event) => (
@@ -258,22 +278,22 @@ export function EventsClient({ events }: EventsClientProps) {
                     key={event.id}
                     event={event}
                     onClick={() => handleEventClick(event)}
+                    dateFnsLocale={dateFnsLocale}
                   />
                 ))}
               </div>
             ) : (
               <Card>
                 <CardContent className="py-8 text-center text-muted-foreground">
-                  No upcoming events scheduled.
+                  {t("events.noUpcoming")}
                 </CardContent>
               </Card>
             )}
           </section>
 
-          {/* Past Events */}
           {pastEvents.length > 0 && (
             <section>
-              <h2 className="text-xl font-semibold mb-4">Past Events</h2>
+              <h2 className="text-xl font-semibold mb-4">{t("events.past")}</h2>
               <div className="space-y-4 opacity-75">
                 {pastEvents.map((event) => (
                   <EventCard
@@ -281,6 +301,7 @@ export function EventsClient({ events }: EventsClientProps) {
                     event={event}
                     onClick={() => handleEventClick(event)}
                     isPast
+                    dateFnsLocale={dateFnsLocale}
                   />
                 ))}
               </div>
@@ -336,7 +357,7 @@ export function EventsClient({ events }: EventsClientProps) {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    RSVP
+                    {t("events.rsvp")}
                     <ExternalLink className="ml-2 h-4 w-4" />
                   </a>
                 </Button>
@@ -347,14 +368,14 @@ export function EventsClient({ events }: EventsClientProps) {
                   download={`${selectedEvent.title.replace(/\s+/g, "-")}.ics`}
                 >
                   <Download className="mr-2 h-4 w-4" />
-                  Add to Calendar
+                  {t("events.addToCalendar")}
                 </a>
               </Button>
               {selectedEvent.organizerContact && (
                 <Button variant="outline" asChild>
                   <a href={`mailto:${selectedEvent.organizerContact}`}>
                     <Mail className="mr-2 h-4 w-4" />
-                    Contact Organizer
+                    {t("events.contactOrganizer")}
                   </a>
                 </Button>
               )}
@@ -370,10 +391,12 @@ function EventCard({
   event,
   onClick,
   isPast,
+  dateFnsLocale,
 }: {
   event: Event;
   onClick: () => void;
   isPast?: boolean;
+  dateFnsLocale: Locale;
 }) {
   return (
     <Card
@@ -387,7 +410,7 @@ function EventCard({
               {format(new Date(event.startDateTime), "d")}
             </span>
             <span className="text-xs text-primary uppercase">
-              {format(new Date(event.startDateTime), "MMM")}
+              {format(new Date(event.startDateTime), "MMM", { locale: dateFnsLocale })}
             </span>
           </div>
           <div className="flex-1">

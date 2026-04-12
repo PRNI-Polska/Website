@@ -14,6 +14,7 @@ import {
   startOfWeek,
   endOfWeek,
   isToday,
+  type Locale,
 } from "date-fns";
 import { pl, enUS, de } from "date-fns/locale";
 import {

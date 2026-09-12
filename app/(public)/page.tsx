@@ -20,6 +20,8 @@ export default function HomePage() {
     { id: "s4", title: t("ideology.s4.title"), text: t("ideology.s4.text") },
     { id: "s5", title: t("ideology.s5.title"), text: t("ideology.s5.text") },
     { id: "s6", title: t("ideology.s6.title"), text: t("ideology.s6.text") },
+    { id: "s7", title: t("ideology.s7.title"), text: t("ideology.s7.text") },
+    { id: "s8", title: t("ideology.s8.title"), text: t("ideology.s8.text") },
   ];
 
   const siteNavJsonLd = {
